@@ -3,6 +3,7 @@ import Credentials from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { authConfig } from './auth.config'
 
 const LoginSchema = z.object({
   username: z.string().min(1).max(30),
@@ -10,10 +11,7 @@ const LoginSchema = z.object({
 })
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  session: { strategy: 'jwt', maxAge: 60 * 60 * 24 * 7 }, // 7 days
-  pages: {
-    signIn: '/login',
-  },
+  ...authConfig,
   providers: [
     Credentials({
       async authorize(credentials) {
@@ -38,22 +36,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.userId = user.id
-        token.username = user.name
-        token.sounderType = (user as any).sounderType
-        token.seasicknessTolerance = (user as any).seasicknessTolerance
-      }
-      return token
-    },
-    async session({ session, token }) {
-      session.user.id = token.userId as string
-      session.user.name = token.username as string
-      ;(session.user as any).sounderType = token.sounderType
-      ;(session.user as any).seasicknessTolerance = token.seasicknessTolerance
-      return session
-    },
-  },
 })
