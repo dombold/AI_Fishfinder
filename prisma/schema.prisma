@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Note: SQLite does not support enums; stored as String with validation in app layer
+
+model User {
+  id                   String           @id @default(cuid())
+  username             String           @unique
+  email                String           @unique
+  passwordHash         String
+  sounderType          String           @default("GARMIN")
+  seasicknessTolerance Int              @default(3)
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  sessions             FishingSession[]
+  catchLogs            CatchLog[]
+
+  @@map("users")
+}
+
+model FishingSession {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  latitude        Float
+  longitude       Float
+  locationName    String?
+  startDate       String
+  endDate         String
+  fishingType     String
+  targetType      String
+  status          String   @default("PENDING")
+  errorMessage    String?
+  saved           Boolean  @default(false)
+  contextData     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  selectedSpecies SelectedSpecies[]
+  marineData      MarineData[]
+  fishingPlans    FishingPlan[]
+
+  @@index([userId])
+  @@map("fishing_sessions")
+}
+
+model SelectedSpecies {
+  id          String         @id @default(cuid())
+  sessionId   String
+  session     FishingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  speciesName String
+
+  @@index([sessionId])
+  @@map("selected_species")
+}
+
+model MarineData {
+  id               String         @id @default(cuid())
+  sessionId        String
+  session          FishingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  date             String
+  willyWeatherData String
+  openMeteoData    String
+  tideData         String
+  fetchedAt        DateTime       @default(now())
+
+  @@unique([sessionId, date])
+  @@index([sessionId])
+  @@map("marine_data")
+}
+
+model FishingPlan {
+  id          String         @id @default(cuid())
+  sessionId   String
+  session     FishingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  date        String
+  planContent String
+  generatedAt DateTime       @default(now())
+
+  @@unique([sessionId, date])
+  @@index([sessionId])
+  @@map("fishing_plans")
+}
+
+model CatchLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      String
+  latitude  Float
+  longitude Float
+  species   String
+  quantity  Int      @default(1)
+  weightKg  Float?
+  lengthCm  Float?
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("catch_logs")
+}

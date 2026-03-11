@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Build output
+.next/
+out/
+
+# Environment — never commit secrets
+.env
+.env.local
+.env*.local
+# .env.example is intentionally committed
+
+# Database
+prisma/*.db
+prisma/*.db-journal
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json
+*.swp
+
+# Project-specific large files
+temporary screenshots/
+
+# PM2 runtime
+.pm2/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
