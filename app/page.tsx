@@ -69,7 +69,7 @@ export default function LandingPage() {
           }
         `}</style>
 
-        <section style={{ width: '100%', padding: '3rem 0 0' }}>
+        <section style={{ width: '100%', maxWidth: '900px', padding: '3rem 0 0' }}>
           <div className="carousel-wrap">
             <div className="carousel-track">
               {/* Cards — rendered twice for seamless loop */}
