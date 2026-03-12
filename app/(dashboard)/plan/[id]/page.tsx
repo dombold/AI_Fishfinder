@@ -7,6 +7,7 @@ import PlanPoller from '@/components/PlanPoller'
 import PrintButton from '@/components/PrintButton'
 import SavePlanButton from '@/components/SavePlanButton'
 import DataSourcesModal from '@/components/DataSourcesModal'
+import ExportGPXButton from '@/components/ExportGPXButton'
 import UserDropdown from '@/components/UserDropdown'
 import type { DailyPlan } from '@/lib/claude-api'
 
@@ -34,8 +35,8 @@ export default async function PlanPage({ params }: { params: { id: string } }) {
     return (
       <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at 20% 20%, #0E2A45 0%, #0B1929 60%, #061018 100%)' }}>
         <nav style={{ padding: '1rem 1.5rem', borderBottom: '1px solid rgba(107,143,163,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link href="/" style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', color: 'var(--color-foam)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            🎣 AI Fishfinder
+          <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+            <img src="/logo-mark.svg" alt="AI Fishfinder" style={{ height: '26px', width: 'auto' }} />
           </Link>
         </nav>
         <PlanPoller sessionId={params.id} initialStatus={status} />
@@ -48,15 +49,15 @@ export default async function PlanPage({ params }: { params: { id: string } }) {
     return (
       <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at 20% 20%, #0E2A45 0%, #0B1929 60%, #061018 100%)' }}>
         <nav style={{ padding: '1rem 1.5rem', borderBottom: '1px solid rgba(107,143,163,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link href="/" style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', color: 'var(--color-foam)', textDecoration: 'none' }}>
-            🎣 AI Fishfinder
+          <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+            <img src="/logo-mark.svg" alt="AI Fishfinder" style={{ height: '26px', width: 'auto' }} />
           </Link>
         </nav>
         <div style={{ maxWidth: '560px', margin: '4rem auto', padding: '2rem', textAlign: 'center' }}>
           <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>⚠️</div>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: 'var(--color-foam)', marginBottom: '0.5rem' }}>Plan Generation Failed</h2>
           {errorMessage && <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>{errorMessage}</p>}
-          <Link href="/" className="btn-primary" style={{ textDecoration: 'none', display: 'inline-flex' }}>Try Again</Link>
+          <Link href="/dashboard" className="btn-primary" style={{ textDecoration: 'none', display: 'inline-flex' }}>Try Again</Link>
         </div>
       </div>
     )
@@ -78,11 +79,11 @@ export default async function PlanPage({ params }: { params: { id: string } }) {
 
       {/* Nav */}
       <nav style={{ padding: '1rem 1.5rem', borderBottom: '1px solid rgba(107,143,163,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
-        <Link href="/" style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', color: 'var(--color-foam)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          🎣 AI Fishfinder
+        <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+          <img src="/logo-mark.svg" alt="AI Fishfinder" style={{ height: '26px', width: 'auto' }} />
         </Link>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <Link href="/" style={{ color: 'var(--color-seafoam)', fontSize: '0.875rem', textDecoration: 'none', fontWeight: 500 }}>← New Plan</Link>
+          <Link href="/dashboard" style={{ color: 'var(--color-seafoam)', fontSize: '0.875rem', textDecoration: 'none', fontWeight: 500 }}>← New Plan</Link>
           <UserDropdown />
         </div>
       </nav>
@@ -93,10 +94,10 @@ export default async function PlanPage({ params }: { params: { id: string } }) {
           <span className="section-label" style={{ margin: 0 }}>Fishing Briefing</span>
         </div>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--color-foam)', marginBottom: '0.25rem' }}>
-          {locationName ?? `${Math.abs(latitude).toFixed(4)}°S, ${longitude.toFixed(4)}°E`}
+          {dateRangeLabel} · {fishingType} · {selectedSpecies.join(', ')}
         </h1>
         <p style={{ color: 'var(--color-mist)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-          {dateRangeLabel} · {fishingType} · {selectedSpecies.join(', ')}
+          {locationName ?? `${Math.abs(latitude).toFixed(4)}°S, ${longitude.toFixed(4)}°E`}
         </p>
 
         {/* Actions */}
@@ -104,6 +105,7 @@ export default async function PlanPage({ params }: { params: { id: string } }) {
           <SavePlanButton sessionId={params.id} initialSaved={saved} />
           <PrintButton />
           <DataSourcesModal contextData={contextData ?? null} latitude={latitude} longitude={longitude} />
+          <ExportGPXButton plans={plans} locationName={locationName ?? null} startDate={startDate} endDate={endDate} />
         </div>
       </div>
 
@@ -111,7 +113,7 @@ export default async function PlanPage({ params }: { params: { id: string } }) {
       <main style={{ maxWidth: '960px', margin: '0 auto', padding: '0 1.5rem 4rem' }}>
         {plans.length === 0 ? (
           <div className="card" style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-mist)' }}>
-            No plan data available. <Link href="/" style={{ color: 'var(--color-seafoam)' }}>Try generating a new plan.</Link>
+            No plan data available. <Link href="/dashboard" style={{ color: 'var(--color-seafoam)' }}>Try generating a new plan.</Link>
           </div>
         ) : (
           plans.map(plan => (

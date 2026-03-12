@@ -9,19 +9,20 @@ export default auth((req) => {
   const { pathname } = req.nextUrl
 
   const isAuthPage = pathname === '/login' || pathname === '/register'
+  const isLandingPage = pathname === '/'
   const isApiAuth = pathname.startsWith('/api/auth')
   const isApiPublic = pathname === '/api/register'
-  const isPublic = isAuthPage || isApiAuth || isApiPublic
+  const isPublic = isAuthPage || isLandingPage || isApiAuth || isApiPublic
 
   if (!isAuthenticated && !isPublic) {
     return NextResponse.redirect(new URL('/login', req.nextUrl))
   }
 
-  if (isAuthenticated && isAuthPage) {
-    return NextResponse.redirect(new URL('/', req.nextUrl))
+  if (isAuthenticated && (isAuthPage || isLandingPage)) {
+    return NextResponse.redirect(new URL('/dashboard', req.nextUrl))
   }
 })
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon\\.ico|favicon\\.svg|logo-mark\\.svg).*)'],
 }

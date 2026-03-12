@@ -29,7 +29,7 @@ function LoginForm() {
       if (result?.error) {
         setError('Invalid username or password')
       } else {
-        router.push('/')
+        router.push('/dashboard')
         router.refresh()
       }
     } catch {
@@ -43,12 +43,9 @@ function LoginForm() {
     <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at 20% 20%, #0E2A45 0%, #0B1929 60%, #061018 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
       <div style={{ width: '100%', maxWidth: '420px' }}>
 
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🎣</div>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--color-foam)', marginBottom: '0.25rem' }}>
-            AI Fishfinder
-          </h1>
-          <p style={{ color: 'var(--color-mist)', fontSize: '0.9rem' }}>Western Australia</p>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem' }}>
+          <img src="/logo-mark.svg" alt="AI Fishfinder" style={{ display: 'block', height: '72px', width: 'auto', marginBottom: '0.75rem' }} />
+          <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Western Australia</p>
         </div>
 
         <div className="card" style={{ padding: '2rem' }}>

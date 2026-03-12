@@ -5,7 +5,7 @@ import { z } from 'zod'
 
 const updateSchema = z.object({
   email: z.string().email().optional(),
-  sounderType: z.enum(['GARMIN', 'SIMRAD', 'LOWRANCE', 'HUMMINBIRD', 'RAYMARINE']).optional(),
+  sounderType: z.enum(['NONE', 'GARMIN', 'SIMRAD', 'LOWRANCE', 'HUMMINBIRD', 'RAYMARINE', 'FURUNO', 'B&G']).optional(),
   seasicknessTolerance: z.number().int().min(1).max(5).optional(),
 })
 

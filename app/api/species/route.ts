@@ -16,6 +16,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'fishingType and targetType required' }, { status: 400 })
   }
 
-  const species = getAvailableSpecies(fishingType, targetType)
+  const latParam = searchParams.get('lat')
+  const lat = latParam ? parseFloat(latParam) : undefined
+  const species = getAvailableSpecies(fishingType, targetType, lat)
   return NextResponse.json({ species })
 }

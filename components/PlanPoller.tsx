@@ -35,7 +35,7 @@ export default function PlanPoller({ sessionId, initialStatus }: { sessionId: st
         <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>⚠️</div>
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: 'var(--color-foam)', marginBottom: '0.5rem' }}>Plan Generation Failed</h2>
         {errorMessage && <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>{errorMessage}</p>}
-        <a href="/" className="btn-primary" style={{ textDecoration: 'none', display: 'inline-flex' }}>Try Again</a>
+        <a href="/dashboard" className="btn-primary" style={{ textDecoration: 'none', display: 'inline-flex' }}>Try Again</a>
       </div>
     )
   }

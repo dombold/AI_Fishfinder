@@ -51,12 +51,11 @@ export default function CatchLogPage() {
 
       {/* Nav */}
       <nav style={{ padding: '0.875rem 1.5rem', borderBottom: '1px solid rgba(107,143,163,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(11,25,41,0.7)', backdropFilter: 'blur(12px)', position: 'sticky', top: 0, zIndex: 100 }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', textDecoration: 'none' }}>
-          <span style={{ fontSize: '1.25rem' }}>🎣</span>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.125rem', color: 'var(--color-foam)', fontWeight: 600 }}>AI Fishfinder WA</span>
+        <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+          <img src="/logo-mark.svg" alt="AI Fishfinder" style={{ height: '28px', width: 'auto' }} />
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <Link href="/" style={{ color: 'var(--color-seafoam)', fontSize: '0.875rem', textDecoration: 'none' }}>← New Plan</Link>
+          <Link href="/dashboard" style={{ color: 'var(--color-seafoam)', fontSize: '0.875rem', textDecoration: 'none' }}>← New Plan</Link>
           <UserDropdown />
         </div>
       </nav>

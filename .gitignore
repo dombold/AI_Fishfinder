@@ -27,6 +27,10 @@ Thumbs.db
 .vscode/settings.json
 *.swp
 
+# Claude Code — local config and skills (project-specific, not for version control)
+.claude/
+CLAUDE.md
+
 # Project-specific large files
 temporary screenshots/
 

@@ -36,13 +36,14 @@ export default function DashboardPage() {
   const [loadingStep, setLoadingStep] = useState('')
   const [error, setError] = useState('')
 
-  // Fetch available species when type changes
+  // Fetch available species — filtered by location lat when available
   useEffect(() => {
     setSpecies([])
-    fetch(`/api/species?fishingType=${fishingType}&targetType=${targetType}`)
+    const latParam = location ? `&lat=${location.lat}` : ''
+    fetch(`/api/species?fishingType=${fishingType}&targetType=${targetType}${latParam}`)
       .then(r => r.json())
       .then(d => setAvailableSpecies(d.species ?? []))
-  }, [fishingType, targetType])
+  }, [fishingType, targetType, location])
 
   // Check closures when location/type changes — always clear if no location
   useEffect(() => {
@@ -112,9 +113,8 @@ export default function DashboardPage() {
     <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at 30% 0%, #0E2A45 0%, #0B1929 55%, #061018 100%)' }}>
       {/* Nav */}
       <nav style={{ borderBottom: '1px solid rgba(107,143,163,0.15)', padding: '0.875rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(11,25,41,0.7)', backdropFilter: 'blur(12px)', position: 'sticky', top: 0, zIndex: 100 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-          <span style={{ fontSize: '1.25rem' }}>🎣</span>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.125rem', color: 'var(--color-foam)', fontWeight: 600 }}>AI Fishfinder WA</span>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <img src="/logo-mark.svg" alt="AI Fishfinder" style={{ height: '28px', width: 'auto' }} />
         </div>
         <UserDropdown />
       </nav>

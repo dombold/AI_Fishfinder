@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" role="img" aria-label="AI Fishfinder">
+  <!-- Background circle -->
+  <circle cx="16" cy="16" r="15" fill="#0E2A45"/>
+
+  <!-- Wave arc -->
+  <path d="M4 18 C8 10, 12 10, 16 14 C20 18, 24 18, 28 14"
+        stroke="#3CBFAE" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <!-- Wave echo -->
+  <path d="M4 22 C8 15, 12 15, 16 18 C20 21, 24 21, 28 18"
+        stroke="#3CBFAE" stroke-width="1" stroke-linecap="round" fill="none" opacity="0.4"/>
+
+  <!-- Fish body -->
+  <ellipse cx="16" cy="14" rx="6" ry="3" fill="#C9A84C"/>
+  <!-- Tail -->
+  <path d="M10 14 L6 10 L6 18 Z" fill="#C9A84C" opacity="0.9"/>
+  <!-- Eye -->
+  <circle cx="21" cy="13.2" r="1" fill="#0B1929"/>
+  <circle cx="21.4" cy="12.8" r="0.35" fill="#E8F4F8"/>
+</svg>

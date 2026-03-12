@@ -11,6 +11,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <head>
         <script src="https://cdn.tailwindcss.com" async></script>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
       <body>
         <a href="#main-content" className="skip-link">Skip to main content</a>

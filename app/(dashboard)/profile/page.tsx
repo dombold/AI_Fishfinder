@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import UserDropdown from '@/components/UserDropdown'
 
-const SOUNDER_OPTIONS = ['GARMIN', 'SIMRAD', 'LOWRANCE', 'HUMMINBIRD', 'RAYMARINE']
+const SOUNDER_OPTIONS = ['NONE', 'GARMIN', 'SIMRAD', 'LOWRANCE', 'HUMMINBIRD', 'RAYMARINE', 'FURUNO', 'B&G']
 
 const TOLERANCE_LABELS: Record<number, string> = {
   1: 'Calm water only — bays and estuaries',
@@ -25,7 +25,7 @@ const labelStyle: React.CSSProperties = {
 }
 
 export default function ProfilePage() {
-  const [form, setForm] = useState({ email: '', sounderType: 'GARMIN', seasicknessTolerance: 3 })
+  const [form, setForm] = useState({ email: '', sounderType: 'NONE', seasicknessTolerance: 3 })
   const [username, setUsername] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -39,7 +39,7 @@ export default function ProfilePage() {
         setUsername(data.username ?? '')
         setForm({
           email: data.email ?? '',
-          sounderType: data.sounderType ?? 'GARMIN',
+          sounderType: data.sounderType ?? 'NONE',
           seasicknessTolerance: data.seasicknessTolerance ?? 3,
         })
         setLoading(false)
@@ -77,12 +77,11 @@ export default function ProfilePage() {
 
       {/* Nav */}
       <nav style={{ padding: '0.875rem 1.5rem', borderBottom: '1px solid rgba(107,143,163,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(11,25,41,0.7)', backdropFilter: 'blur(12px)', position: 'sticky', top: 0, zIndex: 100 }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', textDecoration: 'none' }}>
-          <span style={{ fontSize: '1.25rem' }}>🎣</span>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.125rem', color: 'var(--color-foam)', fontWeight: 600 }}>AI Fishfinder WA</span>
+        <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+          <img src="/logo-mark.svg" alt="AI Fishfinder" style={{ height: '28px', width: 'auto' }} />
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <Link href="/" style={{ color: 'var(--color-seafoam)', fontSize: '0.875rem', textDecoration: 'none' }}>← Dashboard</Link>
+          <Link href="/dashboard" style={{ color: 'var(--color-seafoam)', fontSize: '0.875rem', textDecoration: 'none' }}>← Dashboard</Link>
           <UserDropdown />
         </div>
       </nav>
@@ -136,7 +135,9 @@ export default function ProfilePage() {
                     style={{ width: '100%' }}
                   >
                     {SOUNDER_OPTIONS.map(s => (
-                      <option key={s} value={s}>{s.charAt(0) + s.slice(1).toLowerCase()}</option>
+                      <option key={s} value={s}>
+                        {s === 'NONE' ? 'None (no sounder)' : s === 'B&G' ? 'B&G' : s.charAt(0) + s.slice(1).toLowerCase()}
+                      </option>
                     ))}
                   </select>
                   <p style={{ marginTop: '0.375rem', fontSize: '0.75rem', color: 'var(--color-mist)' }}>

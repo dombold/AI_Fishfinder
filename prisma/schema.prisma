@@ -14,7 +14,7 @@ model User {
   username             String           @unique
   email                String           @unique
   passwordHash         String
-  sounderType          String           @default("GARMIN")
+  sounderType          String           @default("NONE")
   seasicknessTolerance Int              @default(3)
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @updatedAt

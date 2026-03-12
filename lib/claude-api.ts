@@ -186,7 +186,7 @@ Key WA fishing knowledge:
 - Fishing Type: ${params.fishingType.toUpperCase()}
 - Target Category: ${params.targetType.toUpperCase()}
 - Target Species: ${params.selectedSpecies.join(', ')}
-- Sounder: ${params.sounderType} (tailor sounder-specific recommendations to this brand)
+${params.sounderType === 'NONE' ? '- Sounder: None — the angler has no fish finder. Omit all sounder operation tips. Focus guidance on visual cues, chart reading, and anchor/berley techniques instead.' : `- Sounder: ${params.sounderType} (tailor sounder-specific recommendations to this brand)`}
 - Seasickness Tolerance: ${params.seasicknessTolerance}/5 (${params.seasicknessTolerance <= 2 ? 'stay within 5km of shore, sheltered water only' : params.seasicknessTolerance === 3 ? 'moderate offshore capability, avoid 2.5m+ swell' : 'offshore capable, comfortable in up to 2m swell'})
 - Date Range: ${params.startDate} to ${params.endDate}
 
