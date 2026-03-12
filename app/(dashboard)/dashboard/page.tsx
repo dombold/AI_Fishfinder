@@ -174,10 +174,10 @@ export default function DashboardPage() {
                 <div>
                   <p style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-mist)', marginBottom: '0.625rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Fishing Type</p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    {(['boat', 'beach'] as FishingType[]).map(ft => (
+                    {([['boat', 'Boat'], ['beach', 'Beach']] as [FishingType, string][]).map(([ft, label]) => (
                       <label key={ft} style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', cursor: 'pointer' }}>
                         <input type="radio" name="fishingType" value={ft} checked={fishingType === ft} onChange={() => setFishingType(ft)} style={{ accentColor: 'var(--color-current)', width: 'auto' }} />
-                        <span style={{ color: fishingType === ft ? 'var(--color-foam)' : 'var(--color-mist)', fontSize: '0.9375rem', textTransform: 'capitalize' }}>{ft}</span>
+                        <span style={{ color: fishingType === ft ? 'var(--color-foam)' : 'var(--color-mist)', fontSize: '0.9375rem' }}>{label}</span>
                       </label>
                     ))}
                   </div>
