@@ -87,7 +87,7 @@ export default function LandingPage() {
                     </div>
                     <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.0625rem', color: 'var(--color-foam)', marginBottom: '0.5rem' }}>Live Marine Data</h3>
                     <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', lineHeight: 1.6 }}>
-                      Real swell, wind, tides and ocean temperature sourced from Bureau of Meteorology forecasts.
+                      Real swell, wind, tides and ocean temperature from multiple sources including WillyWeather, Bureau of Meteorology, GEBCO, NOAA and others.
                     </p>
                   </div>
 
@@ -143,7 +143,6 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-
       </main>
 
       {/* Footer */}
@@ -152,9 +151,6 @@ export default function LandingPage() {
         <p style={{ color: 'var(--color-mist)', fontSize: '0.8125rem' }}>
           AI Fishfinder · Western Australia
         </p>
-        <Link href="/login" style={{ color: 'var(--color-mist)', fontSize: '0.8125rem', textDecoration: 'none' }}>
-          Sign In
-        </Link>
       </footer>
 
     </div>

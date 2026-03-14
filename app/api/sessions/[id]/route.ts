@@ -7,8 +7,9 @@ const patchSchema = z.object({
   saved: z.boolean(),
 })
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const session = await auth()
     if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -17,7 +18,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (!parsed.success) return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
 
     const fishingSession = await prisma.fishingSession.findUnique({
-      where: { id: params.id, userId: session.user.id },
+      where: { id, userId: session.user.id },
       select: { id: true },
     })
 
@@ -26,7 +27,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     }
 
     await prisma.fishingSession.update({
-      where: { id: params.id },
+      where: { id },
       data: { saved: parsed.data.saved },
     })
 
@@ -37,18 +38,19 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const session = await auth()
     if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const fishingSession = await prisma.fishingSession.findUnique({
-      where: { id: params.id, userId: session.user.id },
+      where: { id, userId: session.user.id },
       select: { id: true },
     })
     if (!fishingSession) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-    await prisma.fishingSession.delete({ where: { id: params.id } })
+    await prisma.fishingSession.delete({ where: { id } })
     return new NextResponse(null, { status: 204 })
   } catch (err: any) {
     console.error('[DELETE /api/sessions/[id]]', err)
