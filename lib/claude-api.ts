@@ -70,10 +70,10 @@ function formatPeriods(periods: PeriodSummary[]): string {
   ).join('\n')
 }
 
-function buildSpeciesBlock(speciesNames: string[], lat: number): string {
+function buildSpeciesBlock(speciesNames: string[], lat: number, lng: number): string {
   return speciesNames.map(name => {
     const knowledge = SPECIES_KNOWLEDGE[name]
-    const regs = getRegulations(name, lat)
+    const regs = getRegulations(name, lat, lng)
     if (!knowledge) return `### ${name}\n- Knowledge: Not available — use general WA fishing knowledge\n`
 
     const regBlock = regs
@@ -101,7 +101,7 @@ const DAILY_PLAN_SCHEMA = `{
     "moonrise": "HH:MM",
     "moonset": "HH:MM",
     "pressureTrend": "rising|falling|steady",
-    "bioregion": "North Coast|West Coast|South Coast"
+    "bioregion": "North Coast|Gascoyne Coast|West Coast|South Coast"
   },
   "windTable": [
     {
@@ -153,8 +153,8 @@ export async function generateFishingPlan(params: {
   salinity: number | null
 }): Promise<DailyPlan[]> {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-  const bioregion = getBioregion(params.latitude)
-  const bioregionName = bioregion === 'north' ? 'North Coast' : bioregion === 'west' ? 'West Coast' : 'South Coast'
+  const bioregion = getBioregion(params.latitude, params.longitude)
+  const bioregionName = { 'north-coast': 'North Coast', gascoyne: 'Gascoyne Coast', 'west-coast': 'West Coast', 'south-coast': 'South Coast' }[bioregion]
 
   const systemPrompt = `You are an expert Western Australia fishing guide, marine analyst and captain with 20+ years of experience fishing WA waters. You produce detailed, accurate daily fishing plans used by professional charter boat captains.
 
@@ -219,7 +219,7 @@ ${formatPeriods(day.periods)}
 `).join('\n')}
 
 ## Target Species Knowledge & Regulations
-${buildSpeciesBlock(params.selectedSpecies, params.latitude)}
+${buildSpeciesBlock(params.selectedSpecies, params.latitude, params.longitude)}
 
 ## Output Schema (return a JSON array matching this exactly):
 ${DAILY_PLAN_SCHEMA}

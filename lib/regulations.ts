@@ -2,7 +2,7 @@
 // and rules.fish.wa.gov.au
 // IMPORTANT: Regulations change — always verify at fish.wa.gov.au before fishing
 
-export type Bioregion = 'north' | 'west' | 'south'
+export type Bioregion = 'north-coast' | 'gascoyne' | 'west-coast' | 'south-coast'
 
 export interface ClosureWarning {
   severity: 'CLOSED' | 'RESTRICTED' | 'SEASONAL'
@@ -19,11 +19,18 @@ export interface SpeciesRegulation {
   closureReason?: string
 }
 
-/** Determine WA bioregion from latitude */
-export function getBioregion(lat: number): Bioregion {
-  if (lat > -26) return 'north'
-  if (lat < -34) return 'south'
-  return 'west'
+/** Determine official WA DPIRD bioregion from latitude and longitude.
+ *  Boundaries per IMCRA / DPIRD:
+ *  - North Coast:   north of 21°46′S (Ashburton River near Onslow)
+ *  - Gascoyne Coast: 21°46′S to 27°S (Zuytdorp Cliffs / Kalbarri)
+ *  - West Coast:    27°S south to Black Point east of Augusta (~115°30′E)
+ *  - South Coast:   east of 115°30′E to WA–SA border
+ */
+export function getBioregion(lat: number, lng: number): Bioregion {
+  if (lat > -21.767) return 'north-coast'
+  if (lat > -27.0)   return 'gascoyne'
+  if (lng >= 115.5 && lat < -33.5) return 'south-coast'
+  return 'west-coast'
 }
 
 const DEMERSAL_SPECIES = new Set([
@@ -43,14 +50,14 @@ export function checkFishingClosures(
   selectedSpecies: string[] = [],
 ): ClosureWarning[] {
   const warnings: ClosureWarning[] = []
-  const bioregion = getBioregion(lat)
+  const bioregion = getBioregion(lat, lng)
 
   // West Coast Boat Demersal Closure: Dec 16 2025 – Spring 2027
   // Only warn if targetType includes demersal AND at least one demersal species is selected
   const targetsDemersals =
     (targetType === 'demersal' || targetType === 'both') &&
     selectedSpecies.some(s => DEMERSAL_SPECIES.has(s))
-  if (bioregion === 'west' && fishingType === 'boat' && targetsDemersals) {
+  if (bioregion === 'west-coast' && fishingType === 'boat' && targetsDemersals) {
     warnings.push({
       severity: 'CLOSED',
       message:
@@ -64,7 +71,7 @@ export function checkFishingClosures(
     lat >= COCKBURN_WARNBRO_BOUNDS.minLat && lat <= COCKBURN_WARNBRO_BOUNDS.maxLat &&
     lng >= COCKBURN_WARNBRO_BOUNDS.minLng && lng <= COCKBURN_WARNBRO_BOUNDS.maxLng
 
-  if (bioregion === 'west' && (targetType === 'demersal' || targetType === 'both') && selectedSpecies.includes('Pink Snapper') && inCockburnWarnbro) {
+  if (bioregion === 'west-coast' && (targetType === 'demersal' || targetType === 'both') && selectedSpecies.includes('Pink Snapper') && inCockburnWarnbro) {
     const now = new Date()
     const month = now.getMonth() + 1 // 1-indexed
     if (month >= 8 || month <= 1) {
@@ -80,171 +87,203 @@ export function checkFishingClosures(
 }
 
 type BioregionRules = {
-  north: SpeciesRegulation
-  west: SpeciesRegulation
-  south: SpeciesRegulation
+  'north-coast': SpeciesRegulation
+  gascoyne:      SpeciesRegulation
+  'west-coast':  SpeciesRegulation
+  'south-coast': SpeciesRegulation
 }
 
 // Full regulations map — keyed by species name
 export const REGULATIONS: Record<string, BioregionRules> = {
   'Spanish Mackerel': {
-    north: { minSize: '900mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag', notes: 'Wire trace prohibited near Esperance Jetty' },
-    west:  { minSize: '900mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag', notes: 'Wire trace banned Perth metro, Busselton and Esperance jetties' },
-    south: { minSize: '900mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag', notes: 'Wire trace prohibited near Esperance Jetty' },
+    'north-coast': { minSize: '900mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag', notes: 'Wire trace prohibited near Esperance Jetty' },
+    gascoyne:      { minSize: '900mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'west-coast':  { minSize: '900mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag', notes: 'Wire trace banned Perth metro, Busselton and Esperance jetties' },
+    'south-coast': { minSize: '900mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag', notes: 'Wire trace prohibited near Esperance Jetty' },
   },
   'Wahoo': {
-    north: { minSize: '900mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
-    west:  { minSize: '900mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
-    south: { minSize: '900mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'north-coast': { minSize: '900mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    gascoyne:      { minSize: '900mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'west-coast':  { minSize: '900mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'south-coast': { minSize: '900mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
   },
   'Mahi-Mahi': {
-    north: { minSize: '500mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
-    west:  { minSize: '500mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
-    south: { minSize: '500mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'north-coast': { minSize: '500mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    gascoyne:      { minSize: '500mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'west-coast':  { minSize: '500mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'south-coast': { minSize: '500mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
   },
   'Yellowfin Tuna': {
-    north: { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
-    west:  { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
-    south: { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'west-coast':  { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
   },
   'Bigeye Tuna': {
-    north: { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
-    west:  { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
-    south: { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'west-coast':  { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
   },
   'Striped Marlin': {
-    north: { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
-    west:  { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
-    south: { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'west-coast':  { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
   },
   'Blue Marlin': {
-    north: { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
-    west:  { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
-    south: { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'west-coast':  { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
   },
   'Sailfish': {
-    north: { bagLimit: '1 fish', combinedLimit: 'Counts within 3 fish large pelagic mixed bag', notes: 'Catch-and-release strongly recommended' },
-    west:  { bagLimit: '1 fish', combinedLimit: 'Counts within 3 fish large pelagic mixed bag', notes: 'Catch-and-release strongly recommended' },
-    south: { bagLimit: '1 fish', combinedLimit: 'Counts within 3 fish large pelagic mixed bag', notes: 'Catch-and-release strongly recommended' },
+    'north-coast': { bagLimit: '1 fish', combinedLimit: 'Counts within 3 fish large pelagic mixed bag', notes: 'Catch-and-release strongly recommended' },
+    gascoyne:      { bagLimit: '1 fish', combinedLimit: 'Counts within 3 fish large pelagic mixed bag', notes: 'Catch-and-release strongly recommended' },
+    'west-coast':  { bagLimit: '1 fish', combinedLimit: 'Counts within 3 fish large pelagic mixed bag', notes: 'Catch-and-release strongly recommended' },
+    'south-coast': { bagLimit: '1 fish', combinedLimit: 'Counts within 3 fish large pelagic mixed bag', notes: 'Catch-and-release strongly recommended' },
   },
   'Queenfish': {
-    north: { bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
-    west:  { bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
-    south: { bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'north-coast': { bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    gascoyne:      { bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'west-coast':  { bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'south-coast': { bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
   },
   'Giant Trevally': {
-    north: { bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
-    west:  { bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
-    south: { bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'north-coast': { bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    gascoyne:      { bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'west-coast':  { bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'south-coast': { bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
   },
   'Yellowtail Kingfish': {
-    north: { minSize: '600mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
-    west:  { minSize: '600mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
-    south: { minSize: '600mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'north-coast': { minSize: '600mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    gascoyne:      { minSize: '600mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'west-coast':  { minSize: '600mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'south-coast': { minSize: '600mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
   },
   'Samson Fish': {
-    north: { minSize: '600mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
-    west:  { minSize: '600mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
-    south: { minSize: '600mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'north-coast': { minSize: '600mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    gascoyne:      { minSize: '600mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'west-coast':  { minSize: '600mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'south-coast': { minSize: '600mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
   },
   'Amberjack': {
-    north: { minSize: '600mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
-    west:  { minSize: '600mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
-    south: { minSize: '600mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'north-coast': { minSize: '600mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    gascoyne:      { minSize: '600mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'west-coast':  { minSize: '600mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'south-coast': { minSize: '600mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
   },
   'Dhufish': {
-    north: { bagLimit: '2 fish', combinedLimit: '4 fish demersal scalefish mixed bag', notes: 'Abrolhos Islands: 1 fish daily limit. Release weight required for barotrauma.' },
-    west:  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.', notes: 'No spearfishing for dhufish. Release weight required.' },
-    south: { bagLimit: '2 fish', combinedLimit: '4 fish demersal scalefish mixed bag', notes: 'Release weight required for barotrauma.' },
+    'north-coast': { bagLimit: '2 fish', combinedLimit: '4 fish demersal scalefish mixed bag', notes: 'Abrolhos Islands: 1 fish daily limit. Release weight required for barotrauma.' },
+    gascoyne:      { bagLimit: '2 fish', combinedLimit: '4 fish demersal scalefish mixed bag', notes: 'Release weight required for barotrauma.' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.', notes: 'No spearfishing for dhufish. Release weight required.' },
+    'south-coast': { bagLimit: '2 fish', combinedLimit: '4 fish demersal scalefish mixed bag', notes: 'Release weight required for barotrauma.' },
   },
   'Pink Snapper': {
-    north: { minSize: '410mm total length', bagLimit: '3 fish', combinedLimit: '5 fish demersal mixed bag', notes: 'Shark Bay seasonal closures apply. Check DPIRD for specific area rules.' },
-    west:  { minSize: '500mm total length (south of 31°S) / 410mm (north of 31°S)', bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027.', seasonalClosures: 'Cockburn Sound & Warnbro Sound closed Aug 1 – Jan 31 for pink snapper (all methods)', notes: 'Release weight required.' },
-    south: { minSize: '410mm total length', bagLimit: '3 fish', combinedLimit: '4 fish demersal mixed bag', notes: 'Release weight required.' },
+    'north-coast': { minSize: '410mm total length', bagLimit: '3 fish', combinedLimit: '5 fish demersal mixed bag', notes: 'Check DPIRD for specific area rules.' },
+    gascoyne:      { minSize: '410mm total length', bagLimit: '3 fish', combinedLimit: '5 fish demersal mixed bag (2 pink snapper + 1 rankin cod + 1 red emperor + 1 goldband snapper)', notes: 'Shark Bay seasonal closures apply. Freycinet Estuary: tagging required (limited annual tags). Check DPIRD for current rules.' },
+    'west-coast':  { minSize: '500mm total length (south of 31°S) / 410mm (north of 31°S)', bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027.', seasonalClosures: 'Cockburn Sound & Warnbro Sound closed Aug 1 – Jan 31 for pink snapper (all methods)', notes: 'Release weight required.' },
+    'south-coast': { minSize: '410mm total length', bagLimit: '3 fish', combinedLimit: '4 fish demersal mixed bag', notes: 'Release weight required.' },
   },
   'Baldchin Groper': {
-    north: { bagLimit: '3 fish', combinedLimit: '4 fish demersal mixed bag', seasonalClosures: 'Abrolhos Islands: closed Oct 1 – Dec 31 (spawning)', notes: 'Abrolhos Islands: 1 fish limit.' },
-    west:  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027.', notes: 'Release weight required.' },
-    south: { bagLimit: '3 fish', combinedLimit: '4 fish demersal mixed bag', notes: 'Release weight required.' },
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal mixed bag', seasonalClosures: 'Abrolhos Islands: closed Oct 1 – Dec 31 (spawning)', notes: 'Abrolhos Islands: 1 fish limit.' },
+    gascoyne:      { bagLimit: '2 fish', combinedLimit: '4 fish demersal mixed bag', notes: 'Shark Bay inner gulfs: combined bag limit of 2 for baldchin groper + tuskfish. Release weight required.' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027.', notes: 'Release weight required.' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal mixed bag', notes: 'Release weight required.' },
   },
   'Redthroat Emperor': {
-    north: { minSize: '410mm total length', bagLimit: '3 fish', combinedLimit: '4 fish demersal mixed bag' },
-    west:  { minSize: '410mm total length', bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027.' },
-    south: { minSize: '410mm total length', bagLimit: '3 fish', combinedLimit: '4 fish demersal mixed bag' },
+    'north-coast': { minSize: '410mm total length', bagLimit: '3 fish', combinedLimit: '4 fish demersal mixed bag' },
+    gascoyne:      { minSize: '410mm total length', bagLimit: '3 fish', combinedLimit: '5 fish demersal mixed bag' },
+    'west-coast':  { minSize: '410mm total length', bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027.' },
+    'south-coast': { minSize: '410mm total length', bagLimit: '3 fish', combinedLimit: '4 fish demersal mixed bag' },
   },
   'Spangled Emperor': {
-    north: { minSize: '410mm total length', bagLimit: '3 fish', combinedLimit: '5 fish demersal mixed bag' },
-    west:  { minSize: '410mm total length', bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027.' },
-    south: { minSize: '410mm total length', bagLimit: '3 fish', combinedLimit: '4 fish demersal mixed bag' },
+    'north-coast': { minSize: '410mm total length', bagLimit: '3 fish', combinedLimit: '5 fish demersal mixed bag' },
+    gascoyne:      { minSize: '410mm total length', bagLimit: '3 fish', combinedLimit: '5 fish demersal mixed bag' },
+    'west-coast':  { minSize: '410mm total length', bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027.' },
+    'south-coast': { minSize: '410mm total length', bagLimit: '3 fish', combinedLimit: '4 fish demersal mixed bag' },
   },
   'Coral Trout': {
-    north: { minSize: '450mm total length', bagLimit: '1 fish', notes: 'Totally protected in Rowley Shoals Marine Park — no take.' },
-    west:  { minSize: '450mm total length', bagLimit: '1 fish (land-based only)', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027.' },
-    south: { minSize: '450mm total length', bagLimit: '1 fish' },
+    'north-coast': { minSize: '450mm total length', bagLimit: '1 fish', notes: 'Totally protected in Rowley Shoals Marine Park — no take.' },
+    gascoyne:      { minSize: '450mm total length', bagLimit: '1 fish', notes: 'Check local marine park rules.' },
+    'west-coast':  { minSize: '450mm total length', bagLimit: '1 fish (land-based only)', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027.' },
+    'south-coast': { minSize: '450mm total length', bagLimit: '1 fish' },
   },
   'Tuskfish': {
-    north: { minSize: 'None (blackspot/blue tuskfish: 400mm)', bagLimit: '3 fish', combinedLimit: '4 fish demersal mixed bag' },
-    west:  { minSize: 'None (blackspot/blue tuskfish: 400mm)', bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027.' },
-    south: { minSize: 'None (blackspot/blue tuskfish: 400mm)', bagLimit: '3 fish', combinedLimit: '4 fish demersal mixed bag' },
+    'north-coast': { minSize: 'None (blackspot/blue tuskfish: 400mm)', bagLimit: '3 fish', combinedLimit: '4 fish demersal mixed bag' },
+    gascoyne:      { minSize: 'None (blackspot/blue tuskfish: 400mm)', bagLimit: '2 fish', combinedLimit: '4 fish demersal mixed bag', notes: 'Shark Bay inner gulfs: combined bag limit of 2 for baldchin groper + tuskfish.' },
+    'west-coast':  { minSize: 'None (blackspot/blue tuskfish: 400mm)', bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027.' },
+    'south-coast': { minSize: 'None (blackspot/blue tuskfish: 400mm)', bagLimit: '3 fish', combinedLimit: '4 fish demersal mixed bag' },
   },
   'Black Snapper (Grass Emperor)': {
-    north: { minSize: '320mm total length', bagLimit: '5 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
-    west:  { minSize: '320mm total length', bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based permitted.' },
-    south: { minSize: '320mm total length', bagLimit: '5 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    'north-coast': { minSize: '320mm total length', bagLimit: '5 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    gascoyne:      { minSize: '320mm total length', bagLimit: '5 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    'west-coast':  { minSize: '320mm total length', bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based permitted.' },
+    'south-coast': { minSize: '320mm total length', bagLimit: '5 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
   },
   'Tailor': {
-    north: { minSize: '300mm total length', bagLimit: '8 fish (max 2 over 500mm)', notes: 'Wire trace prohibited near Esperance Jetty' },
-    west:  { minSize: '300mm total length', bagLimit: '8 fish (max 2 over 500mm)', notes: 'Wire trace prohibited near Perth metro, Busselton and Esperance jetties' },
-    south: { minSize: '300mm total length', bagLimit: '8 fish (max 2 over 500mm)', notes: 'Wire trace prohibited near Esperance Jetty' },
+    'north-coast': { minSize: '300mm total length', bagLimit: '8 fish (max 2 over 500mm)', notes: 'Wire trace prohibited near Esperance Jetty' },
+    gascoyne:      { minSize: '300mm total length', bagLimit: '8 fish (max 2 over 500mm)' },
+    'west-coast':  { minSize: '300mm total length', bagLimit: '8 fish (max 2 over 500mm)', notes: 'Wire trace prohibited near Perth metro, Busselton and Esperance jetties' },
+    'south-coast': { minSize: '300mm total length', bagLimit: '8 fish (max 2 over 500mm)', notes: 'Wire trace prohibited near Esperance Jetty' },
   },
   'Australian Salmon (Western Australian Salmon)': {
-    north: { minSize: '300mm total length', bagLimit: '4 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
-    west:  { minSize: '300mm total length', bagLimit: '4 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
-    south: { minSize: '300mm total length', bagLimit: '4 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'north-coast': { minSize: '300mm total length', bagLimit: '4 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    gascoyne:      { minSize: '300mm total length', bagLimit: '4 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'west-coast':  { minSize: '300mm total length', bagLimit: '4 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'south-coast': { minSize: '300mm total length', bagLimit: '4 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
   },
   'Yellowfin Whiting': {
-    north: { bagLimit: '30 fish', combinedLimit: '30 fish whiting mixed bag' },
-    west:  { bagLimit: '30 fish', combinedLimit: '30 fish whiting mixed bag' },
-    south: { bagLimit: '30 fish', combinedLimit: '30 fish whiting mixed bag' },
+    'north-coast': { bagLimit: '30 fish', combinedLimit: '30 fish whiting mixed bag' },
+    gascoyne:      { bagLimit: '30 fish', combinedLimit: '30 fish whiting mixed bag' },
+    'west-coast':  { bagLimit: '30 fish', combinedLimit: '30 fish whiting mixed bag' },
+    'south-coast': { bagLimit: '30 fish', combinedLimit: '30 fish whiting mixed bag' },
   },
   'Trevally': {
-    north: { minSize: 'None (silver trevally: 250mm)', bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
-    west:  { minSize: 'None (silver trevally: 250mm)', bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
-    south: { minSize: 'None (silver trevally: 250mm)', bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'north-coast': { minSize: 'None (silver trevally: 250mm)', bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    gascoyne:      { minSize: 'None (silver trevally: 250mm)', bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'west-coast':  { minSize: 'None (silver trevally: 250mm)', bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'south-coast': { minSize: 'None (silver trevally: 250mm)', bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
   },
   'Herring': {
-    north: { bagLimit: '20 fish per 24 hours' },
-    west:  { bagLimit: '20 fish per 24 hours' },
-    south: { bagLimit: '20 fish per 24 hours' },
+    'north-coast': { bagLimit: '20 fish per 24 hours' },
+    gascoyne:      { bagLimit: '20 fish per 24 hours' },
+    'west-coast':  { bagLimit: '20 fish per 24 hours' },
+    'south-coast': { bagLimit: '20 fish per 24 hours' },
   },
   'Bream': {
-    north: { minSize: '250mm (yellowfin bream: 300mm)', bagLimit: '6 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
-    west:  { minSize: '250mm (yellowfin bream: 300mm)', bagLimit: '6 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag', notes: 'Max 2 black bream over 400mm in Swan and Canning rivers' },
-    south: { minSize: '250mm (yellowfin bream: 300mm)', bagLimit: '6 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'north-coast': { minSize: '250mm (yellowfin bream: 300mm)', bagLimit: '6 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    gascoyne:      { minSize: '250mm (yellowfin bream: 300mm)', bagLimit: '6 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'west-coast':  { minSize: '250mm (yellowfin bream: 300mm)', bagLimit: '6 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag', notes: 'Max 2 black bream over 400mm in Swan and Canning rivers' },
+    'south-coast': { minSize: '250mm (yellowfin bream: 300mm)', bagLimit: '6 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
   },
   'Whiting': {
-    north: { bagLimit: '30 fish', combinedLimit: '30 fish whiting mixed bag' },
-    west:  { bagLimit: '30 fish', combinedLimit: '30 fish whiting mixed bag' },
-    south: { bagLimit: '30 fish', combinedLimit: '30 fish whiting mixed bag' },
+    'north-coast': { bagLimit: '30 fish', combinedLimit: '30 fish whiting mixed bag' },
+    gascoyne:      { bagLimit: '30 fish', combinedLimit: '30 fish whiting mixed bag' },
+    'west-coast':  { bagLimit: '30 fish', combinedLimit: '30 fish whiting mixed bag' },
+    'south-coast': { bagLimit: '30 fish', combinedLimit: '30 fish whiting mixed bag' },
   },
   'Flathead': {
-    north: { minSize: '300mm total length', bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
-    west:  { minSize: '300mm total length', bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
-    south: { minSize: '300mm total length', bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'north-coast': { minSize: '300mm total length', bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    gascoyne:      { minSize: '300mm total length', bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'west-coast':  { minSize: '300mm total length', bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'south-coast': { minSize: '300mm total length', bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
   },
   'Mulloway': {
-    north: { minSize: '500mm total length', bagLimit: '2 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
-    west:  { minSize: '500mm total length', bagLimit: '2 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
-    south: { minSize: '500mm total length', bagLimit: '2 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'north-coast': { minSize: '500mm total length', bagLimit: '2 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    gascoyne:      { minSize: '500mm total length', bagLimit: '2 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'west-coast':  { minSize: '500mm total length', bagLimit: '2 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'south-coast': { minSize: '500mm total length', bagLimit: '2 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
   },
   'Flounder': {
-    north: { minSize: '250mm total length', bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
-    west:  { minSize: '250mm total length', bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
-    south: { minSize: '250mm total length', bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'north-coast': { minSize: '250mm total length', bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    gascoyne:      { minSize: '250mm total length', bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'west-coast':  { minSize: '250mm total length', bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'south-coast': { minSize: '250mm total length', bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
   },
 }
 
-export function getRegulations(species: string, lat: number): SpeciesRegulation | null {
-  const bioregion = getBioregion(lat)
+export function getRegulations(species: string, lat: number, lng: number): SpeciesRegulation | null {
+  const bioregion = getBioregion(lat, lng)
   return REGULATIONS[species]?.[bioregion] ?? null
 }

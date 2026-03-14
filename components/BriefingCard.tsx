@@ -25,6 +25,7 @@ interface Props {
   plan: DailyPlan
   selectedSpecies: string[]
   latitude: number
+  longitude: number
   fishingType: string
 }
 
@@ -36,7 +37,7 @@ function SectionHeader({ title }: { title: string }) {
   )
 }
 
-export default function BriefingCard({ plan, selectedSpecies, latitude, fishingType }: Props) {
+export default function BriefingCard({ plan, selectedSpecies, latitude, longitude, fishingType }: Props) {
   const date = new Date(plan.date + 'T12:00:00')
   const dateLabel = date.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 
@@ -213,7 +214,7 @@ export default function BriefingCard({ plan, selectedSpecies, latitude, fishingT
           </thead>
           <tbody>
             {selectedSpecies.map((sp, i) => {
-              const reg = getRegulations(sp, latitude)
+              const reg = getRegulations(sp, latitude, longitude)
               const effectiveClosure = reg?.closureActive && fishingType === 'boat'
               return (
                 <tr key={i}>

@@ -122,6 +122,7 @@ export default async function PlanPage({ params }: { params: { id: string } }) {
               plan={plan}
               selectedSpecies={selectedSpecies}
               latitude={latitude}
+              longitude={longitude}
               fishingType={fishingType}
             />
           ))
