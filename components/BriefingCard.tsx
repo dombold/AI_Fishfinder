@@ -1,6 +1,30 @@
 import type { DailyPlan } from '@/lib/claude-api'
 import { getRegulations, getBioregion } from '@/lib/regulations'
 import WaypointMap from '@/components/WaypointMap'
+import ForecastGraphs from '@/components/ForecastGraphs'
+import type { TideEvent, PeriodSummary, WindHourlyPoint } from '@/lib/marine-api'
+
+// Period label → hour range mapping (matches PERIODS in marine-api.ts)
+const PERIOD_HOURS: { prefix: string; start: number; end: number }[] = [
+  { prefix: 'Pre-dawn',  start: 0,  end: 6  },
+  { prefix: 'Morning',   start: 6,  end: 10 },
+  { prefix: 'Midday',    start: 10, end: 14 },
+  { prefix: 'Afternoon', start: 14, end: 18 },
+  { prefix: 'Evening',   start: 18, end: 24 },
+]
+
+function periodsToWindHourly(periods: PeriodSummary[], date: string): WindHourlyPoint[] {
+  const result: WindHourlyPoint[] = []
+  for (const ph of PERIOD_HOURS) {
+    const p = periods.find(x => x.label.startsWith(ph.prefix))
+    const speedKts = p ? (parseFloat(p.windSpeed) || 0) : 0
+    const dir = p?.windDirection ?? 'N/A'
+    for (let h = ph.start; h < ph.end; h++) {
+      result.push({ time: `${date}T${h.toString().padStart(2, '0')}:00:00`, speedKts, directionText: dir })
+    }
+  }
+  return result
+}
 
 const RATING_STYLE: Record<string, { bg: string; color: string; border: string }> = {
   'BEST WINDOW':   { bg: 'rgba(46,204,138,0.15)',  color: '#2ECC8A', border: 'rgba(46,204,138,0.4)' },
@@ -27,6 +51,8 @@ interface Props {
   latitude: number
   longitude: number
   fishingType: string
+  tides?: TideEvent[]
+  periods?: PeriodSummary[]
 }
 
 function SectionHeader({ title }: { title: string }) {
@@ -37,7 +63,7 @@ function SectionHeader({ title }: { title: string }) {
   )
 }
 
-export default function BriefingCard({ plan, selectedSpecies, latitude, longitude, fishingType }: Props) {
+export default function BriefingCard({ plan, selectedSpecies, latitude, longitude, fishingType, tides, periods }: Props) {
   const date = new Date(plan.date + 'T12:00:00')
   const dateLabel = date.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 
@@ -109,6 +135,19 @@ export default function BriefingCard({ plan, selectedSpecies, latitude, longitud
           </tbody>
         </table>
       </div>
+
+      {/* ── Wind & Tide Forecast Charts ─────────────────── */}
+      {((tides && tides.length > 0) || (periods && periods.length > 0)) && (
+        <div style={{ padding: '0 1.5rem 1.5rem' }}>
+          <SectionHeader title="WIND & TIDE FORECAST" />
+          <div style={{ marginTop: '0.75rem' }}>
+            <ForecastGraphs
+              windHourly={periodsToWindHourly(periods ?? [], plan.date)}
+              tideData={tides ?? []}
+            />
+          </div>
+        </div>
+      )}
 
       {/* ── 2. Ocean Conditions ──────────────────────────── */}
       <SectionHeader title="2. OCEAN CONDITIONS" />

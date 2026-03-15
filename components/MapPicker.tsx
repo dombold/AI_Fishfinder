@@ -6,7 +6,7 @@ const MapPickerInner = dynamic(() => import('./MapPickerInner'), {
   ssr: false,
   loading: () => (
     <div style={{
-      height: '320px',
+      height: '640px',
       background: 'rgba(14,42,69,0.6)',
       borderRadius: '0.75rem',
       border: '1px solid rgba(107,143,163,0.2)',

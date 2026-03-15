@@ -10,6 +10,7 @@ import DataSourcesModal from '@/components/DataSourcesModal'
 import ExportGPXButton from '@/components/ExportGPXButton'
 import UserDropdown from '@/components/UserDropdown'
 import type { DailyPlan } from '@/lib/claude-api'
+import type { TideEvent, PeriodSummary } from '@/lib/marine-api'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,6 +23,7 @@ export default async function PlanPage({ params }: { params: { id: string } }) {
     include: {
       selectedSpecies: true,
       fishingPlans: { orderBy: { date: 'asc' } },
+      marineData: { orderBy: { date: 'asc' } },
     },
   })
 
@@ -69,6 +71,17 @@ export default async function PlanPage({ params }: { params: { id: string } }) {
     return content as DailyPlan
   })
 
+  // Map date → tides + periods for charts
+  const marineByDate: Record<string, { tides: TideEvent[]; periods: PeriodSummary[] }> = Object.fromEntries(
+    fishingSession.marineData.map(md => [
+      md.date,
+      {
+        tides: JSON.parse(md.tideData) as TideEvent[],
+        periods: (JSON.parse(md.openMeteoData) as { periods: PeriodSummary[] }).periods,
+      },
+    ])
+  )
+
   const start = new Date(startDate + 'T12:00:00')
   const end = new Date(endDate + 'T12:00:00')
   const dateRangeLabel = start.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' }) +
@@ -94,14 +107,14 @@ export default async function PlanPage({ params }: { params: { id: string } }) {
           <span className="section-label" style={{ margin: 0 }}>Fishing Briefing</span>
         </div>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--color-foam)', marginBottom: '0.25rem' }}>
-          {dateRangeLabel} · {fishingType} · {selectedSpecies.join(', ')}
+          {dateRangeLabel} · {fishingType.charAt(0).toUpperCase() + fishingType.slice(1)} · {selectedSpecies.join(', ')}
         </h1>
         <p style={{ color: 'var(--color-mist)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
           {locationName ?? `${Math.abs(latitude).toFixed(4)}°S, ${longitude.toFixed(4)}°E`}
         </p>
 
         {/* Actions */}
-        <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+        <div className="no-print" style={{ display: 'flex', gap: '0.75rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
           <SavePlanButton sessionId={params.id} initialSaved={saved} />
           <PrintButton />
           <DataSourcesModal contextData={contextData ?? null} latitude={latitude} longitude={longitude} />
@@ -124,6 +137,8 @@ export default async function PlanPage({ params }: { params: { id: string } }) {
               latitude={latitude}
               longitude={longitude}
               fishingType={fishingType}
+              tides={marineByDate[plan.date]?.tides ?? []}
+              periods={marineByDate[plan.date]?.periods ?? []}
             />
           ))
         )}

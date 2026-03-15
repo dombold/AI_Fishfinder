@@ -34,10 +34,18 @@ export interface PeriodSummary {
   precipitation: string
 }
 
+export interface WindHourlyPoint {
+  time: string        // ISO string e.g. "2026-03-15T06:00:00"
+  speedKts: number    // converted from WillyWeather km/h
+  directionText: string
+}
+
 export interface DayMarineData {
   date: string            // YYYY-MM-DD
   tides: TideEvent[]
   periods: PeriodSummary[]
+  windHourly: WindHourlyPoint[]
+  nearestStation: string  // WillyWeather station name used for wind/tide data
   moonPhase: string
   moonIllumination: number
   moonrise: string
@@ -60,11 +68,6 @@ function avg(vals: (number | null)[]): number | null {
   return nums.reduce((a, b) => a + b, 0) / nums.length
 }
 
-function max(vals: (number | null)[]): number | null {
-  const nums = vals.filter((v): v is number => v !== null)
-  if (!nums.length) return null
-  return Math.max(...nums)
-}
 
 /** Convert Open-Meteo parallel arrays → array of hourly objects */
 function zipOpenMeteoHourly(data: any): HourlyRecord[] {
@@ -95,68 +98,154 @@ const PERIODS = [
 /** Summarise hourly Open-Meteo records into 5 named periods */
 function summariseByPeriod(
   records: HourlyRecord[],
-  willyPeriods: any[], // already parsed WillyWeather wind/swell by hour
+  windHourly: any[],  // WillyWeather wind entries  { dateTime, speed (km/h), directionText }
+  swellHourly: any[], // WillyWeather swell entries { dateTime, height (m), period (s), directionText }
   date: string
 ): PeriodSummary[] {
   return PERIODS.map(p => {
+    const inPeriod = (dateTime: string) => {
+      if (!dateTime?.startsWith(date)) return false
+      const h = new Date(dateTime.replace(' ', 'T')).getHours()
+      return h >= p.start && h < p.end
+    }
+
     const hrs = records.filter(r => {
       if (!r.time.startsWith(date)) return false
       const h = new Date(r.time).getHours()
       return h >= p.start && h < p.end
     })
 
-    // WillyWeather wind/swell for this period
-    const willy = willyPeriods.filter((w: any) => {
-      const h = new Date(w.dateTime).getHours()
-      return w.dateTime?.startsWith(date) && h >= p.start && h < p.end
-    })
+    const wind  = windHourly.filter((w: any) => inPeriod(w.dateTime))
+    const swell = swellHourly.filter((w: any) => inPeriod(w.dateTime))
 
-    const windSpeeds = willy.map((w: any) => w.speed).filter(Boolean)
-    const windDirs   = willy.map((w: any) => w.direction).filter(Boolean)
-    const gusts      = willy.map((w: any) => w.gustSpeed).filter(Boolean)
-    const swellHts   = willy.map((w: any) => w.height).filter(Boolean)
-    const swellPers  = willy.map((w: any) => w.period).filter(Boolean)
-    const swellDirs  = willy.map((w: any) => w.directionText).filter(Boolean)
-    const pressures  = willy.map((w: any) => w.pressure).filter(Boolean)
-    const precips    = willy.map((w: any) => w.amount).filter(Boolean)
+    // Wind speed: WillyWeather returns km/h → convert to knots (×0.53996)
+    const windSpeedsKmh = wind.map((w: any) => w.speed).filter((v: any) => v != null && !isNaN(v))
+    const windDirTexts  = wind.map((w: any) => w.directionText).filter(Boolean)
+    const swellHts      = swell.map((w: any) => w.height).filter((v: any) => v != null && !isNaN(v))
+    const swellPers     = swell.map((w: any) => w.period).filter((v: any) => v != null && !isNaN(v))
+    const swellDirs     = swell.map((w: any) => w.directionText).filter(Boolean)
 
-    const avgWind   = windSpeeds.length ? Math.round(windSpeeds.reduce((a:number,b:number)=>a+b,0)/windSpeeds.length) : null
-    const maxGust   = gusts.length ? Math.round(Math.max(...gusts)) : null
-    const avgSwell  = swellHts.length ? (swellHts.reduce((a:number,b:number)=>a+b,0)/swellHts.length).toFixed(1) : null
-    const avgPer    = swellPers.length ? Math.round(swellPers.reduce((a:number,b:number)=>a+b,0)/swellPers.length) : null
-    const avgPres   = pressures.length ? Math.round(pressures.reduce((a:number,b:number)=>a+b,0)/pressures.length) : null
-    const totalPrec = precips.length ? precips.reduce((a:number,b:number)=>a+b,0).toFixed(1) : '0'
+    const avgWindKts = windSpeedsKmh.length
+      ? Math.round(windSpeedsKmh.reduce((a: number, b: number) => a + b, 0) / windSpeedsKmh.length * 0.53996)
+      : null
+    const avgSwell = swellHts.length
+      ? (swellHts.reduce((a: number, b: number) => a + b, 0) / swellHts.length).toFixed(1)
+      : null
+    const avgPer = swellPers.length
+      ? Math.round(swellPers.reduce((a: number, b: number) => a + b, 0) / swellPers.length)
+      : null
+
+    function dominant<T>(arr: T[]): T | string {
+      if (!arr.length) return 'N/A'
+      return arr.sort((a, b) => arr.filter(x => x === b).length - arr.filter(x => x === a).length)[0]
+    }
 
     // SST and currents from Open-Meteo
-    const sstVals  = hrs.map(h => h.sst)
-    const curVals  = hrs.map(h => h.currentVelocity)
-    const curDirs  = hrs.map(h => h.currentDirection)
-    const avgSst   = avg(sstVals)
-    const avgCur   = avg(curVals)
-    const avgCurDir = avg(curDirs)
-
-    const dominantWindDir = windDirs.length
-      ? windDirs.sort((a:string,b:string) => windDirs.filter((x:string)=>x===b).length - windDirs.filter((x:string)=>x===a).length)[0]
-      : 'N/A'
-    const dominantSwellDir = swellDirs.length
-      ? swellDirs.sort((a:string,b:string) => swellDirs.filter((x:string)=>x===b).length - swellDirs.filter((x:string)=>x===a).length)[0]
-      : 'N/A'
+    const avgSst    = avg(hrs.map(h => h.sst))
+    const avgCur    = avg(hrs.map(h => h.currentVelocity))
+    const avgCurDir = avg(hrs.map(h => h.currentDirection))
 
     return {
       label:            `${p.label} ${String(p.start).padStart(2,'0')}:00–${String(p.end).padStart(2,'0')}:00`,
-      windSpeed:        avgWind !== null ? `${avgWind} kts` : 'N/A',
-      windDirection:    dominantWindDir,
-      windGusts:        maxGust !== null ? `${maxGust} kts` : 'N/A',
+      windSpeed:        avgWindKts !== null ? `${avgWindKts} kts` : 'N/A',
+      windDirection:    String(dominant(windDirTexts)),
+      windGusts:        'N/A', // WillyWeather free tier does not include gust data
       swellHeight:      avgSwell !== null ? `${avgSwell}m` : 'N/A',
       swellPeriod:      avgPer !== null ? `${avgPer}s` : 'N/A',
-      swellDirection:   dominantSwellDir,
+      swellDirection:   String(dominant(swellDirs)),
       sst:              avgSst !== null ? `${avgSst.toFixed(1)}°C` : 'N/A',
-      currentSpeed:     avgCur !== null ? `${(avgCur * 1.944).toFixed(1)} kts` : 'N/A', // m/s → knots
+      currentSpeed:     avgCur !== null ? `${(avgCur * 1.944).toFixed(1)} kts` : 'N/A', // m/s → kts
       currentDirection: degreesToCompass(avgCurDir),
-      pressure:         avgPres !== null ? `${avgPres} hPa` : 'N/A',
-      precipitation:    `${totalPrec}mm`,
+      pressure:         'N/A', // not in WillyWeather free forecast
+      precipitation:    'N/A', // not in WillyWeather free forecast
     }
   })
+}
+
+// Static table of WA coastal WillyWeather station IDs.
+// WillyWeather's coordinate search is unreliable — we find the nearest station
+// via haversine distance instead.
+const WA_STATIONS = [
+  // ── Kimberley ──────────────────────────────────────────────────
+  { id: 15124, lat: -14.2945, lng: 126.6423, name: 'Kalumburu' },
+  { id: 18886, lat: -13.7537, lng: 126.1505, name: 'Troughton Island' },
+  { id: 30820, lat: -14.09,   lng: 126.39,   name: 'Truscott' },
+  { id: 15821, lat: -15.4874, lng: 128.1234, name: 'Wyndham' },
+  { id: 15185, lat: -15.7739, lng: 128.739,  name: 'Kununurra' },
+  { id: 27697, lat: -16.5806, lng: 122.9631, name: 'Cygnet Bay' },
+  { id: 27722, lat: -16.5391, lng: 122.8171, name: 'Lombadina' },
+  { id: 15166, lat: -16.1408, lng: 123.7682, name: 'Koolan Island' },
+  { id: 18879, lat: -15.5258, lng: 123.1562, name: 'Adele Island' },
+  { id: 14899, lat: -17.3048, lng: 123.6325, name: 'Derby' },
+  { id: 14735, lat: -17.9551, lng: 122.2415, name: 'Broome' },
+  // ── Pilbara ────────────────────────────────────────────────────
+  { id: 30821, lat: -19.7428, lng: 120.8432, name: 'Mandora' },
+  { id: 18870, lat: -19.588,  lng: 119.0991, name: 'Bedout Island' },
+  { id: 15532, lat: -20.3142, lng: 118.578,  name: 'Port Hedland' },
+  { id: 14651, lat: -20.7919, lng: 115.4001, name: 'Barrow Island' },
+  { id: 15136, lat: -20.7367, lng: 116.8463, name: 'Karratha' },
+  { id: 14879, lat: -20.6617, lng: 116.7071, name: 'Dampier' },
+  { id: 36310, lat: -20.6522, lng: 115.5777, name: 'Varanus Island' },
+  { id: 25407, lat: -20.3919, lng: 116.8909, name: 'Legendre Island' },
+  { id: 15566, lat: -20.7692, lng: 117.1446, name: 'Roebourne' },
+  { id: 15257, lat: -21.1935, lng: 115.9762, name: 'Mardie' },
+  { id: 15664, lat: -21.4613, lng: 115.0089, name: 'Thevenard Island' },
+  { id: 15478, lat: -21.6363, lng: 115.1124, name: 'Onslow' },
+  // ── Gascoyne / Mid-West ────────────────────────────────────────
+  { id: 15215, lat: -22.2148, lng: 114.0944, name: 'Learmonth' },
+  { id: 39786, lat: -21.5917, lng: 113.8046, name: 'Exmouth' },
+  { id: 14846, lat: -23.1428, lng: 113.7708, name: 'Coral Bay' },
+  { id: 14793, lat: -24.8837, lng: 113.657,  name: 'Carnarvon' },
+  { id: 15592, lat: -25.2667, lng: 113.4667, name: 'Shark Bay' },
+  { id: 15315, lat: -25.7942, lng: 113.7183, name: 'Monkey Mia' },
+  { id: 14897, lat: -25.9279, lng: 113.5337, name: 'Denham' },
+  { id: 15117, lat: -27.7106, lng: 114.1644, name: 'Kalbarri' },
+  { id: 18833, lat: -28.3001, lng: 113.5952, name: 'North Island' },
+  { id: 18838, lat: -28.1916, lng: 114.2482, name: 'Port Gregory' },
+  { id: 15002, lat: -28.7731, lng: 114.6113, name: 'Geraldton' },
+  { id: 14909, lat: -29.2485, lng: 114.92,   name: 'Dongara' },
+  { id: 15114, lat: -30.3079, lng: 115.0365, name: 'Jurien Bay' },
+  { id: 14803, lat: -30.5036, lng: 115.07,   name: 'Cervantes' },
+  // ── Swan Coast / Perth ─────────────────────────────────────────
+  { id: 14555, lat: -31.0215, lng: 115.3321, name: 'Lancelin' },
+  { id: 14591, lat: -31.5011, lng: 115.5881, name: 'Two Rocks' },
+  { id: 14542, lat: -31.8074, lng: 115.7435, name: 'Hillarys' },
+  { id: 14468, lat: -31.9954, lng: 115.5396, name: 'Rottnest Island' },
+  { id: 14576, lat: -31.9554, lng: 115.8586, name: 'Perth' },
+  { id: 14384, lat: -32.0531, lng: 115.7459, name: 'Fremantle' },
+  { id: 14387, lat: -32.2258, lng: 115.6864, name: 'Garden Island' },
+  { id: 28091, lat: -32.2265, lng: 115.6999, name: 'Colpoys Point' },
+  { id: 14463, lat: -32.278,  lng: 115.7224, name: 'Rockingham' },
+  { id: 14422, lat: -32.5337, lng: 115.7217, name: 'Mandurah' },
+  // ── South-West ─────────────────────────────────────────────────
+  { id: 15883, lat: -33.3271, lng: 115.637,  name: 'Bunbury' },
+  { id: 14768, lat: -33.6506, lng: 115.347,  name: 'Busselton' },
+  { id: 19524, lat: -33.5315, lng: 115.0057, name: 'Cape Naturaliste' },
+  { id: 14625, lat: -34.3159, lng: 115.1597, name: 'Augusta' },
+  { id: 19512, lat: -34.3755, lng: 115.1361, name: 'Cape Leeuwin' },
+  { id: 15793, lat: -34.8371, lng: 116.0251, name: 'Windy Harbour' },
+  { id: 15715, lat: -34.9764, lng: 116.7322, name: 'Walpole' },
+  { id: 14605, lat: -35.0239, lng: 117.8835, name: 'Albany' },
+  // ── South Coast ────────────────────────────────────────────────
+  { id: 14726, lat: -34.3924, lng: 119.3808, name: 'Bremer Bay' },
+  { id: 15081, lat: -33.95,   lng: 120.1263, name: 'Hopetoun' },
+  { id: 14968, lat: -33.8613, lng: 121.8914, name: 'Esperance' },
+  { id: 14969, lat: -31.6768, lng: 128.888,  name: 'Eucla' },
+]
+
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371
+  const dLat = (lat2 - lat1) * Math.PI / 180
+  const dLng = (lng2 - lng1) * Math.PI / 180
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
+
+function nearestStation(lat: number, lng: number) {
+  return WA_STATIONS.reduce((best, s) =>
+    haversineKm(lat, lng, s.lat, s.lng) < haversineKm(lat, lng, best.lat, best.lng) ? s : best
+  )
 }
 
 /** Fetch tide + weather + astronomy data from WillyWeather API */
@@ -169,7 +258,6 @@ async function fetchWillyWeatherData(lat: number, lng: number, dates: string[]) 
       tides: [] as TideEvent[],
       windHourly: [],
       swellHourly: [],
-      pressureHourly: [],
       moonPhase: 'Waxing Gibbous',
       moonIllumination: 65,
       moonrise: `${date}T20:15:00`,
@@ -180,14 +268,9 @@ async function fetchWillyWeatherData(lat: number, lng: number, dates: string[]) 
     }))
   }
 
-  // Step 1: Find nearest WillyWeather location
-  const searchUrl = `https://api.willyweather.com.au/v2/${apiKey}/search.json?query=${lat},${lng}&limit=1`
-  const searchRes = await fetch(searchUrl)
-  if (!searchRes.ok) throw new Error(`WillyWeather location search failed: ${searchRes.status}`)
-  const searchData = await searchRes.json()
-  const locationId = searchData?.location?.id
-  if (!locationId) throw new Error('No WillyWeather location found for coordinates')
-
+  // Step 1: Find nearest WillyWeather station via haversine distance
+  const station = nearestStation(lat, lng)
+  const locationId = station.id
   const startDate = dates[0]
   const numDays = dates.length
 
@@ -203,30 +286,38 @@ async function fetchWillyWeatherData(lat: number, lng: number, dates: string[]) 
     const swellDay = forecastData?.forecasts?.swell?.days?.find((d: any) => d.dateTime?.startsWith(date))
     const moonDay = forecastData?.forecasts?.moonphases?.days?.find((d: any) => d.dateTime?.startsWith(date))
 
+    // WillyWeather datetimes use "YYYY-MM-DD HH:MM:SS" — normalise to ISO
+    const toISO = (dt: string) => dt ? dt.replace(' ', 'T') : ''
+
     const tides: TideEvent[] = (dayData?.entries ?? []).map((e: any) => ({
-      time: e.dateTime,
+      time: toISO(e.dateTime),
       height: e.height,
       type: e.type === 'high' ? 'HIGH' : 'LOW',
     }))
+
+    // moonphases entries are nested under days[].entries[]
+    const moonEntry = moonDay?.entries?.[0]
 
     return {
       date,
       tides,
       windHourly: windDay?.entries ?? [],
       swellHourly: swellDay?.entries ?? [],
-      pressureHourly: windDay?.entries ?? [],  // pressure often in wind entries
-      moonPhase: moonDay?.phase ?? 'Unknown',
-      moonIllumination: moonDay?.illumination ?? 0,
-      moonrise: moonDay?.riseDateTime ?? '',
-      moonset: moonDay?.setDateTime ?? '',
+      moonPhase: moonEntry?.phase ?? 'Unknown',
+      moonIllumination: moonEntry?.percentageFull ?? 0,
+      moonrise: toISO(moonEntry?.riseDateTime ?? ''),
+      moonset: toISO(moonEntry?.setDateTime ?? ''),
       sunrise: forecastData?.location?.sunrise ?? '',
       sunset: forecastData?.location?.sunset ?? '',
-      pressureTrend: 'steady',  // calculated below if pressure data available
+      pressureTrend: 'steady',
     }
   })
 }
 
-/** Fetch SST and ocean currents from Open-Meteo Marine */
+/** Fetch SST and ocean currents from Open-Meteo Marine.
+ *  Returns empty hourly data for inland/shallow-coastal points where the
+ *  marine grid has no coverage — wind/tide data from WillyWeather still shows.
+ */
 async function fetchOpenMeteoMarine(lat: number, lng: number, startDate: string, endDate: string) {
   const url = new URL('https://marine-api.open-meteo.com/v1/marine')
   url.searchParams.set('latitude', String(lat))
@@ -240,9 +331,18 @@ async function fetchOpenMeteoMarine(lat: number, lng: number, startDate: string,
     'sea_surface_temperature',
   ].join(','))
 
-  const res = await fetch(url.toString())
-  if (!res.ok) throw new Error(`Open-Meteo Marine API failed: ${res.status}`)
-  return res.json()
+  try {
+    const res = await fetch(url.toString())
+    if (!res.ok) {
+      // 400 = no marine grid coverage (land / very shallow coast) — not fatal
+      console.warn(`Open-Meteo Marine: no coverage at ${lat},${lng} (${res.status})`)
+      return { hourly: {} }
+    }
+    return res.json()
+  } catch (err) {
+    console.warn('Open-Meteo Marine fetch failed:', err)
+    return { hourly: {} }
+  }
 }
 
 /** Main function — fetches all marine data for a session */
@@ -253,6 +353,12 @@ export async function fetchAllMarineData(
 ): Promise<DayMarineData[]> {
   const startDate = dates[0]
   const endDate = dates[dates.length - 1]
+
+  // Resolve nearest station name up front (same station used for all dates)
+  const apiKey = process.env.WILLYWEATHER_API_KEY
+  const stationName = (apiKey && apiKey !== 'REPLACE_WITH_YOUR_KEY')
+    ? nearestStation(lat, lng).name
+    : 'Demo data'
 
   // Fetch in parallel
   const [willyData, openMeteoRaw] = await Promise.all([
@@ -265,17 +371,20 @@ export async function fetchAllMarineData(
   return dates.map(date => {
     const willy = willyData.find(d => d.date === date)!
 
-    // Merge WillyWeather wind/swell with Open-Meteo SST/currents into period summaries
-    const allWillyHourly = [
-      ...(willy.windHourly || []),
-      ...(willy.swellHourly || []),
-    ]
-    const periods = summariseByPeriod(hourlyRecords, allWillyHourly, date)
+    const periods = summariseByPeriod(hourlyRecords, willy.windHourly || [], willy.swellHourly || [], date)
+
+    const windHourly = (willy.windHourly || []).map((e: any) => ({
+      time: e.dateTime.replace(' ', 'T'),
+      speedKts: Math.round(e.speed * 0.53996 * 10) / 10,
+      directionText: e.directionText ?? 'N/A',
+    }))
 
     return {
       date,
       tides: willy.tides,
       periods,
+      windHourly,
+      nearestStation: stationName,
       moonPhase: willy.moonPhase,
       moonIllumination: willy.moonIllumination,
       moonrise: willy.moonrise,

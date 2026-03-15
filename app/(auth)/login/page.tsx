@@ -30,7 +30,6 @@ function LoginForm() {
         setError('Invalid username or password')
       } else {
         router.push('/dashboard')
-        router.refresh()
       }
     } catch {
       setError('Network error — please try again')

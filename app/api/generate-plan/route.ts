@@ -43,6 +43,8 @@ export async function POST(req: NextRequest) {
         date: md.date,
         tides: (JSON.parse(md.tideData) as TideEvent[]),
         periods: (omData.periods as PeriodSummary[]),
+        windHourly: willy.windHourly ?? [],
+        nearestStation: willy.nearestStation ?? '',
         moonPhase: willy.moonPhase ?? 'Unknown',
         moonIllumination: willy.moonIllumination ?? 0,
         moonrise: willy.moonrise ?? '',

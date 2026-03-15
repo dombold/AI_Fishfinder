@@ -254,10 +254,15 @@ select option { background: var(--color-depths); color: var(--color-foam); }
 @media print {
   body { background: white !important; color: black !important; }
   body::before { display: none; }
-  .no-print, .waypoint-map, nav { display: none !important; }
+  /* .waypoint-map removed — map prints; action buttons use .no-print */
+  .no-print, nav { display: none !important; }
   .briefing-table th { color: #444; }
   .briefing-table td { color: #000; border-color: #ccc; }
   .section-label { color: #000; background: #f5f5f5; border-left-color: #999; }
   .card { box-shadow: none; border: 1px solid #ddd; }
   .day-tab-panel { display: block !important; page-break-after: always; }
+  /* Recharts SVG — legible in print */
+  .recharts-text { fill: #333 !important; }
+  .recharts-cartesian-axis-line { stroke: #999 !important; }
+  .recharts-cartesian-grid-horizontal line { stroke: #ddd !important; }
 }

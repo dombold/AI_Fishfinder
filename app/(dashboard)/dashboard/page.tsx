@@ -5,7 +5,17 @@ import { useRouter } from 'next/navigation'
 import MapPicker from '@/components/MapPicker'
 import SpeciesSelector from '@/components/SpeciesSelector'
 import UserDropdown from '@/components/UserDropdown'
+import ForecastGraphs from '@/components/ForecastGraphs'
 import { checkFishingClosures } from '@/lib/regulations'
+import type { PeriodSummary, TideEvent, WindHourlyPoint } from '@/lib/marine-api'
+
+interface ForecastDay {
+  date: string
+  tides: TideEvent[]
+  periods: PeriodSummary[]
+  windHourly: WindHourlyPoint[]
+  nearestStation?: string
+}
 
 type FishingType = 'beach' | 'boat'
 type TargetType = 'pelagic' | 'demersal' | 'both'
@@ -36,6 +46,9 @@ export default function DashboardPage() {
   const [loadingStep, setLoadingStep] = useState('')
   const [error, setError] = useState('')
 
+  const [forecastDays, setForecastDays] = useState<ForecastDay[] | null>(null)
+  const [forecastLoading, setForecastLoading] = useState(false)
+
   // Fetch available species — filtered by location lat when available
   useEffect(() => {
     setSpecies([])
@@ -63,6 +76,21 @@ export default function DashboardPage() {
     if (diff > 2) return 'Date range cannot exceed 3 days'
     return ''
   })()
+
+  // Fetch forecast preview when location + valid dates are set
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => {
+    if (!location || !startDate || !endDate || dateError) {
+      setForecastDays(null)
+      return
+    }
+    setForecastLoading(true)
+    fetch(`/api/forecast-preview?lat=${location.lat}&lng=${location.lng}&startDate=${startDate}&endDate=${endDate}`)
+      .then(r => r.json())
+      .then(d => setForecastDays(d.days ?? null))
+      .catch(() => setForecastDays(null))
+      .finally(() => setForecastLoading(false))
+  }, [location?.lat, location?.lng, startDate, endDate, dateError]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -166,6 +194,42 @@ export default function DashboardPage() {
               {dateError && <p role="alert" style={{ color: 'var(--color-warning)', fontSize: '0.8125rem', marginTop: '0.5rem' }}>{dateError}</p>}
               <p style={{ color: 'var(--color-mist)', fontSize: '0.75rem', marginTop: '0.625rem' }}>Up to 7 days in advance · Maximum 3-day range</p>
             </section>
+
+            {/* Forecast Preview — appears once location + dates are set */}
+            {forecastLoading && (
+              <section className="card" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', gap: '4px', alignItems: 'flex-end' }}>
+                  {[...Array(4)].map((_,i) => <span key={i} className="wave-bar" style={{ animationDelay: `${i*0.1}s`, height: `${10 + i*4}px` }} />)}
+                </div>
+                <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem' }}>Loading wind &amp; tide forecast…</p>
+              </section>
+            )}
+            {!forecastLoading && forecastDays && forecastDays.length > 0 && (() => {
+              const start = new Date(forecastDays[0].date + 'T12:00:00')
+              const end   = new Date(forecastDays[forecastDays.length - 1].date + 'T12:00:00')
+              const rangeLabel = forecastDays.length === 1
+                ? start.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })
+                : `${start.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' })} – ${end.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}`
+              const allWind  = forecastDays.flatMap(d => d.windHourly  ?? [])
+              const allTides = forecastDays.flatMap(d => d.tides ?? [])
+              const station  = forecastDays[0]?.nearestStation
+              return (
+                <section className="card" style={{ padding: '1.5rem' }}>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--color-foam)', marginBottom: '0.25rem' }}>
+                    Wind &amp; Tide Forecast
+                  </h2>
+                  <p style={{ color: 'var(--color-mist)', fontSize: '0.8125rem', marginBottom: '0.75rem' }}>
+                    {rangeLabel}
+                    {station && (
+                      <span style={{ marginLeft: '0.75rem', color: 'var(--color-seafoam)', fontWeight: 500 }}>
+                        · {station}
+                      </span>
+                    )}
+                  </p>
+                  <ForecastGraphs windHourly={allWind} tideData={allTides} />
+                </section>
+              )
+            })()}
 
             {/* Section 3 & 4: Fishing Type + Target */}
             <section className="card" style={{ padding: '1.5rem' }}>

@@ -41,6 +41,11 @@ const DEMERSAL_SPECIES = new Set([
 // Approximate bounding box for Cockburn Sound + Warnbro Sound
 const COCKBURN_WARNBRO_BOUNDS = { minLat: -32.45, maxLat: -32.05, minLng: 115.62, maxLng: 115.82 }
 
+// Shark Bay Pink Snapper spawning closure zones (Gascoyne bioregion)
+const SHARK_BAY_EASTERN_GULF_BOUNDS  = { minLat: -26.5, maxLat: -25.3, minLng: 113.6, maxLng: 114.5 }
+const SHARK_BAY_FREYCINET_BOUNDS     = { minLat: -26.4, maxLat: -25.8, minLng: 113.9, maxLng: 114.5 }
+const SHARK_BAY_BERNIER_NORTH_BOUNDS = { minLat: -25.0, maxLat: -24.3, minLng: 112.7, maxLng: 113.5 }
+
 /** Check for active fishery closures based on location, fishing setup, and selected species */
 export function checkFishingClosures(
   lat: number,
@@ -79,6 +84,54 @@ export function checkFishingClosures(
         severity: 'SEASONAL',
         message:
           'Pink Snapper spawning closure in effect for Cockburn Sound and Warnbro Sound (Aug 1 – Jan 31). No fishing for pink snapper in these specific areas. Other West Coast areas remain open for beach fishing.',
+      })
+    }
+  }
+
+  // Shark Bay Pink Snapper spawning closures (all methods — boat and land-based)
+  const targetsSharkBaySnapper =
+    (targetType === 'demersal' || targetType === 'both') &&
+    selectedSpecies.includes('Pink Snapper') &&
+    bioregion === 'gascoyne'
+
+  if (targetsSharkBaySnapper) {
+    const now = new Date()
+    const month = now.getMonth() + 1
+    const day = now.getDate()
+
+    // Eastern Gulf (Henri Freycinet Harbour): closed 1 May – 31 Jul
+    const inEasternGulf =
+      lat >= SHARK_BAY_EASTERN_GULF_BOUNDS.minLat && lat <= SHARK_BAY_EASTERN_GULF_BOUNDS.maxLat &&
+      lng >= SHARK_BAY_EASTERN_GULF_BOUNDS.minLng && lng <= SHARK_BAY_EASTERN_GULF_BOUNDS.maxLng
+    if (inEasternGulf && month >= 5 && month <= 7) {
+      warnings.push({
+        severity: 'SEASONAL',
+        message:
+          'Pink Snapper spawning closure in effect — Shark Bay Eastern Gulf / Henri Freycinet Harbour (1 May – 31 Jul). No fishing for pink snapper by any method. Source: DPIRD WA.',
+      })
+    }
+
+    // Freycinet Estuary: closed 15 Aug – 30 Sep
+    const inFreycinet =
+      lat >= SHARK_BAY_FREYCINET_BOUNDS.minLat && lat <= SHARK_BAY_FREYCINET_BOUNDS.maxLat &&
+      lng >= SHARK_BAY_FREYCINET_BOUNDS.minLng && lng <= SHARK_BAY_FREYCINET_BOUNDS.maxLng
+    if (inFreycinet && (month === 9 || (month === 8 && day >= 15))) {
+      warnings.push({
+        severity: 'SEASONAL',
+        message:
+          'Pink Snapper spawning closure in effect — Shark Bay Freycinet Estuary (15 Aug – 30 Sep). No fishing for pink snapper by any method. Source: DPIRD WA.',
+      })
+    }
+
+    // Northern Bernier Island / Koks Island area: closed 1 Jun – 31 Aug
+    const inBernierNorth =
+      lat >= SHARK_BAY_BERNIER_NORTH_BOUNDS.minLat && lat <= SHARK_BAY_BERNIER_NORTH_BOUNDS.maxLat &&
+      lng >= SHARK_BAY_BERNIER_NORTH_BOUNDS.minLng && lng <= SHARK_BAY_BERNIER_NORTH_BOUNDS.maxLng
+    if (inBernierNorth && month >= 6 && month <= 8) {
+      warnings.push({
+        severity: 'SEASONAL',
+        message:
+          'Pink Snapper spawning closure in effect — Northern Bernier Island / Koks Island area (1 Jun – 31 Aug). No fishing for pink snapper by any method. Source: DPIRD WA.',
       })
     }
   }
@@ -181,7 +234,7 @@ export const REGULATIONS: Record<string, BioregionRules> = {
   },
   'Pink Snapper': {
     'north-coast': { minSize: '410mm total length', bagLimit: '3 fish', combinedLimit: '5 fish demersal mixed bag', notes: 'Check DPIRD for specific area rules.' },
-    gascoyne:      { minSize: '410mm total length', bagLimit: '3 fish', combinedLimit: '5 fish demersal mixed bag (2 pink snapper + 1 rankin cod + 1 red emperor + 1 goldband snapper)', notes: 'Shark Bay seasonal closures apply. Freycinet Estuary: tagging required (limited annual tags). Check DPIRD for current rules.' },
+    gascoyne:      { minSize: '410mm total length', bagLimit: '3 fish', combinedLimit: '5 fish demersal mixed bag (2 pink snapper + 1 rankin cod + 1 red emperor + 1 goldband snapper)', seasonalClosures: 'Eastern Gulf closed 1 May–31 Jul; Freycinet Estuary closed 15 Aug–30 Sep; Northern Bernier Island closed 1 Jun–31 Aug (all methods)', notes: 'No tagging required. Check fish.wa.gov.au for current rules.' },
     'west-coast':  { minSize: '500mm total length (south of 31°S) / 410mm (north of 31°S)', bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027.', seasonalClosures: 'Cockburn Sound & Warnbro Sound closed Aug 1 – Jan 31 for pink snapper (all methods)', notes: 'Release weight required.' },
     'south-coast': { minSize: '410mm total length', bagLimit: '3 fish', combinedLimit: '4 fish demersal mixed bag', notes: 'Release weight required.' },
   },
