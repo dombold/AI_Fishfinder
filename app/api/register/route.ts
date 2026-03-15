@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { sendWelcomeEmail } from '@/lib/email'
 
 const RegisterSchema = z.object({
   username: z.string().min(3).max(30).regex(/^[a-zA-Z0-9_]+$/),
@@ -35,8 +36,14 @@ export async function POST(req: NextRequest) {
       data: { username, email, passwordHash },
     })
 
+    // Fire-and-forget: don't block registration if email fails
+    sendWelcomeEmail(username, email).catch(err =>
+      console.error('[email] Welcome email failed:', err)
+    )
+
     return NextResponse.json({ success: true }, { status: 201 })
-  } catch {
+  } catch (err: any) {
+    console.error('[POST /api/register]', err?.message ?? err)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

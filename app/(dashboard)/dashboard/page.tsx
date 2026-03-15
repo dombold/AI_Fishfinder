@@ -34,8 +34,10 @@ export default function DashboardPage() {
   const router = useRouter()
 
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null)
-  const [startDate, setStartDate] = useState(todayStr())
-  const [endDate, setEndDate] = useState(todayStr())
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [minDate, setMinDate] = useState('')
+  const [maxDate, setMaxDate] = useState('')
   const [fishingType, setFishingType] = useState<FishingType>('boat')
   const [targetType, setTargetType] = useState<TargetType>('pelagic')
   const [species, setSpecies] = useState<string[]>([])
@@ -48,6 +50,16 @@ export default function DashboardPage() {
 
   const [forecastDays, setForecastDays] = useState<ForecastDay[] | null>(null)
   const [forecastLoading, setForecastLoading] = useState(false)
+
+  // Initialise dates client-side only — avoids server/client UTC vs local-time mismatch
+  useEffect(() => {
+    const today = todayStr()
+    const max = maxDateStr()
+    setStartDate(today)
+    setEndDate(today)
+    setMinDate(today)
+    setMaxDate(max)
+  }, [])
 
   // Fetch available species — filtered by location lat when available
   useEffect(() => {
@@ -184,11 +196,11 @@ export default function DashboardPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-mist)', marginBottom: '0.375rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Start Date</label>
-                  <input type="date" value={startDate} min={todayStr()} max={maxDateStr()} onChange={e => { setStartDate(e.target.value); if (e.target.value > endDate) setEndDate(e.target.value) }} required />
+                  <input type="date" value={startDate} min={minDate} max={maxDate} onChange={e => { setStartDate(e.target.value); if (e.target.value > endDate) setEndDate(e.target.value) }} required />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-mist)', marginBottom: '0.375rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>End Date</label>
-                  <input type="date" value={endDate} min={startDate} max={maxDateStr()} onChange={e => setEndDate(e.target.value)} required />
+                  <input type="date" value={endDate} min={startDate} max={maxDate} onChange={e => setEndDate(e.target.value)} required />
                 </div>
               </div>
               {dateError && <p role="alert" style={{ color: 'var(--color-warning)', fontSize: '0.8125rem', marginTop: '0.5rem' }}>{dateError}</p>}
@@ -297,7 +309,7 @@ export default function DashboardPage() {
             <button
               type="submit"
               className="btn-primary"
-              disabled={loading || !!dateError || !location || species.length === 0}
+              disabled={loading || !!dateError || !location || species.length === 0 || !startDate || !endDate}
               style={{ width: '100%', justifyContent: 'center', fontSize: '1rem', padding: '0.875rem' }}
             >
               Generate Fishing Plan

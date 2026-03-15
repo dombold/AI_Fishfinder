@@ -6,6 +6,12 @@ interface ReefFeature {
   type: string
   lat: number
   lng: number
+  depth_min?: number
+  depth_max?: number
+  substrate?: string
+  features?: string[]
+  species?: string[]
+  notes?: string
 }
 
 const GEBCO_API = 'https://api.opentopodata.org/v1/gebco2020'

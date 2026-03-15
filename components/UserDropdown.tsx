@@ -109,7 +109,7 @@ export default function UserDropdown() {
             <button
               type="button"
               role="menuitem"
-              onClick={() => signOut({ callbackUrl: '/login' })}
+              onClick={() => signOut({ callbackUrl: '/' })}
               className="dropdown-item"
               style={{
                 display: 'block',

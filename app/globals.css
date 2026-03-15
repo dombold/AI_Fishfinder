@@ -106,7 +106,7 @@ input, select, textarea {
   border: 1px solid rgba(107,143,163,0.3);
   border-radius: 0.5rem;
   color: var(--color-foam);
-  padding: 0.625rem 0.875rem;
+  padding: 0.875rem 1rem;
   width: 100%;
   transition: border-color 200ms ease, box-shadow 200ms ease;
 }
@@ -183,12 +183,12 @@ select option { background: var(--color-depths); color: var(--color-foam); }
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--color-mist);
-  padding: 0.625rem 0.875rem;
+  padding: 0.75rem 0.875rem;
   text-align: left;
   border-bottom: 1px solid rgba(107,143,163,0.2);
 }
 .briefing-table td {
-  padding: 0.625rem 0.875rem;
+  padding: 0.75rem 0.875rem;
   border-bottom: 1px solid rgba(107,143,163,0.1);
   color: var(--color-foam);
   vertical-align: top;

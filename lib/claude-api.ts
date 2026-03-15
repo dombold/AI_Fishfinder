@@ -3,6 +3,7 @@ import { SPECIES_KNOWLEDGE } from '@/lib/species'
 import { getRegulations, getBioregion } from '@/lib/regulations'
 import type { DayMarineData, TideEvent, PeriodSummary } from '@/lib/marine-api'
 import { validateWaypoints } from '@/lib/seafloor'
+import type { CrowdSummary } from '@/lib/crowd-source-aggregator'
 
 export interface WindPeriodRow {
   timePeriod: string
@@ -84,10 +85,36 @@ function buildSpeciesBlock(speciesNames: string[], lat: number, lng: number): st
 - Feeding behaviour: ${knowledge.feedingBehaviour}
 - Preferred conditions: ${knowledge.preferredConditions}
 - Depth range: ${knowledge.depth}
+- Best season: ${knowledge.seasonality}
+- Best tidal phase: ${knowledge.tidePhase}
+- Bait/lure preferences: ${knowledge.baitPreferences}
 - Techniques: ${knowledge.techniques}
 - Sounder signatures: ${knowledge.sounderSignatures}
 ${regBlock}`
   }).join('\n\n')
+}
+
+function buildCrowdBlock(summary: CrowdSummary): string {
+  const trendIcon = { increasing: '↑', stable: '→', decreasing: '↓' }
+  const speciesLines = summary.topSpecies.slice(0, 6).map(s =>
+    `- ${s.species}: ${s.totalSightings} sightings | last 30d: ${s.last30Days} | trend: ${trendIcon[s.trend]} ${s.trend.toUpperCase()} | area centroid: ${Math.abs(s.avgLat).toFixed(2)}°S, ${s.avgLng.toFixed(2)}°E`
+  ).join('\n')
+
+  const hotspotLines = summary.hotspots.slice(0, 6).map((h, i) =>
+    `- Hotspot ${i + 1}: ${Math.abs(h.centerLat).toFixed(3)}°S, ${h.centerLng.toFixed(3)}°E — ${h.count} observations — species: ${h.species.slice(0, 3).join(', ')} — last seen: ${h.lastSeen}`
+  ).join('\n')
+
+  const updatedDate = summary.generatedAt.slice(0, 10)
+  return `## Crowd-Sourced Fishing Intelligence (${summary.bioregion} Bioregion)
+Source: ${summary.inatCount} citizen science observations + ${summary.catchLogCount} verified angler reports. Data window: last 180 days. Updated: ${updatedDate}.
+
+### Species Activity (ranked by recent sightings)
+${speciesLines || '- No matched species observations in this bioregion yet.'}
+
+### Verified Hotspot Clusters
+${hotspotLines || '- No hotspot clusters identified yet.'}
+
+Use this crowd-sourced data to: (1) weight waypoint placement toward confirmed hotspot clusters when they overlap appropriate depth/structure for target species; (2) flag any "increasing" trend species as bonus targets worth mentioning; (3) reference hotspot coordinates in waypoint notes where relevant.`
 }
 
 const DAILY_PLAN_SCHEMA = `{
@@ -148,9 +175,10 @@ export async function generateFishingPlan(params: {
   marineDataByDay: DayMarineData[]
   nearbyBoatRamps: Array<{ name: string; distanceKm: number; region?: string }>
   locationDepth: number | null
-  nearbyReefs: Array<{ name: string; type: string; distanceKm: number }>
+  nearbyReefs: Array<{ name: string; type: string; distanceKm: number; depth_min?: number; depth_max?: number; substrate?: string; features?: string[]; species?: string[]; notes?: string }>
   chlorophyll: number | null
   salinity: number | null
+  crowdSummary: CrowdSummary | null
 }): Promise<DailyPlan[]> {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   const bioregion = getBioregion(params.latitude, params.longitude)
@@ -203,10 +231,16 @@ ${params.nearbyBoatRamps.length > 0
   : 'Unavailable'}
 - Surface Salinity: ${params.salinity !== null ? `${params.salinity} PSU` : 'Unavailable (nearshore or no data)'}
 ${params.nearbyReefs.length > 0
-  ? '- Nearby reefs/structures:\n' + params.nearbyReefs.map(r => `  • ${r.name} (${r.type}, ${r.distanceKm.toFixed(1)}km away)`).join('\n')
+  ? '- Nearby reefs/structures:\n' + params.nearbyReefs.map(r => {
+      const depth = r.depth_min != null ? `, ${r.depth_min}–${r.depth_max}m` : ''
+      const spp = r.species?.length ? ` — targets: ${r.species.slice(0, 3).join(', ')}` : ''
+      const note = r.notes ? ` — ${r.notes}` : ''
+      return `  • ${r.name} (${r.type}${depth}, ${r.distanceKm.toFixed(1)}km away${spp}${note})`
+    }).join('\n')
   : '- No named reef features within 20km — focus on depth contours and current edges.'}
 Use this ocean context to place waypoints at realistic depths and advise on likely bait concentrations.
 
+${params.crowdSummary ? buildCrowdBlock(params.crowdSummary) + '\n' : ''}
 ## Marine Conditions by Day
 ${params.marineDataByDay.map(day => `
 ### ${day.date}

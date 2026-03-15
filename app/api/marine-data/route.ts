@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
           sessionId,
           date: day.date,
           willyWeatherData: JSON.stringify({
+            nearestStation: day.nearestStation,
             tides: day.tides,
             moonPhase: day.moonPhase,
             moonIllumination: day.moonIllumination,
@@ -52,6 +53,7 @@ export async function POST(req: NextRequest) {
         },
         update: {
           willyWeatherData: JSON.stringify({
+            nearestStation: day.nearestStation,
             tides: day.tides,
             moonPhase: day.moonPhase,
             moonIllumination: day.moonIllumination,

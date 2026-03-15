@@ -14,7 +14,7 @@ interface Props {
   onChange: (coords: { lat: number; lng: number }) => void
 }
 
-const TILES = {
+const TILES: Record<MapMode, { url: string; attribution: string }[]> = {
   map: [
     {
       url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
@@ -65,12 +65,10 @@ export default function MapPickerInner({ value, onChange }: Props) {
       const el = containerRef.current
       if (!el) return
 
-      // If a previous Leaflet map is still attached (e.g. fast hot-reload),
-      // remove it cleanly before creating a new one.
-      if ((el as any)._leaflet_id) {
-        try { mapRef.current?.remove() } catch {}
-        ;(el as any)._leaflet_id = undefined
-      }
+      // If this container already has a Leaflet map (React 18 StrictMode runs
+      // effects twice), skip — the cleanup from the first run will remove it
+      // and clear _leaflet_id so the next legitimate mount proceeds cleanly.
+      if ((el as any)._leaflet_id) return
 
       map = L.map(el, {
         center: WA_CENTER,
@@ -93,14 +91,14 @@ export default function MapPickerInner({ value, onChange }: Props) {
 
     return () => {
       mounted = false
-      if (map) {
-        map.remove()
-        map = null
-        mapRef.current = null
-        markerRef.current = null
-        layersRef.current = []
-        setReady(false)
+      try { mapRef.current?.remove() } catch {}
+      mapRef.current = null
+      markerRef.current = null
+      layersRef.current = []
+      if (containerRef.current) {
+        ;(containerRef.current as any)._leaflet_id = undefined
       }
+      setReady(false)
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 

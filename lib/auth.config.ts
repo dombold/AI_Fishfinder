@@ -3,7 +3,7 @@ import type { NextAuthConfig } from 'next-auth'
 export const authConfig = {
   trustHost: true,
   session: { strategy: 'jwt' as const, maxAge: 60 * 60 * 24 * 7 },
-  pages: { signIn: '/login' },
+  pages: { signIn: '/' },
   providers: [],
   callbacks: {
     async jwt({ token, user }) {

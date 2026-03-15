@@ -12,6 +12,8 @@ An AI-powered fishing briefing card generator for Western Australian waters. Ent
 - **Seafloor context** — Real GEBCO bathymetry depths and nearby WA reef/structure data fed to the AI
 - **Boat ramp finder** — Nearest public WA boat ramps within 20km of your location; beach launch advice if none found
 - **WA regulations** — Species-specific bag limits, minimum sizes, and active closures per bioregion
+- **Crowd-sourced activity** — iNaturalist citizen-science observations + community catch logs aggregated per bioregion; trends and hotspots fed into each plan
+- **Weekly fishing digest** — Opt-in email digest summarising species activity and hotspots for your region
 - **Saved plans** — Bookmark plans to your profile for later reference
 - **User accounts** — Secure registration and login with NextAuth
 
@@ -21,13 +23,15 @@ An AI-powered fishing briefing card generator for Western Australian waters. Ent
 
 | Layer | Technology |
 |-------|-----------|
-| Framework | Next.js 14 (App Router) |
+| Framework | Next.js 16 (App Router) |
 | Database | PostgreSQL + Prisma ORM |
 | Auth | NextAuth v5 (JWT strategy) |
 | AI | Anthropic Claude (claude-sonnet-4-6) |
 | Marine data | WillyWeather API + Open-Meteo Marine |
 | Bathymetry | OpenTopoData GEBCO 2020 (free, no auth) |
+| Citizen science | iNaturalist API (research-grade observations) |
 | Maps | React Leaflet — CartoDB Voyager + Esri Satellite |
+| Email | Nodemailer (any SMTP provider) |
 | Styling | Tailwind CSS (CDN) |
 | Deployment | PM2 |
 
@@ -39,6 +43,7 @@ An AI-powered fishing briefing card generator for Western Australian waters. Ent
 - PostgreSQL database
 - [Anthropic API key](https://console.anthropic.com)
 - [WillyWeather API key](https://www.willyweather.com.au/info/api.html)
+- SMTP credentials (Gmail, Mailgun, Postmark, Brevo, etc.) for email features
 
 ---
 
@@ -76,6 +81,12 @@ App runs at [http://localhost:3000](http://localhost:3000).
 | `NEXTAUTH_URL` | App base URL | `http://localhost:3000` (dev) |
 | `ANTHROPIC_API_KEY` | Claude API key | [console.anthropic.com](https://console.anthropic.com) |
 | `WILLYWEATHER_API_KEY` | Marine/weather data | [willyweather.com.au/info/api.html](https://www.willyweather.com.au/info/api.html) |
+| `SMTP_HOST` | SMTP server hostname | Your email provider |
+| `SMTP_PORT` | SMTP port (587 for STARTTLS, 465 for SSL) | Your email provider |
+| `SMTP_SECURE` | `true` for port 465, `false` for 587 | — |
+| `SMTP_USER` | SMTP login username / email address | Your email provider |
+| `SMTP_PASS` | SMTP password or app password | Your email provider |
+| `SMTP_FROM` | Sender display name and address | e.g. `AI Fishfinder <noreply@yourdomain.com.au>` |
 
 ---
 
@@ -93,6 +104,22 @@ pm2 save
 pm2 startup
 ```
 
+### Cron Jobs
+
+Two background jobs keep crowd-sourced data and weekly digests up to date. Trigger them via HTTP on a schedule (e.g. cron, systemd timer, or an external scheduler):
+
+| Endpoint | Recommended schedule | Purpose |
+|----------|---------------------|---------|
+| `POST /api/cron/update-crowd-data` | Weekly (e.g. Sunday 02:00) | Fetches new iNaturalist observations, aggregates community catch logs, and writes per-bioregion crowd summaries to the DB |
+| `POST /api/cron/send-weekly-digest` | Weekly (e.g. Sunday 08:00) | Emails opted-in users a fishing activity digest for their bioregion |
+
+Example crontab (run on the server):
+
+```cron
+0 2 * * 0  curl -s -X POST http://localhost:3000/api/cron/update-crowd-data
+0 8 * * 0  curl -s -X POST http://localhost:3000/api/cron/send-weekly-digest
+```
+
 ---
 
 ## Project Structure
@@ -101,16 +128,25 @@ pm2 startup
 app/
   (auth)/          # Login and register pages
   (dashboard)/     # Protected routes: home, plan viewer, profile
-  api/             # Route handlers (sessions, generate-plan, marine-data, profile)
-components/        # React components (maps, forms, plan display)
+  api/
+    cron/
+      update-crowd-data/   # Weekly iNaturalist + catch-log aggregation
+      send-weekly-digest/  # Weekly email digest to opted-in users
+    # ... other route handlers (sessions, generate-plan, marine-data, profile)
+  components/      # Shared client components (AuthModal, etc.)
+components/        # Page-level React components (maps, forms, plan display)
 lib/
-  claude-api.ts    # AI plan generation prompt + schema
-  marine-api.ts    # WillyWeather + Open-Meteo data fetching
-  seafloor.ts      # GEBCO depth queries + waypoint validation
-  boat-ramps.ts    # Nearest WA boat ramp lookup
-  regulations.ts   # WA fishing closure and bag limit logic
-  species.ts       # Species knowledge base
-  data/            # Static JSON: boat ramps, reef features
+  claude-api.ts          # AI plan generation prompt + schema
+  marine-api.ts          # WillyWeather + Open-Meteo data fetching
+  seafloor.ts            # GEBCO depth queries + waypoint validation
+  boat-ramps.ts          # Nearest WA boat ramp lookup
+  regulations.ts         # WA fishing closure and bag limit logic
+  species.ts             # Species knowledge base
+  inaturalist-api.ts     # iNaturalist citizen-science observation fetcher
+  crowd-source-aggregator.ts  # Combines iNaturalist + catch logs → CrowdSummary
+  email.ts               # Nodemailer transport + branded HTML email templates
+  data/                  # Static JSON: boat ramps, reef features
 prisma/
   schema.prisma    # Database schema
+  migrations/      # Prisma migration history
 ```

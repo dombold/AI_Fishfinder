@@ -16,6 +16,7 @@ model User {
   passwordHash         String
   sounderType          String           @default("NONE")
   seasicknessTolerance Int              @default(3)
+  weeklyDigestOptIn    Boolean          @default(false)
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @updatedAt
   sessions             FishingSession[]
@@ -100,8 +101,37 @@ model CatchLog {
   weightKg  Float?
   lengthCm  Float?
   notes     String?
+  bioregion String?
   createdAt DateTime @default(now())
 
   @@index([userId])
+  @@index([bioregion])
+  @@index([bioregion, species])
   @@map("catch_logs")
+}
+
+model InatObservation {
+  id           String   @id
+  taxonName    String
+  appSpecies   String?
+  bioregion    String
+  latitude     Float
+  longitude    Float
+  observedOn   String
+  qualityGrade String
+  fetchedAt    DateTime @default(now())
+
+  @@index([bioregion])
+  @@index([bioregion, appSpecies])
+  @@index([observedOn])
+  @@map("inat_observations")
+}
+
+model CrowdSourceSummary {
+  id          String   @id @default(cuid())
+  bioregion   String   @unique
+  updatedAt   DateTime @updatedAt
+  summaryJson String
+
+  @@map("crowd_source_summaries")
 }

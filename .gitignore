@@ -32,8 +32,10 @@ Thumbs.db
 CLAUDE.md
 
 # Project-specific large files
-AI_Fishfinder_Western_Australia.pdf
 temporary screenshots/
+
+# Dev utilities (not needed on production server)
+screenshot.mjs
 
 # PM2 runtime
 .pm2/

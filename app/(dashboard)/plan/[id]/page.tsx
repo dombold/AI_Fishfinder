@@ -14,12 +14,13 @@ import type { TideEvent, PeriodSummary } from '@/lib/marine-api'
 
 export const dynamic = 'force-dynamic'
 
-export default async function PlanPage({ params }: { params: { id: string } }) {
+export default async function PlanPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const session = await auth()
   if (!session?.user?.id) redirect('/login')
 
   const fishingSession = await prisma.fishingSession.findUnique({
-    where: { id: params.id, userId: session.user.id },
+    where: { id, userId: session.user.id },
     include: {
       selectedSpecies: true,
       fishingPlans: { orderBy: { date: 'asc' } },
@@ -41,7 +42,7 @@ export default async function PlanPage({ params }: { params: { id: string } }) {
             <img src="/logo-mark.svg" alt="AI Fishfinder" style={{ height: '26px', width: 'auto' }} />
           </Link>
         </nav>
-        <PlanPoller sessionId={params.id} initialStatus={status} />
+        <PlanPoller sessionId={id} initialStatus={status} />
       </div>
     )
   }
@@ -115,7 +116,7 @@ export default async function PlanPage({ params }: { params: { id: string } }) {
 
         {/* Actions */}
         <div className="no-print" style={{ display: 'flex', gap: '0.75rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-          <SavePlanButton sessionId={params.id} initialSaved={saved} />
+          <SavePlanButton sessionId={id} initialSaved={saved} />
           <PrintButton />
           <DataSourcesModal contextData={contextData ?? null} latitude={latitude} longitude={longitude} />
           <ExportGPXButton plans={plans} locationName={locationName ?? null} startDate={startDate} endDate={endDate} />

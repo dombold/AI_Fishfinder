@@ -12,6 +12,8 @@ interface SavedPlan {
   endDate: string
   fishingType: string
   createdAt: string
+  nearestStation: string | null
+  species: string[]
 }
 
 export default function SavedPlansPage() {
@@ -90,11 +92,11 @@ export default function SavedPlansPage() {
               return (
                 <div key={plan.id} className="card" style={{ padding: '1rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ color: 'var(--color-foam)', fontSize: '0.9375rem', fontWeight: 600, marginBottom: '0.2rem' }}>
-                      {plan.locationName ?? `${Math.abs(plan.latitude).toFixed(2)}°S`}
-                    </p>
-                    <p style={{ color: 'var(--color-mist)', fontSize: '0.8125rem' }}>
-                      {dateLabel} · {plan.fishingType}
+                    <p style={{ color: 'var(--color-foam)', fontSize: '0.9375rem', fontWeight: 600 }}>
+                      {plan.nearestStation ?? plan.locationName ?? `${Math.abs(plan.latitude).toFixed(2)}°S`}
+                      {' · '}{dateLabel}
+                      {' · '}{plan.fishingType.charAt(0).toUpperCase() + plan.fishingType.slice(1)}
+                      {plan.species.length > 0 && ` · ${plan.species.join(', ')}`}
                     </p>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>

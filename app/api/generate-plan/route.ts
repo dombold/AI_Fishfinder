@@ -6,6 +6,7 @@ import type { DayMarineData, TideEvent, PeriodSummary } from '@/lib/marine-api'
 import { getNearestBoatRamps } from '@/lib/boat-ramps'
 import { getDepthAt, getNearbyReefs } from '@/lib/seafloor'
 import { getChlorophyll, getSalinity } from '@/lib/ocean-data'
+import { getCrowdSummaryForBioregion } from '@/lib/crowd-source-aggregator'
 
 export async function POST(req: NextRequest) {
   const session = await auth()
@@ -58,12 +59,13 @@ export async function POST(req: NextRequest) {
     // Sort by date
     marineDataByDay.sort((a, b) => a.date.localeCompare(b.date))
 
-    const [nearbyBoatRamps, locationDepth, nearbyReefs, chlorophyll, salinity] = await Promise.all([
+    const [nearbyBoatRamps, locationDepth, nearbyReefs, chlorophyll, salinity, crowdSummary] = await Promise.all([
       getNearestBoatRamps(fishingSession.latitude, fishingSession.longitude),
       getDepthAt(fishingSession.latitude, fishingSession.longitude),
       getNearbyReefs(fishingSession.latitude, fishingSession.longitude),
       getChlorophyll(fishingSession.latitude, fishingSession.longitude),
       getSalinity(fishingSession.latitude, fishingSession.longitude),
+      getCrowdSummaryForBioregion(fishingSession.latitude, fishingSession.longitude),
     ])
 
     // Persist context for "Data Sources" modal
@@ -96,6 +98,7 @@ export async function POST(req: NextRequest) {
       nearbyReefs,
       chlorophyll,
       salinity,
+      crowdSummary,
     })
 
     // Store each day's plan

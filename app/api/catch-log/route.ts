@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { getBioregion } from '@/lib/regulations'
 
 const createSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -50,6 +51,7 @@ export async function POST(req: NextRequest) {
         weightKg: parsed.data.weightKg ?? null,
         lengthCm: parsed.data.lengthCm ?? null,
         notes: parsed.data.notes ?? null,
+        bioregion: getBioregion(parsed.data.latitude, parsed.data.longitude),
       },
     })
     return NextResponse.json(entry, { status: 201 })

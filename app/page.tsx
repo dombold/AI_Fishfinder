@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import AuthModal from './components/AuthModal'
 
 export default function LandingPage() {
   return (
@@ -7,14 +7,6 @@ export default function LandingPage() {
       {/* Nav */}
       <header style={{ padding: '1.25rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(107,143,163,0.1)' }}>
         <img src="/logo-mark.svg" alt="AI Fishfinder" style={{ height: '30px', width: 'auto' }} />
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <Link href="/login" style={{ color: 'var(--color-mist)', fontSize: '0.875rem', textDecoration: 'none', fontWeight: 500, letterSpacing: '0.02em' }}>
-            Sign In
-          </Link>
-          <Link href="/register" className="btn-primary" style={{ textDecoration: 'none', fontSize: '0.875rem', padding: '0.5rem 1.25rem' }}>
-            Get Started
-          </Link>
-        </nav>
       </header>
 
       {/* Hero */}
@@ -37,12 +29,8 @@ export default function LandingPage() {
 
           {/* CTAs */}
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/register" className="btn-primary" style={{ textDecoration: 'none', fontSize: '1rem', padding: '0.75rem 2rem' }}>
-              Create Free Account
-            </Link>
-            <Link href="/login" style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--color-seafoam)', fontSize: '1rem', textDecoration: 'none', fontWeight: 500, padding: '0.75rem 1.5rem', border: '1px solid rgba(59,191,174,0.3)', borderRadius: '0.5rem' }}>
-              Sign In
-            </Link>
+            <AuthModal defaultView="register" />
+            <AuthModal defaultView="signin" />
           </div>
         </div>
 

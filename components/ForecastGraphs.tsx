@@ -43,6 +43,52 @@ function fmtTime(iso: string, multiDay: boolean): string {
   return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`
 }
 
+// Cosine interpolation between two tide events — produces the natural sinusoidal tide curve
+function interpolateTides24h(events: TideEvent[]): Array<{ time: string; height: number; hour: string; isEvent: false }> {
+  if (events.length < 2) return []
+
+  const sorted = [...events].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime())
+
+  // Anchor to midnight of the first event's day
+  const dayStart = new Date(sorted[0].time)
+  dayStart.setHours(0, 0, 0, 0)
+
+  const points: Array<{ time: string; height: number; hour: string; isEvent: false }> = []
+
+  for (let h = 0; h <= 24; h++) {
+    const t = new Date(dayStart)
+    t.setHours(h)
+    const tMs = t.getTime()
+
+    // Find the two surrounding events (clamp to first/last if outside range)
+    let before = sorted[0]
+    let after  = sorted[sorted.length - 1]
+    for (let i = 0; i < sorted.length - 1; i++) {
+      const t1 = new Date(sorted[i].time).getTime()
+      const t2 = new Date(sorted[i + 1].time).getTime()
+      if (tMs >= t1 && tMs <= t2) {
+        before = sorted[i]
+        after  = sorted[i + 1]
+        break
+      }
+    }
+
+    const t1Ms    = new Date(before.time).getTime()
+    const t2Ms    = new Date(after.time).getTime()
+    const frac    = t2Ms === t1Ms ? 0 : Math.max(0, Math.min(1, (tMs - t1Ms) / (t2Ms - t1Ms)))
+    const mu      = (1 - Math.cos(frac * Math.PI)) / 2
+    const height  = parseFloat((before.height * (1 - mu) + after.height * mu).toFixed(3))
+
+    points.push({
+      time:    t.toISOString(),
+      height,
+      hour:    `${String(h % 24).padStart(2, '0')}:00`,
+      isEvent: false,
+    })
+  }
+  return points
+}
+
 export default function ForecastGraphs({ windHourly, tideData }: ForecastGraphsProps) {
   const hasWind = windHourly.length > 0
   const hasTides = tideData.length > 0
@@ -51,9 +97,9 @@ export default function ForecastGraphs({ windHourly, tideData }: ForecastGraphsP
 
   const multiDay = new Set(windHourly.map(p => p.time.slice(0, 10))).size > 1
 
-  // Tick every 6 hours on wind chart
+  // Tick every 3 hours on wind chart for full 24-hour coverage
   const windTicks = windHourly
-    .filter(p => new Date(p.time).getHours() % 6 === 0)
+    .filter(p => new Date(p.time).getHours() % 3 === 0)
     .map(p => p.time)
 
   // Day-boundary reference lines (all midnights except first point if it's midnight)
@@ -61,11 +107,15 @@ export default function ForecastGraphs({ windHourly, tideData }: ForecastGraphsP
     .filter((p, i) => i > 0 && new Date(p.time).getHours() === 0 && new Date(p.time).getMinutes() === 0)
     .map(p => p.time)
 
-  // Tide chart: enrich with formatted time labels
-  const tideChartData = tideData.map(t => ({
-    ...t,
-    timeLabel: fmtTime(t.time, multiDay || tideData.some(x => x.time.slice(0, 10) !== tideData[0].time.slice(0, 10))),
-  }))
+  // 24-hour interpolated tide curve
+  const tideCurve = interpolateTides24h(tideData)
+
+  // Original events mapped to their nearest hour slot for dot overlay
+  const tideEventMarkers = tideData.map(e => {
+    const h = new Date(e.time).getHours()
+    const label = `${String(h).padStart(2, '0')}:00`
+    return { ...e, hour: label }
+  })
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -118,14 +168,14 @@ export default function ForecastGraphs({ windHourly, tideData }: ForecastGraphsP
         </div>
       )}
 
-      {/* ── Tide Height ──────────────────────────────────────── */}
-      {hasTides && (
+      {/* ── Tide Height — 24-hour sinusoidal curve ────────────── */}
+      {hasTides && tideCurve.length > 0 && (
         <div>
           <p style={{ fontSize: '0.75rem', fontWeight: 600, color: BRAND.mist, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>
             Tides (m)
           </p>
-          <ResponsiveContainer width="100%" height={180}>
-            <AreaChart data={tideChartData} margin={{ top: 18, right: 8, bottom: 0, left: -16 }}>
+          <ResponsiveContainer width="100%" height={200}>
+            <AreaChart data={tideCurve} margin={{ top: 18, right: 8, bottom: 0, left: -16 }}>
               <defs>
                 <linearGradient id="tideFill" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%"  stopColor={BRAND.teal} stopOpacity={0.40} />
@@ -133,14 +183,18 @@ export default function ForecastGraphs({ windHourly, tideData }: ForecastGraphsP
                 </linearGradient>
               </defs>
               <CartesianGrid vertical={false} stroke={BRAND.grid} />
-              <XAxis dataKey="timeLabel" tick={axisStyle} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+              <XAxis
+                dataKey="hour"
+                tick={axisStyle}
+                axisLine={false}
+                tickLine={false}
+                interval={2}
+              />
               <YAxis tick={axisStyle} axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={tooltipStyle}
-                formatter={(v, _, p) => [
-                  `${Number(v).toFixed(2)}m — ${p.payload.type === 'HIGH' ? '▲ High' : '▼ Low'}`,
-                  'Tide',
-                ]}
+                formatter={(v: unknown) => [`${Number(v).toFixed(2)}m`, 'Tide height']}
+                labelFormatter={(label: unknown) => `Time: ${label}`}
               />
               <Area
                 type="monotone"
@@ -148,30 +202,21 @@ export default function ForecastGraphs({ windHourly, tideData }: ForecastGraphsP
                 stroke={BRAND.teal}
                 strokeWidth={2}
                 fill="url(#tideFill)"
-                dot={(props: any) => {
-                  const { cx, cy, payload } = props
-                  return (
-                    <circle
-                      key={`dot-${cx}-${cy}`}
-                      cx={cx} cy={cy} r={4}
-                      fill={payload.type === 'HIGH' ? BRAND.teal : BRAND.blue}
-                      stroke={BRAND.foam}
-                      strokeWidth={1.5}
-                    />
-                  )
-                }}
+                dot={false}
+                activeDot={{ r: 3, fill: BRAND.teal, stroke: BRAND.foam, strokeWidth: 1.5 }}
               />
-              {tideChartData.map((t, i) => (
+              {/* High/low event markers */}
+              {tideEventMarkers.map((e, i) => (
                 <ReferenceLine
                   key={i}
-                  x={t.timeLabel}
-                  stroke={t.type === 'HIGH' ? BRAND.teal : BRAND.mist}
+                  x={e.hour}
+                  stroke={e.type === 'HIGH' ? BRAND.teal : BRAND.mist}
                   strokeDasharray="3 3"
-                  strokeOpacity={0.4}
+                  strokeOpacity={0.5}
                   label={{
-                    value: `${t.type === 'HIGH' ? '▲' : '▼'} ${t.height.toFixed(2)}m`,
+                    value: `${e.type === 'HIGH' ? '▲' : '▼'} ${e.height.toFixed(2)}m`,
                     position: 'insideTopRight',
-                    fill: t.type === 'HIGH' ? BRAND.teal : BRAND.mist,
+                    fill: e.type === 'HIGH' ? BRAND.teal : BRAND.mist,
                     fontSize: 10,
                   }}
                 />

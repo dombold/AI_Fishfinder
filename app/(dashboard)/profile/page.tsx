@@ -25,7 +25,7 @@ const labelStyle: React.CSSProperties = {
 }
 
 export default function ProfilePage() {
-  const [form, setForm] = useState({ email: '', sounderType: 'NONE', seasicknessTolerance: 3 })
+  const [form, setForm] = useState({ email: '', sounderType: 'NONE', seasicknessTolerance: 3, weeklyDigestOptIn: false })
   const [username, setUsername] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -41,6 +41,7 @@ export default function ProfilePage() {
           email: data.email ?? '',
           sounderType: data.sounderType ?? 'NONE',
           seasicknessTolerance: data.seasicknessTolerance ?? 3,
+          weeklyDigestOptIn: data.weeklyDigestOptIn ?? false,
         })
         setLoading(false)
       })
@@ -167,6 +168,46 @@ export default function ProfilePage() {
                   <p style={{ fontSize: '0.8125rem', color: 'var(--color-seafoam)' }}>
                     {TOLERANCE_LABELS[form.seasicknessTolerance]}
                   </p>
+                </div>
+
+                {/* Weekly digest opt-in */}
+                <div style={{ paddingTop: '0.25rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer' }}>
+                    <div style={{ position: 'relative', flexShrink: 0, marginTop: '1px' }}>
+                      <input
+                        type="checkbox"
+                        checked={form.weeklyDigestOptIn}
+                        onChange={e => setForm(f => ({ ...f, weeklyDigestOptIn: e.target.checked }))}
+                        style={{ position: 'absolute', opacity: 0, width: '18px', height: '18px', margin: 0, cursor: 'pointer' }}
+                      />
+                      <div style={{
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '4px',
+                        border: `2px solid ${form.weeklyDigestOptIn ? 'var(--color-seafoam)' : 'rgba(107,143,163,0.4)'}`,
+                        background: form.weeklyDigestOptIn ? 'var(--color-seafoam)' : 'transparent',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'background 0.15s, border-color 0.15s',
+                        pointerEvents: 'none',
+                      }}>
+                        {form.weeklyDigestOptIn && (
+                          <svg width="11" height="9" viewBox="0 0 11 9" fill="none">
+                            <path d="M1 4L4 7.5L10 1" stroke="#0B1929" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <span style={{ display: 'block', fontSize: '0.9rem', color: 'var(--color-foam)', fontWeight: 500 }}>
+                        Weekly fishing intelligence email
+                      </span>
+                      <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--color-mist)', marginTop: '0.2rem', lineHeight: 1.5 }}>
+                        Receive a weekly digest of crowd-sourced species activity and hotspots across all four WA bioregions.
+                      </span>
+                    </div>
+                  </label>
                 </div>
 
                 {error && (

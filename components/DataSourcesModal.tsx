@@ -11,6 +11,9 @@ interface Reef {
   name: string
   type?: string
   distanceKm: number
+  depth_min?: number
+  depth_max?: number
+  species?: string[]
 }
 
 interface ContextData {
@@ -228,6 +231,8 @@ export default function DataSourcesModal({ contextData, latitude, longitude }: P
                       <tr>
                         <th style={thStyle}>Name</th>
                         <th style={thStyle}>Type</th>
+                        <th style={thStyle}>Depth</th>
+                        <th style={thStyle}>Species</th>
                         <th style={{ ...thStyle, textAlign: 'right' }}>Distance</th>
                       </tr>
                     </thead>
@@ -236,6 +241,8 @@ export default function DataSourcesModal({ contextData, latitude, longitude }: P
                         <tr key={i}>
                           <td style={tdStyle}>{r.name}</td>
                           <td style={tdMutedStyle}>{r.type ?? '—'}</td>
+                          <td style={tdMutedStyle}>{r.depth_min != null ? `${r.depth_min}–${r.depth_max}m` : '—'}</td>
+                          <td style={tdMutedStyle}>{r.species?.length ? r.species.slice(0, 3).join(', ') : '—'}</td>
                           <td style={{ ...tdMutedStyle, textAlign: 'right' }}>{r.distanceKm.toFixed(1)} km</td>
                         </tr>
                       ))}
