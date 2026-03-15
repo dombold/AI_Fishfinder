@@ -32,8 +32,6 @@ Thumbs.db
 CLAUDE.md
 
 # Project-specific large files
-Chart_Sample.jpg
-Chart_Sample_2.png
 temporary screenshots/
 
 # Dev utilities (not needed on production server)

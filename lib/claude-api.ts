@@ -269,12 +269,17 @@ Rules:
 - Incorporate regulations into fishingPlan notes (bag limits, any closures)
 - Each fishingPlan phase must specify ONE primary technique only — trolling and bait/jigging are mutually exclusive; if switching methods, write it as a phase transition`
 
-  const message = await client.messages.create({
+  const message = await client.beta.messages.create({
     model: 'claude-sonnet-4-6',
-    max_tokens: 8192,
+    max_tokens: 16000,
     system: systemPrompt,
     messages: [{ role: 'user', content: userPrompt }],
+    betas: ['output-128k-2025-02-19'],
   })
+
+  if (message.stop_reason === 'max_tokens') {
+    throw new Error('AI response was truncated — try a shorter date range or fewer species')
+  }
 
   const content = message.content[0]
   if (content.type !== 'text') throw new Error('Unexpected AI response type')

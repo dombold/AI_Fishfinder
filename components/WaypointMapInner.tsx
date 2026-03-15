@@ -13,6 +13,25 @@ interface Waypoint {
 
 type MapMode = 'map' | 'satellite'
 
+const TILES: Record<MapMode, { url: string; attribution: string }[]> = {
+  map: [
+    {
+      url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    },
+  ],
+  satellite: [
+    {
+      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, USGS, NOAA',
+    },
+    {
+      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+      attribution: '',
+    },
+  ],
+}
+
 export default function WaypointMapInner({ waypoints }: { waypoints: Waypoint[] }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef       = useRef<any>(null)
@@ -80,21 +99,9 @@ export default function WaypointMapInner({ waypoints }: { waypoints: Waypoint[] 
 
       map.eachLayer((layer: any) => { try { map.removeLayer(layer) } catch {} })
 
-      if (mode === 'map') {
-        L.tileLayer(
-          'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-          { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>' }
-        ).addTo(map)
-      } else {
-        L.tileLayer(
-          'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-          { attribution: 'Tiles &copy; Esri &mdash; Source: Esri, USGS, NOAA' }
-        ).addTo(map)
-        L.tileLayer(
-          'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
-          { attribution: '' }
-        ).addTo(map)
-      }
+      TILES[mode].forEach(({ url, attribution }) => {
+        L.tileLayer(url, { attribution }).addTo(map)
+      })
 
       waypoints.forEach((wp, i) => {
         const marker = L.marker([wp.latitude, wp.longitude])

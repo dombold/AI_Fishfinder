@@ -43,19 +43,24 @@ function fmtTime(iso: string, multiDay: boolean): string {
   return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`
 }
 
-// Cosine interpolation between two tide events — produces the natural sinusoidal tide curve
-function interpolateTides24h(events: TideEvent[]): Array<{ time: string; height: number; hour: string; isEvent: false }> {
+// Cosine interpolation between tide events — spans all days in the event set
+function interpolateTidesMultiDay(events: TideEvent[]): Array<{ time: string; height: number; isEvent: false }> {
   if (events.length < 2) return []
 
   const sorted = [...events].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime())
 
-  // Anchor to midnight of the first event's day
+  // Anchor from midnight of first event's day to midnight after last event's day
   const dayStart = new Date(sorted[0].time)
   dayStart.setHours(0, 0, 0, 0)
 
-  const points: Array<{ time: string; height: number; hour: string; isEvent: false }> = []
+  const dayEnd = new Date(sorted[sorted.length - 1].time)
+  dayEnd.setHours(0, 0, 0, 0)
+  dayEnd.setDate(dayEnd.getDate() + 1)
 
-  for (let h = 0; h <= 24; h++) {
+  const totalHours = Math.round((dayEnd.getTime() - dayStart.getTime()) / 3_600_000)
+  const points: Array<{ time: string; height: number; isEvent: false }> = []
+
+  for (let h = 0; h <= totalHours; h++) {
     const t = new Date(dayStart)
     t.setHours(h)
     const tMs = t.getTime()
@@ -73,18 +78,13 @@ function interpolateTides24h(events: TideEvent[]): Array<{ time: string; height:
       }
     }
 
-    const t1Ms    = new Date(before.time).getTime()
-    const t2Ms    = new Date(after.time).getTime()
-    const frac    = t2Ms === t1Ms ? 0 : Math.max(0, Math.min(1, (tMs - t1Ms) / (t2Ms - t1Ms)))
-    const mu      = (1 - Math.cos(frac * Math.PI)) / 2
-    const height  = parseFloat((before.height * (1 - mu) + after.height * mu).toFixed(3))
+    const t1Ms   = new Date(before.time).getTime()
+    const t2Ms   = new Date(after.time).getTime()
+    const frac   = t2Ms === t1Ms ? 0 : Math.max(0, Math.min(1, (tMs - t1Ms) / (t2Ms - t1Ms)))
+    const mu     = (1 - Math.cos(frac * Math.PI)) / 2
+    const height = parseFloat((before.height * (1 - mu) + after.height * mu).toFixed(3))
 
-    points.push({
-      time:    t.toISOString(),
-      height,
-      hour:    `${String(h % 24).padStart(2, '0')}:00`,
-      isEvent: false,
-    })
+    points.push({ time: t.toISOString(), height, isEvent: false })
   }
   return points
 }
@@ -95,7 +95,9 @@ export default function ForecastGraphs({ windHourly, tideData }: ForecastGraphsP
 
   if (!hasWind && !hasTides) return null
 
-  const multiDay = new Set(windHourly.map(p => p.time.slice(0, 10))).size > 1
+  const multiDay =
+    new Set(windHourly.map(p => p.time.slice(0, 10))).size > 1 ||
+    new Set(tideData.map(e => e.time.slice(0, 10))).size > 1
 
   // Tick every 3 hours on wind chart for full 24-hour coverage
   const windTicks = windHourly
@@ -107,14 +109,24 @@ export default function ForecastGraphs({ windHourly, tideData }: ForecastGraphsP
     .filter((p, i) => i > 0 && new Date(p.time).getHours() === 0 && new Date(p.time).getMinutes() === 0)
     .map(p => p.time)
 
-  // 24-hour interpolated tide curve
-  const tideCurve = interpolateTides24h(tideData)
+  // Multi-day interpolated tide curve using ISO time keys
+  const tideCurve = interpolateTidesMultiDay(tideData)
 
-  // Original events mapped to their nearest hour slot for dot overlay
+  // Tick every 3 hours on tide chart
+  const tideTicks = tideCurve
+    .filter(p => new Date(p.time).getHours() % 3 === 0)
+    .map(p => p.time)
+
+  // Day-boundary reference lines for tide chart
+  const tideMidnights = tideCurve
+    .filter((p, i) => i > 0 && new Date(p.time).getHours() === 0 && new Date(p.time).getMinutes() === 0)
+    .map(p => p.time)
+
+  // Original events rounded to nearest hour so x values match interpolated data points
   const tideEventMarkers = tideData.map(e => {
-    const h = new Date(e.time).getHours()
-    const label = `${String(h).padStart(2, '0')}:00`
-    return { ...e, hour: label }
+    const d = new Date(e.time)
+    d.setMinutes(0, 0, 0)
+    return { ...e, timeKey: d.toISOString() }
   })
 
   return (
@@ -184,18 +196,24 @@ export default function ForecastGraphs({ windHourly, tideData }: ForecastGraphsP
               </defs>
               <CartesianGrid vertical={false} stroke={BRAND.grid} />
               <XAxis
-                dataKey="hour"
+                dataKey="time"
+                ticks={tideTicks}
+                tickFormatter={t => fmtTime(String(t), multiDay)}
                 tick={axisStyle}
                 axisLine={false}
                 tickLine={false}
-                interval={2}
               />
               <YAxis tick={axisStyle} axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={tooltipStyle}
+                labelFormatter={t => fmtTime(String(t), multiDay)}
                 formatter={(v: unknown) => [`${Number(v).toFixed(2)}m`, 'Tide height']}
-                labelFormatter={(label: unknown) => `Time: ${label}`}
               />
+              {tideMidnights.map(t => (
+                <ReferenceLine key={t} x={t} stroke={BRAND.midnight} strokeDasharray="4 2"
+                  label={{ value: fmtTime(t, true), position: 'insideTopRight', fill: BRAND.mist, fontSize: 10 }}
+                />
+              ))}
               <Area
                 type="monotone"
                 dataKey="height"
@@ -209,7 +227,7 @@ export default function ForecastGraphs({ windHourly, tideData }: ForecastGraphsP
               {tideEventMarkers.map((e, i) => (
                 <ReferenceLine
                   key={i}
-                  x={e.hour}
+                  x={e.timeKey}
                   stroke={e.type === 'HIGH' ? BRAND.teal : BRAND.mist}
                   strokeDasharray="3 3"
                   strokeOpacity={0.5}
