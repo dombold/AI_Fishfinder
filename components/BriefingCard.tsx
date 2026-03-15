@@ -53,6 +53,7 @@ interface Props {
   fishingType: string
   tides?: TideEvent[]
   periods?: PeriodSummary[]
+  windHourly?: WindHourlyPoint[]
 }
 
 function SectionHeader({ title }: { title: string }) {
@@ -63,7 +64,7 @@ function SectionHeader({ title }: { title: string }) {
   )
 }
 
-export default function BriefingCard({ plan, selectedSpecies, latitude, longitude, fishingType, tides, periods }: Props) {
+export default function BriefingCard({ plan, selectedSpecies, latitude, longitude, fishingType, tides, periods, windHourly }: Props) {
   const date = new Date(plan.date + 'T12:00:00')
   const dateLabel = date.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 
@@ -142,7 +143,11 @@ export default function BriefingCard({ plan, selectedSpecies, latitude, longitud
           <SectionHeader title="WIND & TIDE FORECAST" />
           <div style={{ marginTop: '0.75rem' }}>
             <ForecastGraphs
-              windHourly={periodsToWindHourly(periods ?? [], plan.date)}
+              windHourly={
+                (windHourly && windHourly.length > 0)
+                  ? windHourly
+                  : periodsToWindHourly(periods ?? [], plan.date)
+              }
               tideData={tides ?? []}
             />
           </div>

@@ -8,9 +8,9 @@ import PrintButton from '@/components/PrintButton'
 import SavePlanButton from '@/components/SavePlanButton'
 import DataSourcesModal from '@/components/DataSourcesModal'
 import ExportGPXButton from '@/components/ExportGPXButton'
-import UserDropdown from '@/components/UserDropdown'
+import DashboardNav from '@/components/DashboardNav'
 import type { DailyPlan } from '@/lib/claude-api'
-import type { TideEvent, PeriodSummary } from '@/lib/marine-api'
+import type { TideEvent, PeriodSummary, WindHourlyPoint } from '@/lib/marine-api'
 
 export const dynamic = 'force-dynamic'
 
@@ -72,15 +72,19 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
     return content as DailyPlan
   })
 
-  // Map date → tides + periods for charts
-  const marineByDate: Record<string, { tides: TideEvent[]; periods: PeriodSummary[] }> = Object.fromEntries(
-    fishingSession.marineData.map(md => [
-      md.date,
-      {
-        tides: JSON.parse(md.tideData) as TideEvent[],
-        periods: (JSON.parse(md.openMeteoData) as { periods: PeriodSummary[] }).periods,
-      },
-    ])
+  // Map date → tides + periods + windHourly for charts
+  const marineByDate: Record<string, { tides: TideEvent[]; periods: PeriodSummary[]; windHourly: WindHourlyPoint[] }> = Object.fromEntries(
+    fishingSession.marineData.map(md => {
+      const ww = JSON.parse(md.willyWeatherData) as { windHourly?: WindHourlyPoint[] }
+      return [
+        md.date,
+        {
+          tides: JSON.parse(md.tideData) as TideEvent[],
+          periods: (JSON.parse(md.openMeteoData) as { periods: PeriodSummary[] }).periods,
+          windHourly: ww.windHourly ?? [],
+        },
+      ]
+    })
   )
 
   const start = new Date(startDate + 'T12:00:00')
@@ -91,16 +95,7 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
   return (
     <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at 20% 20%, #0E2A45 0%, #0B1929 60%, #061018 100%)' }}>
 
-      {/* Nav */}
-      <nav style={{ padding: '1rem 1.5rem', borderBottom: '1px solid rgba(107,143,163,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
-        <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-          <img src="/logo-mark.svg" alt="AI Fishfinder" style={{ height: '26px', width: 'auto' }} />
-        </Link>
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <Link href="/dashboard" style={{ color: 'var(--color-seafoam)', fontSize: '0.875rem', textDecoration: 'none', fontWeight: 500 }}>← New Plan</Link>
-          <UserDropdown />
-        </div>
-      </nav>
+      <DashboardNav backHref="/dashboard" backLabel="← New Plan" />
 
       {/* Page header */}
       <div style={{ maxWidth: '960px', margin: '0 auto', padding: '2rem 1.5rem 0' }}>
@@ -140,6 +135,7 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
               fishingType={fishingType}
               tides={marineByDate[plan.date]?.tides ?? []}
               periods={marineByDate[plan.date]?.periods ?? []}
+              windHourly={marineByDate[plan.date]?.windHourly ?? []}
             />
           ))
         )}

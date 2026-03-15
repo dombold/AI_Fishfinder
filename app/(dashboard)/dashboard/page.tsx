@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import MapPicker from '@/components/MapPicker'
 import SpeciesSelector from '@/components/SpeciesSelector'
-import UserDropdown from '@/components/UserDropdown'
+import DashboardNav from '@/components/DashboardNav'
 import ForecastGraphs from '@/components/ForecastGraphs'
 import { checkFishingClosures } from '@/lib/regulations'
 import type { PeriodSummary, TideEvent, WindHourlyPoint } from '@/lib/marine-api'
@@ -151,13 +151,7 @@ export default function DashboardPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at 30% 0%, #0E2A45 0%, #0B1929 55%, #061018 100%)' }}>
-      {/* Nav */}
-      <nav style={{ borderBottom: '1px solid rgba(107,143,163,0.15)', padding: '0.875rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(11,25,41,0.7)', backdropFilter: 'blur(12px)', position: 'sticky', top: 0, zIndex: 100 }}>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <img src="/logo-mark.svg" alt="AI Fishfinder" style={{ height: '28px', width: 'auto' }} />
-        </div>
-        <UserDropdown />
-      </nav>
+      <DashboardNav />
 
       <main style={{ maxWidth: '860px', margin: '0 auto', padding: '2rem 1.5rem' }}>
         <div style={{ marginBottom: '2rem' }}>
