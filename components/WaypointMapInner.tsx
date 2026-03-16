@@ -39,8 +39,12 @@ export default function WaypointMapInner({ waypoints }: { waypoints: Waypoint[] 
   const mapRef       = useRef<any>(null)
   const [ready, setReady] = useState(false)
   const [mode, setMode]   = useState<MapMode>('satellite')
-  const [showBoatRamps, setShowBoatRamps]           = useState(false)
-  const [showWeatherStations, setShowWeatherStations] = useState(false)
+  const [showBoatRamps, setShowBoatRamps]               = useState(false)
+  const [showWeatherStations, setShowWeatherStations]   = useState(false)
+  const [showMyCatches, setShowMyCatches]               = useState(false)
+  const [showNewsletterCatches, setShowNewsletterCatches] = useState(false)
+  const [myCatchData, setMyCatchData]                   = useState<any[] | null>(null)
+  const [newsletterCatchData, setNewsletterCatchData]   = useState<any[] | null>(null)
 
   const center: [number, number] = [
     waypoints.reduce((s, w) => s + w.latitude, 0) / waypoints.length,
@@ -92,6 +96,18 @@ export default function WaypointMapInner({ waypoints }: { waypoints: Waypoint[] 
       setReady(false)
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Fetch my catches when toggled on ──────────────────────────
+  useEffect(() => {
+    if (!showMyCatches || myCatchData) return
+    fetch('/api/catch-log').then(r => r.json()).then(d => setMyCatchData(d.catches ?? []))
+  }, [showMyCatches]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Fetch newsletter catches when toggled on ───────────────────
+  useEffect(() => {
+    if (!showNewsletterCatches || newsletterCatchData) return
+    fetch('/api/catch-log/newsletter').then(r => r.json()).then(d => setNewsletterCatchData(d.catches ?? []))
+  }, [showNewsletterCatches]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Swap tile layers and re-add markers when mode changes ──────
   useEffect(() => {
@@ -146,8 +162,36 @@ export default function WaypointMapInner({ waypoints }: { waypoints: Waypoint[] 
             .addTo(map)
         })
       }
+
+      if (showMyCatches && myCatchData) {
+        const catchIcon = L.divIcon({
+          className: '',
+          html: `<div style="width:26px;height:26px;border-radius:50%;background:rgba(34,197,94,0.92);border:2px solid rgba(255,255,255,0.8);box-shadow:0 2px 6px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;">🎣</div>`,
+          iconSize:   [26, 26],
+          iconAnchor: [13, 13],
+        })
+        myCatchData.forEach((c: any) => {
+          L.marker([c.latitude, c.longitude], { icon: catchIcon })
+            .bindPopup(`<div style="font-family:sans-serif;min-width:140px;"><strong>${c.species}</strong> × ${c.quantity}<div style="font-size:0.8em;color:#666;margin-top:3px;">${c.date}</div></div>`)
+            .addTo(map)
+        })
+      }
+
+      if (showNewsletterCatches && newsletterCatchData) {
+        const newsletterIcon = L.divIcon({
+          className: '',
+          html: `<div style="width:26px;height:26px;border-radius:50%;background:rgba(147,51,234,0.92);border:2px solid rgba(255,255,255,0.8);box-shadow:0 2px 6px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;">📰</div>`,
+          iconSize:   [26, 26],
+          iconAnchor: [13, 13],
+        })
+        newsletterCatchData.forEach((c: any) => {
+          L.marker([c.latitude, c.longitude], { icon: newsletterIcon })
+            .bindPopup(`<div style="font-family:sans-serif;min-width:140px;"><strong>${c.species}</strong> × ${c.quantity}<div style="font-size:0.8em;color:#666;margin-top:3px;">${c.date}</div><em style="font-size:0.8em;color:#888;">RecFishWest</em></div>`)
+            .addTo(map)
+        })
+      }
     })
-  }, [ready, mode, showBoatRamps, showWeatherStations]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ready, mode, showBoatRamps, showWeatherStations, showMyCatches, showNewsletterCatches, myCatchData, newsletterCatchData]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div style={{ position: 'relative' }}>
@@ -216,6 +260,34 @@ export default function WaypointMapInner({ waypoints }: { waypoints: Waypoint[] 
               transition: 'background 150ms',
             }}
           >📡</button>
+          <button
+            type="button"
+            onClick={() => setShowMyCatches(v => !v)}
+            title="Toggle my catch logs"
+            style={{
+              width: '30px', height: '30px', borderRadius: '0.375rem',
+              border: '1px solid rgba(255,255,255,0.25)',
+              background: showMyCatches ? 'rgba(34,197,94,0.85)' : 'rgba(11,25,41,0.85)',
+              color: '#fff', fontSize: '14px', cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'background 150ms',
+            }}
+          >🎣</button>
+          <button
+            type="button"
+            onClick={() => setShowNewsletterCatches(v => !v)}
+            title="Toggle RecFishWest catches"
+            style={{
+              width: '30px', height: '30px', borderRadius: '0.375rem',
+              border: '1px solid rgba(255,255,255,0.25)',
+              background: showNewsletterCatches ? 'rgba(147,51,234,0.85)' : 'rgba(11,25,41,0.85)',
+              color: '#fff', fontSize: '14px', cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'background 150ms',
+            }}
+          >📰</button>
         </div>
       </div>
     </div>

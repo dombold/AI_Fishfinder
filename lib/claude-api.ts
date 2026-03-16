@@ -100,21 +100,24 @@ function buildCrowdBlock(summary: CrowdSummary): string {
     `- ${s.species}: ${s.totalSightings} sightings | last 30d: ${s.last30Days} | trend: ${trendIcon[s.trend]} ${s.trend.toUpperCase()} | area centroid: ${Math.abs(s.avgLat).toFixed(2)}°S, ${s.avgLng.toFixed(2)}°E`
   ).join('\n')
 
-  const hotspotLines = summary.hotspots.slice(0, 6).map((h, i) =>
-    `- Hotspot ${i + 1}: ${Math.abs(h.centerLat).toFixed(3)}°S, ${h.centerLng.toFixed(3)}°E — ${h.count} observations — species: ${h.species.slice(0, 3).join(', ')} — last seen: ${h.lastSeen}`
-  ).join('\n')
+  const hotspotLines = summary.hotspots.slice(0, 6).map((h, i) => {
+    const userCount = h.userCount ?? h.count  // undefined = legacy summary, treat as all-user
+    const isApprox = userCount < h.count * 0.5
+    const label = isApprox ? ' ⚠ approx. area (newsletter)' : ''
+    return `- Hotspot ${i + 1}: ${Math.abs(h.centerLat).toFixed(3)}°S, ${h.centerLng.toFixed(3)}°E — ${h.count} observations (${userCount} user GPS)${label} — species: ${h.species.slice(0, 3).join(', ')} — last seen: ${h.lastSeen}`
+  }).join('\n')
 
   const updatedDate = summary.generatedAt.slice(0, 10)
   return `## Crowd-Sourced Fishing Intelligence (${summary.bioregion} Bioregion)
-Source: ${summary.catchLogCount} verified angler reports. Data window: last 180 days. Updated: ${updatedDate}.
+Source: ${summary.catchLogCount} verified angler reports (includes RecFishWest newsletter + user GPS logs). Data window: last 180 days. Updated: ${updatedDate}.
 
 ### Species Activity (ranked by recent sightings)
 ${speciesLines || '- No matched species observations in this bioregion yet.'}
 
-### Verified Hotspot Clusters
+### Hotspot Clusters
 ${hotspotLines || '- No hotspot clusters identified yet.'}
 
-Use this crowd-sourced data to: (1) weight waypoint placement toward confirmed hotspot clusters when they overlap appropriate depth/structure for target species; (2) flag any "increasing" trend species as bonus targets worth mentioning; (3) reference hotspot coordinates in waypoint notes where relevant.`
+Use this crowd-sourced data to: (1) weight waypoint placement toward confirmed hotspot clusters — ONLY clusters without an "approx. area" warning have precise GPS coordinates suitable for waypoint placement; clusters marked "approx. area (newsletter)" indicate general fishing zones from area-level reports, not specific spots; (2) flag any "increasing" trend species as bonus targets; (3) reference hotspot coordinates in waypoint notes, noting approximate ones as general areas only.`
 }
 
 const DAILY_PLAN_SCHEMA = `{

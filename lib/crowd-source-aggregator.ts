@@ -23,6 +23,7 @@ export interface HotspotCluster {
   centerLat: number
   centerLng: number
   count: number
+  userCount?: number   // observations from user GPS logs (undefined = legacy, treat as all-user)
   species: string[]    // top species at this location
   lastSeen: string     // YYYY-MM-DD
 }
@@ -41,6 +42,7 @@ interface ObsPoint {
   latitude: number
   longitude: number
   date: string  // YYYY-MM-DD
+  isNewsletter: boolean
 }
 
 function toDateStr(d: Date | string): string {
@@ -68,30 +70,38 @@ function gridKey(lat: number, lng: number): string {
 
 function buildHotspots(points: ObsPoint[]): HotspotCluster[] {
   // Step 1: group by grid cell
-  const cells = new Map<string, { lats: number[]; lngs: number[]; species: string[]; dates: string[] }>()
+  const cells = new Map<string, { lats: number[]; lngs: number[]; userLats: number[]; userLngs: number[]; species: string[]; dates: string[] }>()
   for (const p of points) {
     const key = gridKey(p.latitude, p.longitude)
     let cell = cells.get(key)
     if (!cell) {
-      cell = { lats: [], lngs: [], species: [], dates: [] }
+      cell = { lats: [], lngs: [], userLats: [], userLngs: [], species: [], dates: [] }
       cells.set(key, cell)
     }
     cell.lats.push(p.latitude)
     cell.lngs.push(p.longitude)
+    if (!p.isNewsletter) {
+      cell.userLats.push(p.latitude)
+      cell.userLngs.push(p.longitude)
+    }
     if (p.species) cell.species.push(p.species)
     cell.dates.push(p.date)
   }
 
   // Step 2: build preliminary clusters from cells
-  type RawCluster = { centerLat: number; centerLng: number; count: number; species: string[]; lastSeen: string }
+  type RawCluster = { centerLat: number; centerLng: number; count: number; userCount: number; species: string[]; lastSeen: string }
   const raw: RawCluster[] = Array.from(cells.entries()).map(([, cell]) => {
-    const avgLat = cell.lats.reduce((a, b) => a + b, 0) / cell.lats.length
-    const avgLng = cell.lngs.reduce((a, b) => a + b, 0) / cell.lngs.length
+    // Centroid from user GPS points only; fall back to all points if no user data
+    const centroidLats = cell.userLats.length > 0 ? cell.userLats : cell.lats
+    const centroidLngs = cell.userLngs.length > 0 ? cell.userLngs : cell.lngs
+    const avgLat = centroidLats.reduce((a, b) => a + b, 0) / centroidLats.length
+    const avgLng = centroidLngs.reduce((a, b) => a + b, 0) / centroidLngs.length
     const sortedDates = [...cell.dates].sort().reverse()
     return {
       centerLat: avgLat,
       centerLng: avgLng,
       count: cell.lats.length,
+      userCount: cell.userLats.length,
       species: cell.species,
       lastSeen: sortedDates[0] ?? '',
     }
@@ -111,6 +121,7 @@ function buildHotspots(points: ObsPoint[]): HotspotCluster[] {
       const dlng = Math.abs(sorted[j].centerLng - cluster.centerLng)
       if (dlat <= 0.05 && dlng <= 0.05) {
         cluster.count += sorted[j].count
+        cluster.userCount += sorted[j].userCount
         cluster.species.push(...sorted[j].species)
         if (sorted[j].lastSeen > cluster.lastSeen) cluster.lastSeen = sorted[j].lastSeen
         used.add(j)
@@ -135,6 +146,7 @@ function buildHotspots(points: ObsPoint[]): HotspotCluster[] {
         centerLat: parseFloat(c.centerLat.toFixed(3)),
         centerLng: parseFloat(c.centerLng.toFixed(3)),
         count: c.count,
+        userCount: c.userCount,
         species: topSpecies,
         lastSeen: c.lastSeen,
       }
@@ -154,15 +166,19 @@ export async function aggregateCrowdData(bioregion: Bioregion): Promise<CrowdSum
       bioregion,
       date: { gte: cutoffStr },
     },
-    select: { species: true, latitude: true, longitude: true, date: true },
+    select: { species: true, latitude: true, longitude: true, date: true, source: true },
   })
 
   const catchLogCount = catchLogs.length
 
   // Merge into unified observation points
-  const allPoints: ObsPoint[] = [
-    ...catchLogs.map(c => ({ species: c.species, latitude: c.latitude, longitude: c.longitude, date: c.date })),
-  ]
+  const allPoints: ObsPoint[] = catchLogs.map(c => ({
+    species: c.species,
+    latitude: c.latitude,
+    longitude: c.longitude,
+    date: c.date,
+    isNewsletter: c.source === 'recfishwest-newsletter',
+  }))
 
   // Species activity (only points with a known app species)
   const matchedPoints = allPoints.filter(p => p.species)
@@ -177,8 +193,11 @@ export async function aggregateCrowdData(bioregion: Bioregion): Promise<CrowdSum
   for (const [species, pts] of speciesMap.entries()) {
     const last30 = pts.filter(p => daysBetween(p.date, now) <= 30).length
     const last90 = pts.filter(p => daysBetween(p.date, now) <= 90).length
-    const avgLat = pts.reduce((a, b) => a + b.latitude, 0) / pts.length
-    const avgLng = pts.reduce((a, b) => a + b.longitude, 0) / pts.length
+    // Centroid from user GPS only; fall back to all points if no user data for this species
+    const userPts = pts.filter(p => !p.isNewsletter)
+    const centroidPts = userPts.length > 0 ? userPts : pts
+    const avgLat = centroidPts.reduce((a, b) => a + b.latitude, 0) / centroidPts.length
+    const avgLng = centroidPts.reduce((a, b) => a + b.longitude, 0) / centroidPts.length
     topSpecies.push({
       species,
       totalSightings: pts.length,

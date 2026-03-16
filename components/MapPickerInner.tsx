@@ -40,12 +40,18 @@ export default function MapPickerInner({ value, onChange }: Props) {
   const mapRef      = useRef<any>(null)
   const markerRef   = useRef<any>(null)
   const layersRef              = useRef<any[]>([])
-  const boatRampLayersRef      = useRef<any[]>([])
-  const weatherStationLayersRef = useRef<any[]>([])
+  const boatRampLayersRef        = useRef<any[]>([])
+  const weatherStationLayersRef  = useRef<any[]>([])
+  const myCatchLayersRef         = useRef<any[]>([])
+  const newsletterCatchLayersRef = useRef<any[]>([])
+  const myCatchDataRef           = useRef<any[] | null>(null)
+  const newsletterCatchDataRef   = useRef<any[] | null>(null)
   const [mode, setMode] = useState<MapMode>('satellite')
   const [ready, setReady] = useState(false)
-  const [showBoatRamps, setShowBoatRamps]           = useState(false)
-  const [showWeatherStations, setShowWeatherStations] = useState(false)
+  const [showBoatRamps, setShowBoatRamps]               = useState(false)
+  const [showWeatherStations, setShowWeatherStations]   = useState(false)
+  const [showMyCatches, setShowMyCatches]               = useState(false)
+  const [showNewsletterCatches, setShowNewsletterCatches] = useState(false)
 
   // ── Initialize map ────────────────────────────────────────────
   useEffect(() => {
@@ -103,6 +109,8 @@ export default function MapPickerInner({ value, onChange }: Props) {
       layersRef.current = []
       boatRampLayersRef.current = []
       weatherStationLayersRef.current = []
+      myCatchLayersRef.current = []
+      newsletterCatchLayersRef.current = []
       if (containerRef.current) {
         ;(containerRef.current as any)._leaflet_id = undefined
       }
@@ -182,6 +190,68 @@ export default function MapPickerInner({ value, onChange }: Props) {
       })
     })
   }, [showWeatherStations, ready])
+
+  // ── My catch log overlay ──────────────────────────────────────
+  useEffect(() => {
+    if (!ready || !mapRef.current) return
+    import('leaflet').then(async (mod) => {
+      const L   = mod.default
+      const map = mapRef.current
+      if (!map) return
+      myCatchLayersRef.current.forEach(l => map.removeLayer(l))
+      myCatchLayersRef.current = []
+      if (!showMyCatches) return
+      if (!myCatchDataRef.current) {
+        const res = await fetch('/api/catch-log')
+        const data = await res.json()
+        myCatchDataRef.current = data.catches ?? []
+      }
+      const icon = L.divIcon({
+        className: '',
+        html: `<div style="width:26px;height:26px;border-radius:50%;background:rgba(34,197,94,0.92);border:2px solid rgba(255,255,255,0.8);box-shadow:0 2px 6px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;">🎣</div>`,
+        iconSize:   [26, 26],
+        iconAnchor: [13, 13],
+      })
+      ;(myCatchDataRef.current ?? []).forEach((c: any) => {
+        const marker = L.marker([c.latitude, c.longitude], { icon }).bindPopup(
+          `<div style="font-family:sans-serif;min-width:140px;"><strong>${c.species}</strong> × ${c.quantity}<div style="font-size:0.8em;color:#666;margin-top:3px;">${c.date}</div></div>`
+        )
+        marker.addTo(map)
+        myCatchLayersRef.current.push(marker)
+      })
+    })
+  }, [showMyCatches, ready])
+
+  // ── RecFishWest newsletter catch overlay ──────────────────────
+  useEffect(() => {
+    if (!ready || !mapRef.current) return
+    import('leaflet').then(async (mod) => {
+      const L   = mod.default
+      const map = mapRef.current
+      if (!map) return
+      newsletterCatchLayersRef.current.forEach(l => map.removeLayer(l))
+      newsletterCatchLayersRef.current = []
+      if (!showNewsletterCatches) return
+      if (!newsletterCatchDataRef.current) {
+        const res = await fetch('/api/catch-log/newsletter')
+        const data = await res.json()
+        newsletterCatchDataRef.current = data.catches ?? []
+      }
+      const icon = L.divIcon({
+        className: '',
+        html: `<div style="width:26px;height:26px;border-radius:50%;background:rgba(147,51,234,0.92);border:2px solid rgba(255,255,255,0.8);box-shadow:0 2px 6px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;">📰</div>`,
+        iconSize:   [26, 26],
+        iconAnchor: [13, 13],
+      })
+      ;(newsletterCatchDataRef.current ?? []).forEach((c: any) => {
+        const marker = L.marker([c.latitude, c.longitude], { icon }).bindPopup(
+          `<div style="font-family:sans-serif;min-width:140px;"><strong>${c.species}</strong> × ${c.quantity}<div style="font-size:0.8em;color:#666;margin-top:3px;">${c.date}</div><em style="font-size:0.8em;color:#888;">RecFishWest</em></div>`
+        )
+        marker.addTo(map)
+        newsletterCatchLayersRef.current.push(marker)
+      })
+    })
+  }, [showNewsletterCatches, ready])
 
   // ── Sync marker with value prop ───────────────────────────────
   useEffect(() => {
@@ -268,6 +338,34 @@ export default function MapPickerInner({ value, onChange }: Props) {
               transition: 'background 150ms',
             }}
           >📡</button>
+          <button
+            type="button"
+            onClick={() => setShowMyCatches(v => !v)}
+            title="Toggle my catch logs"
+            style={{
+              width: '30px', height: '30px', borderRadius: '0.375rem',
+              border: '1px solid rgba(255,255,255,0.25)',
+              background: showMyCatches ? 'rgba(34,197,94,0.85)' : 'rgba(11,25,41,0.85)',
+              color: '#fff', fontSize: '14px', cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'background 150ms',
+            }}
+          >🎣</button>
+          <button
+            type="button"
+            onClick={() => setShowNewsletterCatches(v => !v)}
+            title="Toggle RecFishWest catches"
+            style={{
+              width: '30px', height: '30px', borderRadius: '0.375rem',
+              border: '1px solid rgba(255,255,255,0.25)',
+              background: showNewsletterCatches ? 'rgba(147,51,234,0.85)' : 'rgba(11,25,41,0.85)',
+              color: '#fff', fontSize: '14px', cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'background 150ms',
+            }}
+          >📰</button>
         </div>
       </div>
 

@@ -11,6 +11,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { prisma } from '@/lib/prisma'
 import { getBioregion } from '@/lib/regulations'
+import { batchDepths } from '@/lib/seafloor'
 
 const ARCHIVE_URL =
   'https://us3.campaign-archive.com/home/?u=77a1cc2ef5b08dfe3cb33b3ce&id=d8755dad3e'
@@ -217,6 +218,25 @@ function isValidObservation(o: unknown): o is ParsedObservation {
   )
 }
 
+/**
+ * Removes observations whose coordinates fall on land (GEBCO elevation >= 0).
+ * On API error (null elevation) the observation is kept — fail open.
+ */
+async function filterLandObservations(
+  observations: ParsedObservation[],
+): Promise<ParsedObservation[]> {
+  if (!observations.length) return []
+  const depths = await batchDepths(
+    observations.map(o => ({ lat: o.approxLat, lng: o.approxLng })),
+  )
+  const filtered = observations.filter((_, i) => depths[i] === null || depths[i]! < 0)
+  const removed = observations.length - filtered.length
+  if (removed > 0) {
+    console.log(`[recfishwest-newsletter] Removed ${removed} land-based observation(s)`)
+  }
+  return filtered
+}
+
 // ─── Database insertion ────────────────────────────────────────────────────────
 
 /**
@@ -230,7 +250,10 @@ export async function insertNewsletterObservations(
 ): Promise<number> {
   if (observations.length === 0) return 0
 
-  const rows = observations.map(obs => ({
+  const seaObservations = await filterLandObservations(observations)
+  if (seaObservations.length === 0) return 0
+
+  const rows = seaObservations.map(obs => ({
     userId: systemUserId,
     date: publishedDate,
     latitude: obs.approxLat,
