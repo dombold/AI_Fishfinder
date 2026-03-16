@@ -95,7 +95,7 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
   return (
     <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at 20% 20%, #0E2A45 0%, #0B1929 60%, #061018 100%)' }}>
 
-      <DashboardNav backHref="/dashboard" backLabel="← New Plan" />
+      <DashboardNav />
 
       {/* Page header */}
       <div style={{ maxWidth: '960px', margin: '0 auto', padding: '2rem 1.5rem 0' }}>

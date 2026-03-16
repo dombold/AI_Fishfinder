@@ -75,7 +75,7 @@ export default function ProfilePage() {
   return (
     <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at 20% 20%, #0E2A45 0%, #0B1929 60%, #061018 100%)' }}>
 
-      <DashboardNav backHref="/dashboard" backLabel="← Dashboard" />
+      <DashboardNav />
 
       <div style={{ maxWidth: '560px', margin: '3rem auto', padding: '0 1.5rem' }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--color-foam)', marginBottom: '0.25rem' }}>

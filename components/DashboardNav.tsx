@@ -20,9 +20,9 @@ export default function DashboardNav({ backHref, backLabel = '← Dashboard' }: 
           </Link>
         )}
         <Link href="/dashboard" style={{ color: 'var(--color-mist)', fontSize: '0.875rem', textDecoration: 'none' }}>Plan</Link>
-        <RegulationsDropdown />
         <Link href="/contact" style={{ color: 'var(--color-mist)', fontSize: '0.875rem', textDecoration: 'none' }}>Contact</Link>
         <Link href="/about" style={{ color: 'var(--color-mist)', fontSize: '0.875rem', textDecoration: 'none' }}>About</Link>
+        <RegulationsDropdown />
         <UserDropdown />
       </div>
     </nav>
