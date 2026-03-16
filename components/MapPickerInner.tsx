@@ -2,6 +2,8 @@
 
 import 'leaflet/dist/leaflet.css'
 import { useEffect, useRef, useState } from 'react'
+import BOAT_RAMPS from '@/lib/data/boat-ramps.json'
+import { WA_STATIONS } from '@/lib/marine-api'
 
 // WA bounding box
 const WA_BOUNDS = { minLat: -35, maxLat: -13, minLng: 113, maxLng: 129 }
@@ -37,9 +39,13 @@ export default function MapPickerInner({ value, onChange }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef      = useRef<any>(null)
   const markerRef   = useRef<any>(null)
-  const layersRef   = useRef<any[]>([])
+  const layersRef              = useRef<any[]>([])
+  const boatRampLayersRef      = useRef<any[]>([])
+  const weatherStationLayersRef = useRef<any[]>([])
   const [mode, setMode] = useState<MapMode>('satellite')
   const [ready, setReady] = useState(false)
+  const [showBoatRamps, setShowBoatRamps]           = useState(false)
+  const [showWeatherStations, setShowWeatherStations] = useState(false)
 
   // ── Initialize map ────────────────────────────────────────────
   useEffect(() => {
@@ -95,6 +101,8 @@ export default function MapPickerInner({ value, onChange }: Props) {
       mapRef.current = null
       markerRef.current = null
       layersRef.current = []
+      boatRampLayersRef.current = []
+      weatherStationLayersRef.current = []
       if (containerRef.current) {
         ;(containerRef.current as any)._leaflet_id = undefined
       }
@@ -123,6 +131,58 @@ export default function MapPickerInner({ value, onChange }: Props) {
     })
   }, [mode, ready])
 
+  // ── Boat ramp overlay ─────────────────────────────────────────
+  useEffect(() => {
+    if (!ready || !mapRef.current) return
+    import('leaflet').then((mod) => {
+      const L   = mod.default
+      const map = mapRef.current
+      if (!map) return
+      boatRampLayersRef.current.forEach(l => map.removeLayer(l))
+      boatRampLayersRef.current = []
+      if (!showBoatRamps) return
+      const icon = L.divIcon({
+        className: '',
+        html: `<div style="width:26px;height:26px;border-radius:50%;background:rgba(255,180,0,0.92);border:2px solid rgba(255,255,255,0.8);box-shadow:0 2px 6px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;">⚓</div>`,
+        iconSize:   [26, 26],
+        iconAnchor: [13, 13],
+      })
+      ;(BOAT_RAMPS as { name: string; lat: number; lng: number; region: string }[]).forEach((ramp) => {
+        const marker = L.marker([ramp.lat, ramp.lng], { icon }).bindPopup(
+          `<div style="font-family:sans-serif;min-width:140px;"><strong>${ramp.name}</strong><div style="font-size:0.8em;color:#666;margin-top:3px;">${ramp.region}</div></div>`
+        )
+        marker.addTo(map)
+        boatRampLayersRef.current.push(marker)
+      })
+    })
+  }, [showBoatRamps, ready])
+
+  // ── Weather station overlay ───────────────────────────────────
+  useEffect(() => {
+    if (!ready || !mapRef.current) return
+    import('leaflet').then((mod) => {
+      const L   = mod.default
+      const map = mapRef.current
+      if (!map) return
+      weatherStationLayersRef.current.forEach(l => map.removeLayer(l))
+      weatherStationLayersRef.current = []
+      if (!showWeatherStations) return
+      const icon = L.divIcon({
+        className: '',
+        html: `<div style="width:26px;height:26px;border-radius:50%;background:rgba(0,190,220,0.92);border:2px solid rgba(255,255,255,0.8);box-shadow:0 2px 6px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;">📡</div>`,
+        iconSize:   [26, 26],
+        iconAnchor: [13, 13],
+      })
+      WA_STATIONS.forEach((station) => {
+        const marker = L.marker([station.lat, station.lng], { icon }).bindPopup(
+          `<div style="font-family:sans-serif;min-width:140px;"><strong>${station.name}</strong><div style="font-size:0.8em;color:#666;margin-top:3px;">Station ID: ${station.id}</div></div>`
+        )
+        marker.addTo(map)
+        weatherStationLayersRef.current.push(marker)
+      })
+    })
+  }, [showWeatherStations, ready])
+
   // ── Sync marker with value prop ───────────────────────────────
   useEffect(() => {
     if (!ready || !mapRef.current) return
@@ -148,30 +208,67 @@ export default function MapPickerInner({ value, onChange }: Props) {
         style={{ height: '640px', width: '100%', borderRadius: '0.75rem' }}
       />
 
-      {/* Map / Satellite toggle */}
+      {/* Top-right controls */}
       <div style={{
         position: 'absolute', top: '10px', right: '10px', zIndex: 1000,
-        display: 'flex', borderRadius: '0.375rem', overflow: 'hidden',
-        border: '1px solid rgba(255,255,255,0.25)',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
+        display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-end',
       }}>
-        {(['map', 'satellite'] as MapMode[]).map(m => (
+        {/* Map / Satellite toggle */}
+        <div style={{
+          display: 'flex', borderRadius: '0.375rem', overflow: 'hidden',
+          border: '1px solid rgba(255,255,255,0.25)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
+        }}>
+          {(['map', 'satellite'] as MapMode[]).map(m => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setMode(m)}
+              style={{
+                padding: '4px 10px', fontSize: '0.75rem', fontWeight: 600,
+                cursor: 'pointer', border: 'none',
+                background: mode === m ? 'var(--color-current)' : 'rgba(11,25,41,0.85)',
+                color: mode === m ? '#fff' : 'rgba(255,255,255,0.7)',
+                textTransform: 'capitalize', letterSpacing: '0.03em',
+                transition: 'background 150ms',
+              }}
+            >
+              {m}
+            </button>
+          ))}
+        </div>
+
+        {/* Overlay toggles */}
+        <div style={{ display: 'flex', gap: '4px' }}>
           <button
-            key={m}
             type="button"
-            onClick={() => setMode(m)}
+            onClick={() => setShowBoatRamps(v => !v)}
+            title="Toggle boat ramps"
             style={{
-              padding: '4px 10px', fontSize: '0.75rem', fontWeight: 600,
-              cursor: 'pointer', border: 'none',
-              background: mode === m ? 'var(--color-current)' : 'rgba(11,25,41,0.85)',
-              color: mode === m ? '#fff' : 'rgba(255,255,255,0.7)',
-              textTransform: 'capitalize', letterSpacing: '0.03em',
+              width: '30px', height: '30px', borderRadius: '0.375rem',
+              border: '1px solid rgba(255,255,255,0.25)',
+              background: showBoatRamps ? 'rgba(255,180,0,0.85)' : 'rgba(11,25,41,0.85)',
+              color: '#fff', fontSize: '14px', cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'background 150ms',
             }}
-          >
-            {m}
-          </button>
-        ))}
+          >⚓</button>
+          <button
+            type="button"
+            onClick={() => setShowWeatherStations(v => !v)}
+            title="Toggle weather stations"
+            style={{
+              width: '30px', height: '30px', borderRadius: '0.375rem',
+              border: '1px solid rgba(255,255,255,0.25)',
+              background: showWeatherStations ? 'rgba(0,190,220,0.85)' : 'rgba(11,25,41,0.85)',
+              color: '#fff', fontSize: '14px', cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'background 150ms',
+            }}
+          >📡</button>
+        </div>
       </div>
 
       <div style={{ marginTop: '0.625rem', fontSize: '0.8125rem', color: 'var(--color-mist)' }}>

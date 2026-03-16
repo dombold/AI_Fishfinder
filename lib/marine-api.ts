@@ -162,10 +162,12 @@ function summariseByPeriod(
   })
 }
 
+export interface WaStation { id: number; lat: number; lng: number; name: string }
+
 // Static table of WA coastal WillyWeather station IDs.
 // WillyWeather's coordinate search is unreliable — we find the nearest station
 // via haversine distance instead.
-const WA_STATIONS = [
+export const WA_STATIONS: WaStation[] = [
   // ── Kimberley ──────────────────────────────────────────────────
   { id: 18886, lat: -13.7537, lng: 126.1505, name: 'Troughton Island' },
   { id: 27606, lat: -13.8951, lng: 126.0938, name: 'Cape Bougainville' },
