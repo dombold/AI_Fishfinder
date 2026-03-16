@@ -12,7 +12,8 @@ export default auth((req) => {
   const isLandingPage = pathname === '/'
   const isApiAuth = pathname.startsWith('/api/auth')
   const isApiPublic = pathname === '/api/register'
-  const isPublic = isAuthPage || isLandingPage || isApiAuth || isApiPublic
+  const isApiCron = pathname.startsWith('/api/cron')
+  const isPublic = isAuthPage || isLandingPage || isApiAuth || isApiPublic || isApiCron
 
   if (!isAuthenticated && !isPublic) {
     return NextResponse.redirect(new URL('/login', req.nextUrl))

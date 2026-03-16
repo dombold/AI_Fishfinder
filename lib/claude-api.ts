@@ -106,7 +106,7 @@ function buildCrowdBlock(summary: CrowdSummary): string {
 
   const updatedDate = summary.generatedAt.slice(0, 10)
   return `## Crowd-Sourced Fishing Intelligence (${summary.bioregion} Bioregion)
-Source: ${summary.inatCount} citizen science observations + ${summary.catchLogCount} verified angler reports. Data window: last 180 days. Updated: ${updatedDate}.
+Source: ${summary.catchLogCount} verified angler reports. Data window: last 180 days. Updated: ${updatedDate}.
 
 ### Species Activity (ranked by recent sightings)
 ${speciesLines || '- No matched species observations in this bioregion yet.'}

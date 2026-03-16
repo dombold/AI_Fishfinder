@@ -102,6 +102,7 @@ model CatchLog {
   lengthCm  Float?
   notes     String?
   bioregion String?
+  source    String?  // null = user-submitted; 'recfishwest-newsletter' = from weekly report
   createdAt DateTime @default(now())
 
   @@index([userId])
@@ -110,21 +111,15 @@ model CatchLog {
   @@map("catch_logs")
 }
 
-model InatObservation {
-  id           String   @id
-  taxonName    String
-  appSpecies   String?
-  bioregion    String
-  latitude     Float
-  longitude    Float
-  observedOn   String
-  qualityGrade String
-  fetchedAt    DateTime @default(now())
+model NewsletterFetch {
+  id               String   @id @default(cuid())
+  source           String   // 'recfishwest'
+  url              String   @unique
+  publishedDate    String   // YYYY-MM-DD
+  fetchedAt        DateTime @default(now())
+  observationCount Int
 
-  @@index([bioregion])
-  @@index([bioregion, appSpecies])
-  @@index([observedOn])
-  @@map("inat_observations")
+  @@map("newsletter_fetches")
 }
 
 model CrowdSourceSummary {

@@ -88,7 +88,7 @@ function emailWrapper(bodyContent: string): string {
                 AI Fishfinder &mdash; Personalised fishing intelligence for WA waters.
               </p>
               <p style="margin:0;font-size:11px;color:${MIST};opacity:0.7;">
-                You're receiving this because you have an account with AI Fishfinder.
+                You're receiving this because you have an account with AI Fishfinder. To Unsubscribe login to Ai Fishfinder, go to your profile and uncheck the Weekly fishing intelligence email.
               </p>
             </td>
           </tr>
@@ -195,7 +195,7 @@ function welcomeEmailHtml(username: string): string {
         <td style="padding:10px 0;">
           <p style="margin:0;font-size:14px;color:${FOAM};line-height:1.6;">
             <strong style="color:${SEAFOAM};">Crowd Intelligence</strong> &mdash;
-            Aggregated sightings from iNaturalist and fellow anglers reveal what's
+            Aggregated catch reports from fellow AI Fishfinder anglers reveal what's
             active in your bioregion right now.
           </p>
         </td>
@@ -237,7 +237,7 @@ function bioregionSection(summary: CrowdSummary): string {
   const label = BIOREGION_LABELS[summary.bioregion] ?? summary.bioregion
   const topThree = summary.topSpecies.slice(0, 3)
   const hotspotCount = summary.hotspots.length
-  const totalDataPoints = summary.inatCount + summary.catchLogCount
+  const totalDataPoints = summary.catchLogCount
 
   const speciesRows = topThree.map((s, i) => `
     <tr>
@@ -298,7 +298,7 @@ function weeklyDigestHtml(summaries: CrowdSummary[]): string {
     .map(id => summaries.find(s => s.bioregion === id))
     .filter((s): s is CrowdSummary => !!s)
 
-  const totalObs = summaries.reduce((n, s) => n + s.inatCount + s.catchLogCount, 0)
+  const totalObs = summaries.reduce((n, s) => n + s.catchLogCount, 0)
 
   const body = `
     <h1 style="margin:0 0 6px 0;font-family:Georgia,serif;font-size:24px;font-weight:700;
@@ -312,7 +312,7 @@ function weeklyDigestHtml(summaries: CrowdSummary[]): string {
       background-color:rgba(201,168,76,0.1);border-left:3px solid ${SAND};
       padding:10px 14px;border-radius:0 4px 4px 0;">
       Based on <strong style="color:${SAND};">${totalObs.toLocaleString()} observations</strong>
-      from iNaturalist and fellow AI Fishfinder anglers across all four WA bioregions.
+      from AI Fishfinder anglers across all four WA bioregions.
     </p>
 
     <p style="margin:0 0 20px 0;font-family:Georgia,serif;font-size:16px;font-weight:700;

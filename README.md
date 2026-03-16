@@ -106,18 +106,20 @@ pm2 startup
 
 ### Cron Jobs
 
-Two background jobs keep crowd-sourced data and weekly digests up to date. Trigger them via HTTP on a schedule (e.g. cron, systemd timer, or an external scheduler):
+Three background jobs run every Friday, triggered via HTTP (cron, systemd timer, or external scheduler):
 
-| Endpoint | Recommended schedule | Purpose |
-|----------|---------------------|---------|
-| `POST /api/cron/update-crowd-data` | Weekly (e.g. Sunday 02:00) | Fetches new iNaturalist observations, aggregates community catch logs, and writes per-bioregion crowd summaries to the DB |
-| `POST /api/cron/send-weekly-digest` | Weekly (e.g. Sunday 08:00) | Emails opted-in users a fishing activity digest for their bioregion |
+| Endpoint | Schedule | Purpose |
+|----------|----------|---------|
+| `POST /api/cron/parse-recfishwest` | Friday 02:00 | Fetch & parse the RecFishWest Statewide Fishing Report newsletter; insert catch observations into the DB |
+| `POST /api/cron/update-crowd-data` | Friday 03:00 | Aggregate all catch logs into per-bioregion crowd summaries |
+| `POST /api/cron/send-weekly-digest` | Friday 04:00 | Email opted-in users the weekly fishing intelligence digest |
 
 Example crontab (run on the server):
 
 ```cron
-0 2 * * 0  curl -s -X POST http://localhost:3000/api/cron/update-crowd-data
-0 8 * * 0  curl -s -X POST http://localhost:3000/api/cron/send-weekly-digest
+0 2 * * 5  curl -s -X POST http://localhost:3000/api/cron/parse-recfishwest -H "x-cron-secret: $CRON_SECRET" >> /var/log/ai-fishfinder-newsletter.log 2>&1
+0 3 * * 5  curl -s -X POST http://localhost:3000/api/cron/update-crowd-data -H "x-cron-secret: $CRON_SECRET" >> /var/log/ai-fishfinder-crowd.log 2>&1
+0 4 * * 5  curl -s -X POST http://localhost:3000/api/cron/send-weekly-digest -H "x-cron-secret: $CRON_SECRET" >> /var/log/ai-fishfinder-digest.log 2>&1
 ```
 
 ---

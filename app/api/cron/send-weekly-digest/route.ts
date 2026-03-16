@@ -1,12 +1,10 @@
 /**
  * Weekly digest cron — sends a crowd-sourced fishing intelligence email to all users.
  *
- * Trigger: weekly, e.g. Sunday 4 AM (after the crowd data update job at 3 AM).
+ * Trigger via system cron (Friday 4 AM, after parse-recfishwest at 2 AM and update-crowd-data at 3 AM):
+ *   0 4 * * 5  curl -s -X POST http://localhost:3000/api/cron/send-weekly-digest \
+ *     -H "x-cron-secret: $CRON_SECRET" >> /var/log/ai-fishfinder-digest.log 2>&1
  * Security: requires x-cron-secret header matching CRON_SECRET env var.
- *
- * Example cron call:
- *   curl -X POST https://your-domain/api/cron/send-weekly-digest \
- *     -H "x-cron-secret: $CRON_SECRET"
  */
 
 import { NextRequest, NextResponse } from 'next/server'

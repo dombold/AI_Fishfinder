@@ -30,7 +30,6 @@ export interface HotspotCluster {
 export interface CrowdSummary {
   bioregion: string
   generatedAt: string  // ISO timestamp
-  inatCount: number
   catchLogCount: number
   topSpecies: SpeciesActivity[]  // top 8 by total sightings
   hotspots: HotspotCluster[]     // top 10 clusters
@@ -148,12 +147,6 @@ export async function aggregateCrowdData(bioregion: Bioregion): Promise<CrowdSum
   cutoff180.setDate(cutoff180.getDate() - 180)
   const cutoffStr = cutoff180.toISOString().slice(0, 10)
 
-  // Fetch iNaturalist observations (last 180 days, matched species only for activity metrics)
-  const inatObs = await prisma.inatObservation.findMany({
-    where: { bioregion, observedOn: { gte: cutoffStr } },
-    select: { appSpecies: true, latitude: true, longitude: true, observedOn: true },
-  })
-
   // Fetch user catch logs (last 180 days)
   // CatchLogs use date field (YYYY-MM-DD string). Filter by bioregion if set, else by lat/lng fallback.
   const catchLogs = await prisma.catchLog.findMany({
@@ -164,12 +157,10 @@ export async function aggregateCrowdData(bioregion: Bioregion): Promise<CrowdSum
     select: { species: true, latitude: true, longitude: true, date: true },
   })
 
-  const inatCount = inatObs.length
   const catchLogCount = catchLogs.length
 
   // Merge into unified observation points
   const allPoints: ObsPoint[] = [
-    ...inatObs.map(o => ({ species: o.appSpecies, latitude: o.latitude, longitude: o.longitude, date: o.observedOn })),
     ...catchLogs.map(c => ({ species: c.species, latitude: c.latitude, longitude: c.longitude, date: c.date })),
   ]
 
@@ -206,7 +197,6 @@ export async function aggregateCrowdData(bioregion: Bioregion): Promise<CrowdSum
   return {
     bioregion,
     generatedAt: now.toISOString(),
-    inatCount,
     catchLogCount,
     topSpecies: topSpecies.slice(0, 8),
     hotspots,
