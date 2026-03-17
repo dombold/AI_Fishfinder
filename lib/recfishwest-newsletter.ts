@@ -33,11 +33,11 @@ const KNOWN_SPECIES = [
   'Dhufish', 'Pink Snapper', 'Baldchin Groper', 'Breaksea Cod',
   'Redthroat Emperor', 'Spangled Emperor', 'Red Emperor',
   'Coral Trout', 'Amberjack', 'Tuskfish',
-  'Black Snapper (Grass Emperor)', 'Bight Redfish (Nannygai)',
-  'Barramundi', 'Black Jewfish', 'King Threadfin (Giant Threadfin)',
+  'Grass Emperor', 'Bight Redfish',
+  'Barramundi', 'Black Jewfish', 'King Threadfin',
   // beach pelagic
   'Tailor', 'Australian Salmon (Western Australian Salmon)',
-  'Yellowfin Whiting', 'Trevally', 'Australian Herring', 'Garfish (Southern Garfish)',
+  'Yellowfin Whiting', 'Trevally', 'Australian Herring', 'Garfish',
   // beach demersal
   'Bream', 'Silver Bream', 'King George Whiting', 'Whiting',
   'Flathead', 'Mulloway', 'Flounder', 'Mangrove Jack',
@@ -163,7 +163,7 @@ ${speciesList}
 
 Rules:
 - Create one observation entry per species-per-distinct-location mentioned
-- Normalize all species names to match the known species list exactly (e.g. "soapy mulloway" → "Mulloway", "big herring" → "Australian Herring", "kingfish" → "Yellowtail Kingfish", "samsonfish" → "Samson Fish", "nannygai" → "Bight Redfish (Nannygai)", "dolph" or "dolphinfish" → "Mahi-Mahi", "tailor" → "Tailor", "KGW" → "King George Whiting")
+- Normalize all species names to match the known species list exactly (e.g. "soapy mulloway" → "Mulloway", "big herring" → "Australian Herring", "kingfish" → "Yellowtail Kingfish", "samsonfish" → "Samson Fish", "nannygai" → "Bight Redfish", "dolph" or "dolphinfish" → "Mahi-Mahi", "tailor" → "Tailor", "KGW" → "King George Whiting")
 - For locations, provide approximate WA lat/lng coordinates (WA bounding box: lat -13 to -35, lng 113 to 129)
 - Skip any mention with no identifiable WA location
 - Skip species not in the known list

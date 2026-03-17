@@ -19,15 +19,15 @@ const SPECIES_LIST: Record<FishingType, Record<'pelagic' | 'demersal', string[]>
       'Dhufish', 'Pink Snapper', 'Baldchin Groper', 'Breaksea Cod',
       'Redthroat Emperor', 'Spangled Emperor', 'Red Emperor',
       'Coral Trout', 'Amberjack', 'Tuskfish',
-      'Black Snapper (Grass Emperor)', 'Bight Redfish (Nannygai)',
-      'Barramundi', 'Black Jewfish', 'King Threadfin (Giant Threadfin)',
+      'Grass Emperor', 'Bight Redfish',
+      'Barramundi', 'Black Jewfish', 'King Threadfin',
     ],
   },
   beach: {
     pelagic: [
       'Tailor', 'Australian Salmon (Western Australian Salmon)',
       'Yellowfin Whiting', 'Trevally', 'Giant Trevally', 'Queenfish',
-      'Australian Herring', 'Garfish (Southern Garfish)', 'Squid',
+      'Australian Herring', 'Garfish', 'Squid',
     ],
     demersal: [
       'Bream', 'Silver Bream', 'King George Whiting', 'Whiting',
@@ -457,7 +457,7 @@ export const SPECIES_KNOWLEDGE: Record<string, SpeciesKnowledge> = {
     baitPreferences: '1. Fresh whole prawn (unpeeled, most effective); 2. Fresh crab flesh or whole small crab; 3. Fresh squid (small pieces or whole small squid); 4. Creature baits and crab-imitating soft plastics (3–5 inch) on 20–40g jig heads; 5. Fresh octopus tentacle.',
   },
 
-  'Black Snapper (Grass Emperor)': {
+  'Grass Emperor': {
     feedingBehaviour: 'Active reef and sandy-bottom feeder, hunts crustaceans and small fish on and around reef edges and rubble zones. Feeds across all tidal phases with peaks at tide changes and morning/evening. Less wary than other emperor species — will take lures and bait readily. Good table fish. School sizes vary from 5–30 fish. More abundant in northern waters but present throughout tropical and subtropical WA.',
     preferredConditions: 'SST 20–28°C; reef edges, rubble and sandy patches in tropical to subtropical WA. Common north of Shark Bay but present on the West Coast. Distributed across all WA bioregions north of 30°S.',
     depth: '10–60m on reef and rubble substrate; commonly 15–40m',
@@ -469,7 +469,7 @@ export const SPECIES_KNOWLEDGE: Record<string, SpeciesKnowledge> = {
     baitPreferences: '1. Fresh prawn (whole small or half large); 2. Squid strips; 3. Fresh pilchard pieces; 4. Small soft plastic paddle-tails (3–4 inch) on 20–30g jig heads; 5. Small chunks of fresh fish (mullet or herring).',
   },
 
-  'Bight Redfish (Nannygai)': {
+  'Bight Redfish': {
     feedingBehaviour: 'Schooling deep-water demersal that forms dense vertical schools near the seafloor at dawn and dusk, then scatters to feed individually at night. Feeds on molluscs, crustaceans and small fish. Readily takes baited rigs and jigs. Often found in very large aggregations at the continental shelf edge. Excellent table fish — commercially valued. Responds well to berley in deep water.',
     preferredConditions: 'Temperate southern WA and Great Australian Bight. Rocky reefs, pinnacles and the continental shelf edge. Found south of Lancelin through to the South Coast and Bight. Requires deeper, cooler water than most WA species.',
     depth: '10–500m; most commonly 120–200m on the continental shelf; can be found shallower (40–80m) in southern WA',
@@ -505,7 +505,7 @@ export const SPECIES_KNOWLEDGE: Record<string, SpeciesKnowledge> = {
     baitPreferences: '1. Live whole mullet (200–400g) nose-hooked on running sinker — most effective; 2. Live herring on running sinker; 3. Large whole squid on heavy paternoster at night; 4. Large paddle-tail soft plastics (5–8 inch, white or natural); 5. Fresh prawn (whole, large) on size 3/0–5/0 circle hook.',
   },
 
-  'King Threadfin (Giant Threadfin)': {
+  'King Threadfin': {
     feedingBehaviour: 'Powerful estuary predator with distinctive long pectoral fin threadlets used to sense bottom-dwelling prey (prawns, crabs, small fish). Most active on run-in tides over tidal flats and in shallow estuary channels. Strikes hard and runs powerfully. Feeds in turbid water more effectively than most species — the threadlets compensate for poor visibility. Schools of 5–20 fish common over sandy flats.',
     preferredConditions: 'SST 24–32°C; tropical WA estuaries and tidal rivers from Exmouth to Broome and Kimberley. Sandy and muddy estuary systems and tidal creek mouths. Tolerates very turbid water after rain.',
     depth: '1–10m in tidal systems; nearshore to 20m by boat',
@@ -577,7 +577,7 @@ export const SPECIES_KNOWLEDGE: Record<string, SpeciesKnowledge> = {
     baitPreferences: '1. Dough bait (bread dough ball on size 12 hook); 2. Tiny prawn pieces; 3. Pilchard flesh (very small pieces); 4. Commercial herring pellets; 5. Sabiki rig — most efficient for catching live bait quickly.',
   },
 
-  'Garfish (Southern Garfish)': {
+  'Garfish': {
     feedingBehaviour: 'Surface-swimming schooling fish with a long lower jaw. Feeds on algae, plankton and small invertebrates near the water surface. Schools gather in sheltered bays, estuaries and at jetties particularly in spring–summer. Responds very quickly to bread-based berley — schools appear at the berley trail within minutes. Delicate, fine-boned table fish highly prized for eating.',
     preferredConditions: 'SST 14–22°C; sheltered bays, estuaries, jetties and beaches. Southern and south-west WA. Estuarine and nearshore environments in sheltered water.',
     depth: 'Surface to 3m; almost exclusively near the surface',

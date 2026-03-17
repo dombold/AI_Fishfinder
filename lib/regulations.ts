@@ -35,7 +35,7 @@ export function getBioregion(lat: number, lng: number): Bioregion {
 
 const DEMERSAL_SPECIES = new Set([
   'Dhufish', 'Pink Snapper', 'Baldchin Groper', 'Redthroat Emperor',
-  'Spangled Emperor', 'Coral Trout', 'Tuskfish', 'Black Snapper (Grass Emperor)',
+  'Spangled Emperor', 'Coral Trout', 'Tuskfish', 'Grass Emperor',
 ])
 
 // Approximate bounding box for Cockburn Sound + Warnbro Sound
@@ -298,7 +298,7 @@ export const REGULATIONS: Record<string, BioregionRules> = {
     'west-coast':  { minSize: '410mm total length', bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
     'south-coast': { minSize: '410mm total length', bagLimit: '3 fish', combinedLimit: '4 fish demersal mixed bag' },
   },
-  'Bight Redfish (Nannygai)': {
+  'Bight Redfish': {
     'north-coast': { minSize: '250mm total length', bagLimit: '10 fish', combinedLimit: '10 fish per person', notes: 'Release weight required — very susceptible to barotrauma at depth.' },
     gascoyne:      { minSize: '250mm total length', bagLimit: '10 fish', combinedLimit: '10 fish per person', notes: 'Release weight required.' },
     'west-coast':  { minSize: '250mm total length', bagLimit: '10 fish', combinedLimit: '10 fish per person', notes: 'Release weight required for barotrauma.' },
@@ -316,13 +316,13 @@ export const REGULATIONS: Record<string, BioregionRules> = {
     'west-coast':  { minSize: '700mm total length', bagLimit: '2 fish', combinedLimit: '5 fish large estuarine species mixed bag' },
     'south-coast': { minSize: '700mm total length', bagLimit: '2 fish', combinedLimit: '5 fish large estuarine species mixed bag' },
   },
-  'King Threadfin (Giant Threadfin)': {
+  'King Threadfin': {
     'north-coast': { minSize: '600mm total length', bagLimit: '5 fish', notes: 'Primarily found in tropical estuaries. Size limit is total length including threadlets.' },
     gascoyne:      { minSize: '600mm total length', bagLimit: '5 fish' },
     'west-coast':  { minSize: '600mm total length', bagLimit: '5 fish', notes: 'Very rare in West Coast Bioregion.' },
     'south-coast': { minSize: '600mm total length', bagLimit: '5 fish', notes: 'Very rare in South Coast Bioregion.' },
   },
-  'Garfish (Southern Garfish)': {
+  'Garfish': {
     'north-coast': { bagLimit: '30 fish', combinedLimit: '30 fish garfish/needlefish mixed bag', notes: 'No minimum size for garfish in WA.' },
     gascoyne:      { bagLimit: '30 fish', combinedLimit: '30 fish garfish/needlefish mixed bag' },
     'west-coast':  { bagLimit: '30 fish', combinedLimit: '30 fish garfish/needlefish mixed bag' },
@@ -388,7 +388,7 @@ export const REGULATIONS: Record<string, BioregionRules> = {
     'west-coast':  { minSize: 'None (blackspot/blue tuskfish: 400mm)', bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027.' },
     'south-coast': { minSize: 'None (blackspot/blue tuskfish: 400mm)', bagLimit: '3 fish', combinedLimit: '4 fish demersal mixed bag' },
   },
-  'Black Snapper (Grass Emperor)': {
+  'Grass Emperor': {
     'north-coast': { minSize: '320mm total length', bagLimit: '5 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
     gascoyne:      { minSize: '320mm total length', bagLimit: '5 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
     'west-coast':  { minSize: '320mm total length', bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based permitted.' },

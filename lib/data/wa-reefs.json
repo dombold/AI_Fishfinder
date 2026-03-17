@@ -308,7 +308,7 @@
     "depth_max": 50,
     "substrate": "coral",
     "features": ["drop_off", "channel", "aggregation_point", "current_edge"],
-    "species": ["Coral Trout", "Giant Trevally", "Dogtooth Tuna", "Nannygai", "Red Emperor", "Wahoo"],
+    "species": ["Coral Trout", "Giant Trevally", "Dogtooth Tuna", "Bight Redfish", "Red Emperor", "Wahoo"],
     "notes": "Remote offshore coral atoll 260km from Broome. World-class fishing; the passes run extremely fast on tides — time your fishing accordingly."
   },
   {
@@ -320,7 +320,7 @@
     "depth_max": 60,
     "substrate": "coral",
     "features": ["drop_off", "channel", "current_edge", "aggregation_point"],
-    "species": ["Coral Trout", "Giant Trevally", "Dogtooth Tuna", "Wahoo", "Red Emperor", "Nannygai"],
+    "species": ["Coral Trout", "Giant Trevally", "Dogtooth Tuna", "Wahoo", "Red Emperor", "Bight Redfish"],
     "notes": "Northernmost Rowley Shoal. Large passes with exceptional tidal flow; dogtooth tuna and GT on the drop-offs."
   },
   {
