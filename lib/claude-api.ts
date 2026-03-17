@@ -81,15 +81,7 @@ function buildSpeciesBlock(speciesNames: string[], lat: number, lng: number): st
       ? `- Regulations: MLS ${regs.minSize ?? 'None'} | Bag limit: ${regs.bagLimit}${regs.combinedLimit ? ` | Combined: ${regs.combinedLimit}` : ''}${regs.closureActive ? `\n  ⛔ CLOSURE ACTIVE: ${regs.closureReason}` : ''}${regs.notes ? `\n  Note: ${regs.notes}` : ''}`
       : '- Regulations: Verify at fish.wa.gov.au'
 
-    return `### ${name}
-- Feeding behaviour: ${knowledge.feedingBehaviour}
-- Preferred conditions: ${knowledge.preferredConditions}
-- Depth range: ${knowledge.depth}
-- Best season: ${knowledge.seasonality}
-- Best tidal phase: ${knowledge.tidePhase}
-- Bait/lure preferences: ${knowledge.baitPreferences}
-- Techniques: ${knowledge.techniques}
-- Sounder signatures: ${knowledge.sounderSignatures}
+    return `**${name}** | behaviour: ${knowledge.feedingBehaviour} | conditions: ${knowledge.preferredConditions} | depth: ${knowledge.depth} | season: ${knowledge.seasonality} | tides: ${knowledge.tidePhase} | bait: ${knowledge.baitPreferences} | techniques: ${knowledge.techniques} | sounder: ${knowledge.sounderSignatures}
 ${regBlock}`
   }).join('\n\n')
 }
@@ -120,49 +112,14 @@ ${hotspotLines || '- No hotspot clusters identified yet.'}
 Use this crowd-sourced data to: (1) weight waypoint placement toward confirmed hotspot clusters — ONLY clusters without an "approx. area" warning have precise GPS coordinates suitable for waypoint placement; clusters marked "approx. area (newsletter)" indicate general fishing zones from area-level reports, not specific spots; (2) flag any "increasing" trend species as bonus targets; (3) reference hotspot coordinates in waypoint notes, noting approximate ones as general areas only.`
 }
 
-const DAILY_PLAN_SCHEMA = `{
-  "date": "YYYY-MM-DD",
-  "header": {
-    "dataSources": ["WillyWeather API v2", "Open-Meteo Marine"],
-    "moonPhase": "string",
-    "moonIllumination": number,
-    "sunrise": "HH:MM",
-    "sunset": "HH:MM",
-    "moonrise": "HH:MM",
-    "moonset": "HH:MM",
-    "pressureTrend": "rising|falling|steady",
-    "bioregion": "North Coast|Gascoyne Coast|West Coast|South Coast"
-  },
-  "windTable": [
-    {
-      "timePeriod": "Pre-dawn 04:00–06:00",
-      "windDirection": "SSW",
-      "windSpeed": "12–15 kts",
-      "swellHeight": "1.2m",
-      "swellPeriod": "8s",
-      "swellDirection": "SW",
-      "rating": "BEST WINDOW|GOOD|IMPROVING|AVERAGE|FISHABLE|DETERIORATING"
-    }
-  ],
-  "oceanConditions": [
-    { "parameter": "SST", "reading": "22.4°C", "assessment": "string" },
-    { "parameter": "Current", "reading": "0.4 kts NNE", "assessment": "string" },
-    { "parameter": "Pressure", "reading": "1018 hPa (rising)", "assessment": "string" },
-    { "parameter": "Moon", "reading": "Waxing Gibbous 68%", "assessment": "string" }
-  ],
-  "fishingPlan": [
-    { "phase": "Start", "time": "05:30", "action": "string", "speed": "string", "notes": "string" },
-    { "phase": "Run", "time": "06:00", "action": "string", "speed": "string", "notes": "string" },
-    { "phase": "Repeat", "time": "08:00", "action": "string", "speed": "string", "notes": "string" },
-    { "phase": "Prime", "time": "10:00", "action": "string", "speed": "string", "notes": "string" },
-    { "phase": "Late", "time": "13:00", "action": "string", "speed": "string", "notes": "string" },
-    { "phase": "Adapt", "time": "15:00", "action": "string", "speed": "string", "notes": "string" },
-    { "phase": "Pack Up", "time": "17:00", "action": "string", "speed": "string", "notes": "string" }
-  ],
-  "waypoints": [
-    { "name": "string", "latitude": -32.123, "longitude": 115.456, "depth": "string", "notes": "string" }
-  ],
-  "biteTimingNotes": "string"
+const DAILY_PLAN_SCHEMA = `DailyPlan {
+  date: "YYYY-MM-DD",
+  header: { dataSources: string[], moonPhase: string, moonIllumination: number, sunrise: "HH:MM", sunset: "HH:MM", moonrise: "HH:MM", moonset: "HH:MM", pressureTrend: "rising|falling|steady", bioregion: "North Coast|Gascoyne Coast|West Coast|South Coast" },
+  windTable: [{ timePeriod: string, windDirection: string, windSpeed: string, swellHeight: string, swellPeriod: string, swellDirection: string, rating: "BEST WINDOW|GOOD|IMPROVING|AVERAGE|FISHABLE|DETERIORATING" }],
+  oceanConditions: [{ parameter: string, reading: string, assessment: string }],
+  fishingPlan: [{ phase: "Start|Run|Repeat|Prime|Late|Adapt|Pack Up", time: "HH:MM", action: string, speed: string, notes: string }],
+  waypoints: [{ name: string, latitude: number, longitude: number, depth?: string, notes: string }],
+  biteTimingNotes: string
 }`
 
 export async function generateFishingPlan(params: {
@@ -258,7 +215,7 @@ ${formatPeriods(day.periods)}
 ## Target Species Knowledge & Regulations
 ${buildSpeciesBlock(params.selectedSpecies, params.latitude, params.longitude)}
 
-## Output Schema (return a JSON array matching this exactly):
+## Output Schema:
 ${DAILY_PLAN_SCHEMA}
 
 Rules:
@@ -275,9 +232,9 @@ Rules:
   const message = await client.beta.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 16000,
-    system: systemPrompt,
+    system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
     messages: [{ role: 'user', content: userPrompt }],
-    betas: ['output-128k-2025-02-19'],
+    betas: ['output-128k-2025-02-19', 'prompt-caching-2024-07-31'],
   })
 
   if (message.stop_reason === 'max_tokens') {
