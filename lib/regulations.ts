@@ -456,7 +456,36 @@ export const REGULATIONS: Record<string, BioregionRules> = {
   },
 }
 
+/** Resolve an AI-returned species name to the canonical key used in REGULATIONS.
+ *  Handles cases like "Pink Snapper (Australasian Snapper)" → "Pink Snapper"
+ *  and "Australian Salmon" → "Australian Salmon (Western Australian Salmon)".
+ */
+export function normalizeSpeciesName(species: string): string {
+  // 1. Exact match
+  if (REGULATIONS[species]) return species
+
+  // 2. Strip parenthetical from AI name and try exact match
+  const stripped = species.replace(/\s*\(.*\)\s*$/, '').trim()
+  if (stripped !== species && REGULATIONS[stripped]) return stripped
+
+  // 3. Compare base names (strip parentheticals from both sides)
+  const base = (stripped || species).toLowerCase()
+  for (const canonical of Object.keys(REGULATIONS)) {
+    const canonicalBase = canonical.replace(/\s*\(.*\)\s*$/, '').trim().toLowerCase()
+    if (canonicalBase === base) return canonical
+  }
+
+  // 4. Case-insensitive full match
+  const lc = species.toLowerCase()
+  for (const canonical of Object.keys(REGULATIONS)) {
+    if (canonical.toLowerCase() === lc) return canonical
+  }
+
+  return species
+}
+
 export function getRegulations(species: string, lat: number, lng: number): SpeciesRegulation | null {
+  const canonical = normalizeSpeciesName(species)
   const bioregion = getBioregion(lat, lng)
-  return REGULATIONS[species]?.[bioregion] ?? null
+  return REGULATIONS[canonical]?.[bioregion] ?? null
 }

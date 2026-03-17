@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { z } from 'zod'
-import { getRegulations, checkFishingClosures, getBioregion } from '@/lib/regulations'
+import { getRegulations, checkFishingClosures, getBioregion, normalizeSpeciesName } from '@/lib/regulations'
 
 const schema = z.object({
   species: z.string().min(1).max(100),
@@ -19,10 +19,11 @@ export async function POST(req: NextRequest) {
     if (!result.success) return NextResponse.json({ error: 'Invalid input', details: result.error.flatten() }, { status: 400 })
 
     const { species, latitude, longitude } = result.data
+    const canonicalSpecies = normalizeSpeciesName(species)
 
     const bioregion = getBioregion(latitude, longitude)
-    const regulation = getRegulations(species, latitude, longitude)
-    const closures = checkFishingClosures(latitude, longitude, 'boat', 'both', [species])
+    const regulation = getRegulations(canonicalSpecies, latitude, longitude)
+    const closures = checkFishingClosures(latitude, longitude, 'boat', 'both', [canonicalSpecies])
 
     return NextResponse.json({ bioregion, regulation, closures })
   } catch (err: any) {

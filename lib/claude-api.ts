@@ -146,7 +146,7 @@ export async function identifySpecies(imageBase64: string, mimeType: string): Pr
         },
         {
           type: 'text',
-          text: 'Analyse this fishing photo. Reply with ONLY valid JSON (no markdown):\n{"species":"common name used in Western Australia, or unknown","count":<integer number of fish visible>,"environment":"beach|boat|jetty|rocks|reef|unknown","method":"lure|bait|fly|unknown"}',
+          text: 'Analyse this fishing photo. Reply with ONLY valid JSON (no markdown):\n{"species":"primary common name used in Western Australia (no aliases or parentheticals), or unknown","count":<integer number of fish visible>,"environment":"beach|boat|jetty|rocks|reef|unknown","method":"lure|bait|fly|unknown"}',
         },
       ],
     }],
