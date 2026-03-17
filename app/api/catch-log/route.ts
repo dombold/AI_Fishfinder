@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { getBioregion } from '@/lib/regulations'
 
-const createSchema = z.object({
+export const createSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
@@ -13,6 +13,10 @@ const createSchema = z.object({
   weightKg: z.number().positive().optional(),
   lengthCm: z.number().positive().optional(),
   notes: z.string().max(500).optional(),
+  captureTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+  fishCount: z.number().int().min(1).optional(),
+  environment: z.string().max(50).optional(),
+  fishingMethod: z.string().max(50).optional(),
 })
 
 export async function GET() {
@@ -52,6 +56,10 @@ export async function POST(req: NextRequest) {
         lengthCm: parsed.data.lengthCm ?? null,
         notes: parsed.data.notes ?? null,
         bioregion: getBioregion(parsed.data.latitude, parsed.data.longitude),
+        captureTime: parsed.data.captureTime ?? null,
+        fishCount: parsed.data.fishCount ?? null,
+        environment: parsed.data.environment ?? null,
+        fishingMethod: parsed.data.fishingMethod ?? null,
       },
     })
     return NextResponse.json(entry, { status: 201 })

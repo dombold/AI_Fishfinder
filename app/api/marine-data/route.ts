@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { fetchAllMarineData } from '@/lib/marine-api'
+import { fetchAllMarineData, fetchSSTGrid } from '@/lib/marine-api'
 
 export async function POST(req: NextRequest) {
   const session = await auth()
@@ -28,7 +28,12 @@ export async function POST(req: NextRequest) {
       cur.setDate(cur.getDate() + 1)
     }
 
-    const marineData = await fetchAllMarineData(fishingSession.latitude, fishingSession.longitude, dates)
+    const [marineData, sstGrid] = await Promise.all([
+      fetchAllMarineData(fishingSession.latitude, fishingSession.longitude, dates),
+      fetchSSTGrid(fishingSession.latitude, fishingSession.longitude, dates[0], dates[dates.length - 1]),
+    ])
+
+    const sstGridJson = JSON.stringify(sstGrid)
 
     // Store each day's data
     for (const day of marineData) {
@@ -48,9 +53,12 @@ export async function POST(req: NextRequest) {
             sunrise: day.sunrise,
             sunset: day.sunset,
             pressureTrend: day.pressureTrend,
+            pressureHourly: day.pressureHourly,
+            pressureHPa: day.pressureHPa,
           }),
           openMeteoData: JSON.stringify({ periods: day.periods }),
           tideData: JSON.stringify(day.tides),
+          sstGrid: sstGridJson,
         },
         update: {
           willyWeatherData: JSON.stringify({
@@ -64,9 +72,12 @@ export async function POST(req: NextRequest) {
             sunrise: day.sunrise,
             sunset: day.sunset,
             pressureTrend: day.pressureTrend,
+            pressureHourly: day.pressureHourly,
+            pressureHPa: day.pressureHPa,
           }),
           openMeteoData: JSON.stringify({ periods: day.periods }),
           tideData: JSON.stringify(day.tides),
+          sstGrid: sstGridJson,
           fetchedAt: new Date(),
         },
       })

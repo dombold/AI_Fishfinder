@@ -69,6 +69,7 @@ model MarineData {
   willyWeatherData String
   openMeteoData    String
   tideData         String
+  sstGrid          String?        // JSON: SSTGridPoint[] — nullable for backwards compat
   fetchedAt        DateTime       @default(now())
 
   @@unique([sessionId, date])
@@ -101,9 +102,13 @@ model CatchLog {
   weightKg  Float?
   lengthCm  Float?
   notes     String?
-  bioregion String?
-  source    String?  // null = user-submitted; 'recfishwest-newsletter' = from weekly report
-  createdAt DateTime @default(now())
+  bioregion     String?
+  source        String?   // null = user-submitted; 'recfishwest-newsletter' = from weekly report
+  captureTime   String?   // HH:MM local time from photo EXIF
+  fishCount     Int?      // AI-counted fish in photo
+  environment   String?   // beach | boat | jetty | rocks | reef | unknown
+  fishingMethod String?   // lure | bait | fly | unknown
+  createdAt     DateTime  @default(now())
 
   @@index([userId])
   @@index([bioregion])

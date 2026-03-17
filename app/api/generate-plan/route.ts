@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateFishingPlan } from '@/lib/claude-api'
-import type { DayMarineData, TideEvent, PeriodSummary } from '@/lib/marine-api'
+import type { DayMarineData, TideEvent, PeriodSummary, PressureHourlyPoint } from '@/lib/marine-api'
 import { getNearestBoatRamps } from '@/lib/boat-ramps'
 import { getDepthAt, getNearbyReefs } from '@/lib/seafloor'
 import { getChlorophyll, getSalinity } from '@/lib/ocean-data'
@@ -45,6 +45,8 @@ export async function POST(req: NextRequest) {
         tides: (JSON.parse(md.tideData) as TideEvent[]),
         periods: (omData.periods as PeriodSummary[]),
         windHourly: willy.windHourly ?? [],
+        pressureHourly: (willy.pressureHourly ?? []) as PressureHourlyPoint[],
+        pressureHPa: willy.pressureHPa ?? null,
         nearestStation: willy.nearestStation ?? '',
         moonPhase: willy.moonPhase ?? 'Unknown',
         moonIllumination: willy.moonIllumination ?? 0,

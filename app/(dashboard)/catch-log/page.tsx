@@ -14,6 +14,9 @@ interface CatchEntry {
   weightKg: number | null
   lengthCm: number | null
   notes: string | null
+  captureTime: string | null
+  environment: string | null
+  fishingMethod: string | null
 }
 
 export default function CatchLogPage() {
@@ -21,6 +24,7 @@ export default function CatchLogPage() {
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
 
   const fetchCatches = useCallback(() => {
     fetch('/api/catch-log')
@@ -92,32 +96,66 @@ export default function CatchLogPage() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
             {catches.map(c => (
-              <div key={c.id} className="card" style={{ padding: '0.875rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ color: 'var(--color-foam)', fontSize: '0.9375rem', fontWeight: 600, marginBottom: '0.15rem' }}>
-                    {c.species}{' '}
-                    <span style={{ color: 'var(--color-mist)', fontWeight: 400, fontSize: '0.875rem' }}>
-                      × {c.quantity}{c.weightKg ? ` · ${c.weightKg}kg` : ''}{c.lengthCm ? ` · ${c.lengthCm}cm` : ''}
-                    </span>
-                  </p>
-                  <p style={{ color: 'var(--color-mist)', fontSize: '0.8125rem' }}>
-                    {new Date(c.date + 'T12:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    {' · '}{Math.abs(c.latitude).toFixed(3)}°S, {c.longitude.toFixed(3)}°E
-                  </p>
-                  {c.notes && (
-                    <p style={{ color: 'rgba(107,143,163,0.7)', fontSize: '0.75rem', marginTop: '0.2rem' }}>{c.notes}</p>
-                  )}
+              <div key={c.id} style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                <div className="card" style={{ padding: '0.875rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ color: 'var(--color-foam)', fontSize: '0.9375rem', fontWeight: 600, marginBottom: '0.15rem' }}>
+                      {c.species}{' '}
+                      <span style={{ color: 'var(--color-mist)', fontWeight: 400, fontSize: '0.875rem' }}>
+                        × {c.quantity}{c.weightKg ? ` · ${c.weightKg}kg` : ''}{c.lengthCm ? ` · ${c.lengthCm}cm` : ''}
+                      </span>
+                    </p>
+                    <p style={{ color: 'var(--color-mist)', fontSize: '0.8125rem' }}>
+                      {new Date(c.date + 'T12:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      {' · '}{Math.abs(c.latitude).toFixed(3)}°S, {c.longitude.toFixed(3)}°E
+                    </p>
+                    {c.notes && (
+                      <p style={{ color: 'rgba(107,143,163,0.7)', fontSize: '0.75rem', marginTop: '0.2rem' }}>{c.notes}</p>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.25rem', flexShrink: 0, alignItems: 'center' }}>
+                    <button
+                      type="button"
+                      onClick={() => setEditingId(editingId === c.id ? null : c.id)}
+                      style={{ background: 'none', border: 'none', padding: '0.25rem', cursor: 'pointer', color: 'var(--color-seafoam)', fontSize: '1rem', lineHeight: 1, opacity: editingId === c.id ? 1 : 0.55, flexShrink: 0 }}
+                      title="Edit catch"
+                      aria-label="Edit catch"
+                    >
+                      ✎
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => deleteCatch(c.id)}
+                      disabled={deletingId === c.id}
+                      style={{ background: 'none', border: 'none', padding: '0.25rem', cursor: 'pointer', color: 'rgba(224,92,42,0.6)', fontSize: '1rem', lineHeight: 1, opacity: deletingId === c.id ? 0.4 : 1, flexShrink: 0 }}
+                      title="Delete catch"
+                      aria-label="Delete catch"
+                    >
+                      ✕
+                    </button>
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => deleteCatch(c.id)}
-                  disabled={deletingId === c.id}
-                  style={{ background: 'none', border: 'none', padding: '0.25rem', cursor: 'pointer', color: 'rgba(224,92,42,0.6)', fontSize: '1rem', lineHeight: 1, opacity: deletingId === c.id ? 0.4 : 1, flexShrink: 0 }}
-                  title="Delete catch"
-                  aria-label="Delete catch"
-                >
-                  ✕
-                </button>
+                {editingId === c.id && (
+                  <div className="card" style={{ padding: '1.5rem', marginTop: '0.25rem', borderTop: '1px solid rgba(107,143,163,0.12)' }}>
+                    <CatchLogForm
+                      catchId={c.id}
+                      initialValues={{
+                        date: c.date,
+                        latitude: c.latitude,
+                        longitude: c.longitude,
+                        species: c.species,
+                        quantity: c.quantity,
+                        weightKg: c.weightKg,
+                        lengthCm: c.lengthCm,
+                        notes: c.notes,
+                        captureTime: c.captureTime,
+                        environment: c.environment,
+                        fishingMethod: c.fishingMethod,
+                      }}
+                      onSuccess={() => { fetchCatches(); setEditingId(null) }}
+                    />
+                  </div>
+                )}
               </div>
             ))}
           </div>

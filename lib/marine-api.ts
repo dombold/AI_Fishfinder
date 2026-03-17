@@ -40,11 +40,24 @@ export interface WindHourlyPoint {
   directionText: string
 }
 
+export interface PressureHourlyPoint {
+  time: string   // ISO string e.g. "2026-03-15T06:00:00"
+  hPa: number
+}
+
+export interface SSTGridPoint {
+  lat: number
+  lng: number
+  sst: number | null
+}
+
 export interface DayMarineData {
   date: string            // YYYY-MM-DD
   tides: TideEvent[]
   periods: PeriodSummary[]
   windHourly: WindHourlyPoint[]
+  pressureHourly: PressureHourlyPoint[]
+  pressureHPa: number | null   // midday reading in hPa
   nearestStation: string  // WillyWeather station name used for wind/tide data
   moonPhase: string
   moonIllumination: number
@@ -52,7 +65,7 @@ export interface DayMarineData {
   moonset: string
   sunrise: string
   sunset: string
-  pressureTrend: string   // 'rising' | 'falling' | 'steady'
+  pressureTrend: string   // formatted e.g. "1013 hPa ↓ falling"
 }
 
 // Compass direction from degrees
@@ -98,9 +111,10 @@ const PERIODS = [
 /** Summarise hourly Open-Meteo records into 5 named periods */
 function summariseByPeriod(
   records: HourlyRecord[],
-  windHourly: any[],  // WillyWeather wind entries  { dateTime, speed (km/h), directionText }
-  swellHourly: any[], // WillyWeather swell entries { dateTime, height (m), period (s), directionText }
-  date: string
+  windHourly: any[],            // WillyWeather wind entries  { dateTime, speed (km/h), directionText }
+  swellHourly: any[],           // WillyWeather swell entries { dateTime, height (m), period (s), directionText }
+  date: string,
+  pressureHourly: PressureHourlyPoint[]
 ): PeriodSummary[] {
   return PERIODS.map(p => {
     const inPeriod = (dateTime: string) => {
@@ -140,10 +154,19 @@ function summariseByPeriod(
       return arr.sort((a, b) => arr.filter(x => x === b).length - arr.filter(x => x === a).length)[0]
     }
 
-    // SST and currents from Open-Meteo
+    // SST, currents from Open-Meteo; pressure from standard forecast API
     const avgSst    = avg(hrs.map(h => h.sst))
     const avgCur    = avg(hrs.map(h => h.currentVelocity))
     const avgCurDir = avg(hrs.map(h => h.currentDirection))
+
+    const periodPressure = pressureHourly.filter(ph => {
+      if (!ph.time.startsWith(date)) return false
+      const h = new Date(ph.time).getHours()
+      return h >= p.start && h < p.end
+    })
+    const avgPressure = periodPressure.length
+      ? Math.round(periodPressure.reduce((s, ph) => s + ph.hPa, 0) / periodPressure.length)
+      : null
 
     return {
       label:            `${p.label} ${String(p.start).padStart(2,'0')}:00–${String(p.end).padStart(2,'0')}:00`,
@@ -156,7 +179,7 @@ function summariseByPeriod(
       sst:              avgSst !== null ? `${avgSst.toFixed(1)}°C` : 'N/A',
       currentSpeed:     avgCur !== null ? `${(avgCur * 1.944).toFixed(1)} kts` : 'N/A', // m/s → kts
       currentDirection: degreesToCompass(avgCurDir),
-      pressure:         'N/A', // not in WillyWeather free forecast
+      pressure:         avgPressure !== null ? `${avgPressure} hPa` : 'N/A',
       precipitation:    'N/A', // not in WillyWeather free forecast
     }
   })
@@ -378,6 +401,104 @@ async function fetchWillyWeatherData(lat: number, lng: number, dates: string[]) 
   })
 }
 
+/** Fetch hourly surface pressure from Open-Meteo standard forecast API */
+async function fetchPressureHourly(lat: number, lng: number, startDate: string, endDate: string): Promise<PressureHourlyPoint[]> {
+  const url = new URL('https://api.open-meteo.com/v1/forecast')
+  url.searchParams.set('latitude', String(lat))
+  url.searchParams.set('longitude', String(lng))
+  url.searchParams.set('hourly', 'surface_pressure')
+  url.searchParams.set('start_date', startDate)
+  url.searchParams.set('end_date', endDate)
+  url.searchParams.set('timezone', 'auto')
+
+  try {
+    const res = await fetch(url.toString())
+    if (!res.ok) {
+      console.warn(`Open-Meteo pressure fetch failed: ${res.status}`)
+      return []
+    }
+    const data = await res.json()
+    const times: string[] = data.hourly?.time ?? []
+    const pressures: (number | null)[] = data.hourly?.surface_pressure ?? []
+    return times.map((time, i) => ({
+      // Open-Meteo returns "YYYY-MM-DDTHH:MM" — normalise to include seconds
+      time: time.length === 16 ? `${time}:00` : time,
+      hPa: pressures[i] ?? 1013,
+    })).filter(p => p.hPa !== null)
+  } catch (err) {
+    console.warn('Open-Meteo pressure fetch error:', err)
+    return []
+  }
+}
+
+/**
+ * Fetch a 3×3 grid of SST values around the session location.
+ * Returns 9 SSTGridPoint objects (center + 8 surrounding at ±0.5° offsets).
+ * Uses Promise.allSettled so land/shallow points returning 400 don't abort the grid.
+ */
+export async function fetchSSTGrid(
+  centerLat: number,
+  centerLng: number,
+  startDate: string,
+  endDate: string
+): Promise<SSTGridPoint[]> {
+  const offsets = [-0.5, 0, 0.5]
+  const points: { lat: number; lng: number }[] = []
+  for (const dLat of offsets) {
+    for (const dLng of offsets) {
+      points.push({ lat: centerLat + dLat, lng: centerLng + dLng })
+    }
+  }
+
+  async function fetchPointSST(lat: number, lng: number): Promise<number | null> {
+    const url = new URL('https://marine-api.open-meteo.com/v1/marine')
+    url.searchParams.set('latitude', String(lat))
+    url.searchParams.set('longitude', String(lng))
+    url.searchParams.set('hourly', 'sea_surface_temperature')
+    url.searchParams.set('start_date', startDate)
+    url.searchParams.set('end_date', endDate)
+    try {
+      const res = await fetch(url.toString())
+      if (!res.ok) return null
+      const data = await res.json()
+      const temps: (number | null)[] = data.hourly?.sea_surface_temperature ?? []
+      const valid = temps.filter((v): v is number => v !== null)
+      return valid.length ? parseFloat((valid.reduce((a, b) => a + b, 0) / valid.length).toFixed(2)) : null
+    } catch {
+      return null
+    }
+  }
+
+  const results = await Promise.allSettled(points.map(p => fetchPointSST(p.lat, p.lng)))
+  return points.map((p, i) => ({
+    lat: p.lat,
+    lng: p.lng,
+    sst: results[i].status === 'fulfilled' ? results[i].value : null,
+  }))
+}
+
+function computePressureTrendForDay(hours: PressureHourlyPoint[]): { hPa: number | null; trend: 'rising' | 'falling' | 'steady' } {
+  if (!hours.length) return { hPa: null, trend: 'steady' }
+
+  const first = hours.filter(p => new Date(p.time).getHours() < 12)
+  const last  = hours.filter(p => new Date(p.time).getHours() >= 12)
+
+  const avgFirst = first.length ? first.reduce((s, p) => s + p.hPa, 0) / first.length : null
+  const avgLast  = last.length  ? last.reduce((s,  p) => s + p.hPa, 0) / last.length  : null
+
+  const midday = hours.find(p => new Date(p.time).getHours() === 12) ?? hours[Math.floor(hours.length / 2)]
+  const hPa = midday ? Math.round(midday.hPa) : null
+
+  let trend: 'rising' | 'falling' | 'steady' = 'steady'
+  if (avgFirst !== null && avgLast !== null) {
+    const delta = avgLast - avgFirst
+    if (delta > 1) trend = 'rising'
+    else if (delta < -1) trend = 'falling'
+  }
+
+  return { hPa, trend }
+}
+
 /** Fetch SST and ocean currents from Open-Meteo Marine.
  *  Returns empty hourly data for inland/shallow-coastal points where the
  *  marine grid has no coverage — wind/tide data from WillyWeather still shows.
@@ -425,9 +546,10 @@ export async function fetchAllMarineData(
     : 'Demo data'
 
   // Fetch in parallel
-  const [willyData, openMeteoRaw] = await Promise.all([
+  const [willyData, openMeteoRaw, allPressureHourly] = await Promise.all([
     fetchWillyWeatherData(lat, lng, dates),
     fetchOpenMeteoMarine(lat, lng, startDate, endDate),
+    fetchPressureHourly(lat, lng, startDate, endDate),
   ])
 
   const hourlyRecords = zipOpenMeteoHourly(openMeteoRaw)
@@ -435,7 +557,14 @@ export async function fetchAllMarineData(
   return dates.map(date => {
     const willy = willyData.find(d => d.date === date)!
 
-    const periods = summariseByPeriod(hourlyRecords, willy.windHourly || [], willy.swellHourly || [], date)
+    const dayPressure = allPressureHourly.filter(p => p.time.startsWith(date))
+    const { hPa: pressureHPa, trend } = computePressureTrendForDay(dayPressure)
+    const trendArrow = { rising: '↑', falling: '↓', steady: '→' } as const
+    const pressureTrend = pressureHPa !== null
+      ? `${pressureHPa} hPa ${trendArrow[trend]} ${trend}`
+      : 'steady'
+
+    const periods = summariseByPeriod(hourlyRecords, willy.windHourly || [], willy.swellHourly || [], date, dayPressure)
 
     const windHourly = (willy.windHourly || []).map((e: any) => ({
       time: e.dateTime.replace(' ', 'T'),
@@ -448,6 +577,8 @@ export async function fetchAllMarineData(
       tides: willy.tides,
       periods,
       windHourly,
+      pressureHourly: dayPressure,
+      pressureHPa,
       nearestStation: stationName,
       moonPhase: willy.moonPhase,
       moonIllumination: willy.moonIllumination,
@@ -455,7 +586,7 @@ export async function fetchAllMarineData(
       moonset: willy.moonset,
       sunrise: willy.sunrise,
       sunset: willy.sunset,
-      pressureTrend: willy.pressureTrend,
+      pressureTrend,
     }
   })
 }

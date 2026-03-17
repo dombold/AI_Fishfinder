@@ -10,7 +10,7 @@ import DataSourcesModal from '@/components/DataSourcesModal'
 import ExportGPXButton from '@/components/ExportGPXButton'
 import DashboardNav from '@/components/DashboardNav'
 import type { DailyPlan } from '@/lib/claude-api'
-import type { TideEvent, PeriodSummary, WindHourlyPoint } from '@/lib/marine-api'
+import type { TideEvent, PeriodSummary, WindHourlyPoint, PressureHourlyPoint, SSTGridPoint } from '@/lib/marine-api'
 
 export const dynamic = 'force-dynamic'
 
@@ -72,20 +72,28 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
     return content as DailyPlan
   })
 
-  // Map date → tides + periods + windHourly for charts
-  const marineByDate: Record<string, { tides: TideEvent[]; periods: PeriodSummary[]; windHourly: WindHourlyPoint[] }> = Object.fromEntries(
+  // Map date → tides + periods + windHourly + pressureHourly for charts
+  const marineByDate: Record<string, { tides: TideEvent[]; periods: PeriodSummary[]; windHourly: WindHourlyPoint[]; pressureHourly: PressureHourlyPoint[] }> = Object.fromEntries(
     fishingSession.marineData.map(md => {
-      const ww = JSON.parse(md.willyWeatherData) as { windHourly?: WindHourlyPoint[] }
+      const ww = JSON.parse(md.willyWeatherData) as { windHourly?: WindHourlyPoint[]; pressureHourly?: PressureHourlyPoint[] }
       return [
         md.date,
         {
           tides: JSON.parse(md.tideData) as TideEvent[],
           periods: (JSON.parse(md.openMeteoData) as { periods: PeriodSummary[] }).periods,
           windHourly: ww.windHourly ?? [],
+          pressureHourly: ww.pressureHourly ?? [],
         },
       ]
     })
   )
+
+  // SST grid — use from first marineData row (same grid for all days in session)
+  const sstGrid: SSTGridPoint[] | undefined = (() => {
+    const raw = fishingSession.marineData.find(md => md.sstGrid)?.sstGrid
+    if (!raw) return undefined
+    try { return JSON.parse(raw) as SSTGridPoint[] } catch { return undefined }
+  })()
 
   const start = new Date(startDate + 'T12:00:00')
   const end = new Date(endDate + 'T12:00:00')
@@ -136,6 +144,8 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
               tides={marineByDate[plan.date]?.tides ?? []}
               periods={marineByDate[plan.date]?.periods ?? []}
               windHourly={marineByDate[plan.date]?.windHourly ?? []}
+              pressureHourly={marineByDate[plan.date]?.pressureHourly ?? []}
+              sstGrid={sstGrid}
             />
           ))
         )}

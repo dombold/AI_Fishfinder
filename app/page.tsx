@@ -47,7 +47,7 @@ export default function LandingPage() {
             display: flex;
             gap: 1.25rem;
             width: max-content;
-            animation: marquee-rtl 32s linear infinite;
+            animation: marquee-rtl 48s linear infinite;
           }
           .carousel-track:hover { animation-play-state: paused; }
           .carousel-wrap {
@@ -123,6 +123,35 @@ export default function LandingPage() {
                     <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.0625rem', color: 'var(--color-foam)', marginBottom: '0.5rem' }}>Chartplotter Ready</h3>
                     <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', lineHeight: 1.6 }}>
                       Export your fishing spots as a GPX file — load directly into Garmin, Simrad, Lowrance, Raymarine and more.
+                    </p>
+                  </div>
+
+                  <div className="card" style={{ padding: '1.75rem', textAlign: 'left', width: '280px', flexShrink: 0 }}>
+                    <div style={{ marginBottom: '1rem' }}>
+                      <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+                        <rect x="5" y="10" width="26" height="18" rx="3" stroke="#3CBFAE" strokeWidth="1.5" fill="none"/>
+                        <circle cx="18" cy="19" r="5" stroke="#3CBFAE" strokeWidth="1.5" fill="none"/>
+                        <rect x="13" y="6" width="10" height="4" rx="1" stroke="#3CBFAE" strokeWidth="1.2" fill="none"/>
+                        <path d="M24 12 L28 8 M28 8 L30 11 M28 8 L31 6" stroke="#C9A84C" strokeWidth="1.5" strokeLinecap="round"/>
+                      </svg>
+                    </div>
+                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.0625rem', color: 'var(--color-foam)', marginBottom: '0.5rem' }}>Catch Log & Photo ID</h3>
+                    <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', lineHeight: 1.6 }}>
+                      Log every catch with location, weight and photo. Claude identifies the species from your photo in seconds.
+                    </p>
+                  </div>
+
+                  <div className="card" style={{ padding: '1.75rem', textAlign: 'left', width: '280px', flexShrink: 0 }}>
+                    <div style={{ marginBottom: '1rem' }}>
+                      <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+                        <path d="M22 6 A11 11 0 1 1 22 30 A8 8 0 1 0 22 6 Z" fill="#C9A84C" opacity="0.85"/>
+                        <path d="M4 28 C8 24 12 24 16 27 C20 30 24 28 28 25 C30 23.5 32 23 34 22" stroke="#3CBFAE" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+                        <path d="M2 32 C6 28 10 28 14 31 C18 34 22 32 26 29" stroke="#3CBFAE" strokeWidth="1" strokeLinecap="round" fill="none" opacity="0.5"/>
+                      </svg>
+                    </div>
+                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.0625rem', color: 'var(--color-foam)', marginBottom: '0.5rem' }}>Solunar Bite Windows</h3>
+                    <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', lineHeight: 1.6 }}>
+                      Major and minor feeding windows calculated from moon phase and tidal data — so you know exactly when to be on the water.
                     </p>
                   </div>
 

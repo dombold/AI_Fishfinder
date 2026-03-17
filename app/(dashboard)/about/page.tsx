@@ -94,6 +94,38 @@ export default async function AboutPage() {
               </p>
             </div>
 
+            <div className="card" style={{ padding: '1.5rem' }}>
+              <div style={{ marginBottom: '0.875rem' }}>
+                <svg width="32" height="32" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+                  <rect x="6" y="4" width="18" height="22" rx="2" stroke="#0A7EA4" strokeWidth="1.5" fill="none"/>
+                  <circle cx="15" cy="12" r="4" stroke="#3CBFAE" strokeWidth="1.5" fill="none"/>
+                  <path d="M11 16 C11 14, 19 14, 19 16" stroke="#3CBFAE" strokeWidth="1" fill="none"/>
+                  <path d="M24 18 L30 12 L34 16" stroke="#C9A84C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                  <circle cx="30" cy="12" r="2" fill="#C9A84C"/>
+                </svg>
+              </div>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--color-foam)', marginBottom: '0.5rem' }}>Catch Log</h3>
+              <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', lineHeight: 1.6 }}>
+                Log every catch with location, species, weight, length, time, and notes. Edit entries after saving, and browse your full fishing history on a map.
+              </p>
+            </div>
+
+            <div className="card" style={{ padding: '1.5rem' }}>
+              <div style={{ marginBottom: '0.875rem' }}>
+                <svg width="32" height="32" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+                  <ellipse cx="18" cy="20" rx="10" ry="5" stroke="#3CBFAE" strokeWidth="1.5" fill="none"/>
+                  <path d="M8 20 L4 16 L4 24 Z" fill="#3CBFAE" opacity="0.7"/>
+                  <circle cx="22" cy="18" r="2" fill="#C9A84C"/>
+                  <path d="M18 10 L18 6 M24 13 L27 10 M12 13 L9 10" stroke="#C9A84C" strokeWidth="1.5" strokeLinecap="round"/>
+                  <path d="M12 28 L14 26 M18 29 L18 27 M24 28 L22 26" stroke="rgba(59,191,174,0.4)" strokeWidth="1" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--color-foam)', marginBottom: '0.5rem' }}>Fish Identifier</h3>
+              <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', lineHeight: 1.6 }}>
+                Caught an unknown fish? Upload a photo and pin the location — Claude AI identifies the species and instantly shows the WA bag limits, size limits, and any active closures for where you caught it.
+              </p>
+            </div>
+
           </div>
         </section>
 

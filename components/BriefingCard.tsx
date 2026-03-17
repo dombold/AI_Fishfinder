@@ -2,7 +2,8 @@ import type { DailyPlan } from '@/lib/claude-api'
 import { getRegulations, getBioregion } from '@/lib/regulations'
 import WaypointMap from '@/components/WaypointMap'
 import ForecastGraphs from '@/components/ForecastGraphs'
-import type { TideEvent, PeriodSummary, WindHourlyPoint } from '@/lib/marine-api'
+import type { TideEvent, PeriodSummary, WindHourlyPoint, PressureHourlyPoint, SSTGridPoint } from '@/lib/marine-api'
+import { calculateSolunarWindows } from '@/lib/solunar'
 
 // Period label → hour range mapping (matches PERIODS in marine-api.ts)
 const PERIOD_HOURS: { prefix: string; start: number; end: number }[] = [
@@ -54,6 +55,8 @@ interface Props {
   tides?: TideEvent[]
   periods?: PeriodSummary[]
   windHourly?: WindHourlyPoint[]
+  pressureHourly?: PressureHourlyPoint[]
+  sstGrid?: SSTGridPoint[]
 }
 
 function SectionHeader({ title }: { title: string }) {
@@ -64,9 +67,17 @@ function SectionHeader({ title }: { title: string }) {
   )
 }
 
-export default function BriefingCard({ plan, selectedSpecies, latitude, longitude, fishingType, tides, periods, windHourly }: Props) {
+const SOLUNAR_QUALITY_COLOR = { PEAK: '#2ECC8A', STRONG: '#3CBFAE', MODERATE: '#C9A84C' } as const
+
+export default function BriefingCard({ plan, selectedSpecies, latitude, longitude, fishingType, tides, periods, windHourly, pressureHourly, sstGrid }: Props) {
   const date = new Date(plan.date + 'T12:00:00')
   const dateLabel = date.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+
+  const solunarWindows = calculateSolunarWindows(
+    plan.header.moonrise,
+    plan.header.moonset,
+    plan.header.moonIllumination
+  )
 
   return (
     <article className="card" style={{ overflow: 'hidden', marginBottom: '2rem' }}>
@@ -149,6 +160,7 @@ export default function BriefingCard({ plan, selectedSpecies, latitude, longitud
                   : periodsToWindHourly(periods ?? [], plan.date)
               }
               tideData={tides ?? []}
+              pressureHourly={pressureHourly}
             />
           </div>
         </div>
@@ -182,7 +194,7 @@ export default function BriefingCard({ plan, selectedSpecies, latitude, longitud
         <>
           <SectionHeader title="WAYPOINTS MAP" />
           <div className="waypoint-map" style={{ padding: '1rem' }}>
-            <WaypointMap waypoints={plan.waypoints} />
+            <WaypointMap waypoints={plan.waypoints} sstGrid={sstGrid} />
           </div>
         </>
       )}
@@ -287,6 +299,47 @@ export default function BriefingCard({ plan, selectedSpecies, latitude, longitud
       <div style={{ padding: '1rem 1.25rem' }}>
         <p style={{ color: 'var(--color-foam)', fontSize: '0.9rem', lineHeight: 1.7 }}>{plan.biteTimingNotes}</p>
       </div>
+
+      {/* ── Solunar Windows ──────────────────────────────── */}
+      {solunarWindows.length > 0 && (
+        <>
+          <SectionHeader title="SOLUNAR WINDOWS" />
+          <div style={{ padding: '0.75rem 1.25rem 1.25rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.5rem' }}>
+            {solunarWindows.map((w, i) => {
+              const isMajor = w.type === 'MAJOR'
+              const qualColor = SOLUNAR_QUALITY_COLOR[w.quality]
+              return (
+                <div key={i} style={{
+                  background: isMajor ? 'rgba(61,184,200,0.08)' : 'rgba(201,168,76,0.08)',
+                  border: `1px solid ${isMajor ? 'rgba(61,184,200,0.25)' : 'rgba(201,168,76,0.25)'}`,
+                  borderRadius: '0.5rem',
+                  padding: '0.5rem 0.75rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.2rem',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{
+                      fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
+                      color: isMajor ? 'var(--color-seafoam)' : 'var(--color-sand)',
+                      background: isMajor ? 'rgba(61,184,200,0.15)' : 'rgba(201,168,76,0.15)',
+                      padding: '0.1rem 0.4rem', borderRadius: '2rem',
+                    }}>
+                      {w.type}
+                    </span>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 600, color: qualColor, letterSpacing: '0.04em' }}>
+                      {w.quality}
+                    </span>
+                  </div>
+                  <span style={{ fontFamily: 'monospace', fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-foam)' }}>
+                    {w.startTime} – {w.endTime}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </>
+      )}
 
     </article>
   )

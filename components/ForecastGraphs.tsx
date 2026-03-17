@@ -4,13 +4,14 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, ReferenceLine,
 } from 'recharts'
-import type { TideEvent, WindHourlyPoint } from '@/lib/marine-api'
+import type { TideEvent, WindHourlyPoint, PressureHourlyPoint } from '@/lib/marine-api'
 
 export type { WindHourlyPoint }
 
 interface ForecastGraphsProps {
   windHourly: WindHourlyPoint[]
   tideData: TideEvent[]
+  pressureHourly?: PressureHourlyPoint[]
 }
 
 const BRAND = {
@@ -89,11 +90,17 @@ function interpolateTidesMultiDay(events: TideEvent[]): Array<{ time: string; he
   return points
 }
 
-export default function ForecastGraphs({ windHourly, tideData }: ForecastGraphsProps) {
-  const hasWind = windHourly.length > 0
-  const hasTides = tideData.length > 0
+export default function ForecastGraphs({ windHourly, tideData, pressureHourly = [] }: ForecastGraphsProps) {
+  const hasWind     = windHourly.length > 0
+  const hasTides    = tideData.length > 0
+  const hasPressure = pressureHourly.length > 0
 
-  if (!hasWind && !hasTides) return null
+  if (!hasWind && !hasTides && !hasPressure) return null
+
+  // Pressure baseline for ±1 hPa reference lines
+  const pressureBaseline = hasPressure
+    ? Math.round(pressureHourly.reduce((s, p) => s + p.hPa, 0) / pressureHourly.length)
+    : 1013
 
   const multiDay =
     new Set(windHourly.map(p => p.time.slice(0, 10))).size > 1 ||
@@ -243,6 +250,61 @@ export default function ForecastGraphs({ windHourly, tideData }: ForecastGraphsP
           </ResponsiveContainer>
         </div>
       )}
+      {/* ── Pressure — 24-hour trend ─────────────────────── */}
+      {hasPressure && (
+        <div>
+          <p style={{ fontSize: '0.75rem', fontWeight: 600, color: BRAND.mist, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>
+            Pressure (hPa)
+          </p>
+          <ResponsiveContainer width="100%" height={100}>
+            <AreaChart data={pressureHourly} margin={{ top: 4, right: 8, bottom: 0, left: -16 }}>
+              <defs>
+                <linearGradient id="pressureFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%"  stopColor="#C9A84C" stopOpacity={0.18} />
+                  <stop offset="95%" stopColor="#C9A84C" stopOpacity={0.02} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid vertical={false} stroke={BRAND.grid} />
+              <XAxis
+                dataKey="time"
+                ticks={windHourly.filter(p => new Date(p.time).getHours() % 6 === 0).map(p => p.time)}
+                tickFormatter={t => fmtTime(String(t), multiDay)}
+                tick={axisStyle}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tick={axisStyle}
+                axisLine={false}
+                tickLine={false}
+                domain={[pressureBaseline - 4, pressureBaseline + 4]}
+                allowDecimals={false}
+              />
+              <Tooltip
+                contentStyle={tooltipStyle}
+                labelFormatter={t => fmtTime(String(t), multiDay)}
+                formatter={(v: unknown) => [`${Number(v).toFixed(0)} hPa`, 'Pressure']}
+              />
+              <ReferenceLine y={pressureBaseline + 1} stroke="#C9A84C" strokeDasharray="3 3" strokeOpacity={0.5}
+                label={{ value: '+1', position: 'insideTopRight', fill: '#C9A84C', fontSize: 9 }}
+              />
+              <ReferenceLine y={pressureBaseline - 1} stroke="#C9A84C" strokeDasharray="3 3" strokeOpacity={0.5}
+                label={{ value: '-1', position: 'insideBottomRight', fill: '#C9A84C', fontSize: 9 }}
+              />
+              <Area
+                type="monotone"
+                dataKey="hPa"
+                stroke="#C9A84C"
+                strokeWidth={2}
+                fill="url(#pressureFill)"
+                dot={false}
+                activeDot={{ r: 3, fill: '#C9A84C', stroke: BRAND.foam, strokeWidth: 1.5 }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
     </div>
   )
 }

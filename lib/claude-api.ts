@@ -4,6 +4,7 @@ import { getRegulations, getBioregion } from '@/lib/regulations'
 import type { DayMarineData, TideEvent, PeriodSummary } from '@/lib/marine-api'
 import { validateWaypoints } from '@/lib/seafloor'
 import type { CrowdSummary } from '@/lib/crowd-source-aggregator'
+import { calculateSolunarWindows } from '@/lib/solunar'
 
 export interface WindPeriodRow {
   timePeriod: string
@@ -122,6 +123,50 @@ const DAILY_PLAN_SCHEMA = `DailyPlan {
   biteTimingNotes: string
 }`
 
+export interface IdentifyResult {
+  species: string
+  count: number
+  environment: string
+  method: string
+}
+
+/** Identify a fish species and extract catch context from a base64-encoded photo using Claude vision. */
+export async function identifySpecies(imageBase64: string, mimeType: string): Promise<IdentifyResult> {
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+
+  const message = await client.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 400,
+    messages: [{
+      role: 'user',
+      content: [
+        {
+          type: 'image',
+          source: { type: 'base64', media_type: mimeType as 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif', data: imageBase64 },
+        },
+        {
+          type: 'text',
+          text: 'Analyse this fishing photo. Reply with ONLY valid JSON (no markdown):\n{"species":"common name used in Western Australia, or unknown","count":<integer number of fish visible>,"environment":"beach|boat|jetty|rocks|reef|unknown","method":"lure|bait|fly|unknown"}',
+        },
+      ],
+    }],
+  })
+
+  const text = message.content[0]?.type === 'text' ? message.content[0].text.trim() : ''
+  const result: IdentifyResult = { species: 'unknown', count: 1, environment: 'unknown', method: 'unknown' }
+  try {
+    const parsed = JSON.parse(text)
+    if (typeof parsed.species === 'string') result.species = parsed.species.replace(/\b\w/g, (c: string) => c.toUpperCase())
+    if (typeof parsed.count === 'number' && parsed.count >= 1) result.count = Math.round(parsed.count)
+    if (typeof parsed.environment === 'string') result.environment = parsed.environment.toLowerCase()
+    if (typeof parsed.method === 'string') result.method = parsed.method.toLowerCase()
+  } catch {
+    // Plain text fallback — treat whole response as species name
+    if (text) result.species = text.replace(/\b\w/g, (c: string) => c.toUpperCase())
+  }
+  return result
+}
+
 export async function generateFishingPlan(params: {
   latitude: number
   longitude: number
@@ -207,6 +252,7 @@ ${params.marineDataByDay.map(day => `
 **Moon:** ${day.moonPhase} (${day.moonIllumination}% illumination) | Rise: ${day.moonrise ? new Date(day.moonrise).toLocaleTimeString('en-AU', {hour:'2-digit',minute:'2-digit',hour12:false}) : 'N/A'} | Set: ${day.moonset ? new Date(day.moonset).toLocaleTimeString('en-AU', {hour:'2-digit',minute:'2-digit',hour12:false}) : 'N/A'}
 **Sun:** Rise ${day.sunrise ? new Date(day.sunrise).toLocaleTimeString('en-AU', {hour:'2-digit',minute:'2-digit',hour12:false}) : 'N/A'} | Set ${day.sunset ? new Date(day.sunset).toLocaleTimeString('en-AU', {hour:'2-digit',minute:'2-digit',hour12:false}) : 'N/A'}
 **Pressure Trend:** ${day.pressureTrend}
+**Solunar:** ${(() => { const w = calculateSolunarWindows(day.moonrise, day.moonset, day.moonIllumination); return w.length ? w.map(s => `${s.type} ${s.startTime}–${s.endTime} (${s.quality})`).join(', ') : 'N/A' })()}
 **Tides:** ${formatTides(day.tides)}
 **Conditions by Period:**
 ${formatPeriods(day.periods)}
@@ -254,6 +300,14 @@ Rules:
   // Validate waypoints: remove land points, annotate with real GEBCO depth
   for (const plan of plans) {
     plan.waypoints = await validateWaypoints(plan.waypoints)
+  }
+
+  // Inject actual measured pressure readings — overrides Claude's inferred trend
+  for (const plan of plans) {
+    const day = params.marineDataByDay.find(d => d.date === plan.date)
+    if (day && day.pressureTrend !== 'steady') {
+      plan.header.pressureTrend = day.pressureTrend
+    }
   }
 
   return plans
