@@ -17,6 +17,9 @@ export const createSchema = z.object({
   fishCount: z.number().int().min(1).optional(),
   environment: z.string().max(50).optional(),
   fishingMethod: z.string().max(50).optional(),
+  sst: z.number().min(-5).max(40).optional(),
+  tideDirection: z.enum(['incoming', 'outgoing', 'slack']).optional(),
+  moonPhase: z.string().max(50).optional(),
 })
 
 export async function GET() {
@@ -60,6 +63,9 @@ export async function POST(req: NextRequest) {
         fishCount: parsed.data.fishCount ?? null,
         environment: parsed.data.environment ?? null,
         fishingMethod: parsed.data.fishingMethod ?? null,
+        sst: parsed.data.sst ?? null,
+        tideDirection: parsed.data.tideDirection ?? null,
+        moonPhase: parsed.data.moonPhase ?? null,
       },
     })
     return NextResponse.json(entry, { status: 201 })

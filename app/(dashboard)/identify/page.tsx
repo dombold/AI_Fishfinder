@@ -265,7 +265,7 @@ export default function IdentifyPage() {
                 Catch Location{location ? ` — ${Math.abs(location.lat).toFixed(4)}°S, ${location.lng.toFixed(4)}°E` : ' — click map to pin'}
               </label>
               <div style={{ borderRadius: '0.75rem', overflow: 'hidden', border: '1px solid rgba(107,143,163,0.2)' }}>
-                <MapPicker value={location} onChange={loc => { setLocation(loc); setGpsFromPhoto(false) }} />
+                <MapPicker value={location} height={420} onChange={loc => { setLocation(loc); setGpsFromPhoto(false) }} />
               </div>
             </div>
 

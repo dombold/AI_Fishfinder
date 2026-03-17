@@ -6,7 +6,7 @@ const MapPickerInner = dynamic(() => import('./MapPickerInner'), {
   ssr: false,
   loading: () => (
     <div style={{
-      height: '640px',
+      height: '640px', // default; actual height set via prop on inner component
       background: 'rgba(14,42,69,0.6)',
       borderRadius: '0.75rem',
       border: '1px solid rgba(107,143,163,0.2)',
@@ -24,8 +24,9 @@ const MapPickerInner = dynamic(() => import('./MapPickerInner'), {
 interface Props {
   value: { lat: number; lng: number } | null
   onChange: (coords: { lat: number; lng: number }) => void
+  height?: number
 }
 
-export default function MapPicker({ value, onChange }: Props) {
-  return <MapPickerInner value={value} onChange={onChange} />
+export default function MapPicker({ value, onChange, height }: Props) {
+  return <MapPickerInner value={value} onChange={onChange} height={height} />
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import exifr from 'exifr'
 
@@ -26,6 +26,9 @@ interface Props {
     captureTime: string | null
     environment: string | null
     fishingMethod: string | null
+    sst: number | null
+    tideDirection: string | null
+    moonPhase: string | null
   }
 }
 
@@ -86,6 +89,38 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
   const [captureTime, setCaptureTime] = useState(initialValues?.captureTime ?? '')
   const [identifyMeta, setIdentifyMeta] = useState<{ count: number; environment: string; method: string } | null>(null)
 
+  // Conditions state
+  const [sst, setSst] = useState<string>(initialValues?.sst != null ? String(initialValues.sst) : '')
+  const [tideDirection, setTideDirection] = useState<string>(initialValues?.tideDirection ?? '')
+  const [moonPhase, setMoonPhase] = useState<string>(initialValues?.moonPhase ?? '')
+  const [conditionsLoading, setConditionsLoading] = useState(false)
+  const [conditionsFetched, setConditionsFetched] = useState(isEditing)
+
+  // Auto-fetch conditions when location + date are set
+  useEffect(() => {
+    if (!location || !date || conditionsFetched) return
+    let cancelled = false
+    setConditionsLoading(true)
+    const params = new URLSearchParams({
+      lat: String(location.lat),
+      lng: String(location.lng),
+      date,
+      ...(captureTime ? { time: captureTime } : {}),
+    })
+    fetch(`/api/catch-conditions?${params}`)
+      .then(r => r.json())
+      .then(data => {
+        if (cancelled) return
+        if (data.sst != null) setSst(String(data.sst))
+        if (data.tideDirection) setTideDirection(data.tideDirection)
+        if (data.moonPhase) setMoonPhase(data.moonPhase)
+        setConditionsFetched(true)
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setConditionsLoading(false) })
+    return () => { cancelled = true }
+  }, [location, date, captureTime, conditionsFetched])
+
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
@@ -100,6 +135,7 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
       if (exifData?.latitude != null && exifData?.longitude != null) {
         setLocation({ lat: exifData.latitude, lng: exifData.longitude })
         setGpsFromPhoto(true)
+        setConditionsFetched(false)
       }
 
       if (exifData?.DateTimeOriginal instanceof Date) {
@@ -115,6 +151,7 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
         const min = String(local.getUTCMinutes()).padStart(2, '0')
         setDate(`${y}-${mo}-${d}`)
         setCaptureTime(`${h}:${min}`)
+        setConditionsFetched(false)
       }
 
       const { base64, mimeType } = await resizeImage(file)
@@ -172,6 +209,9 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
         fishCount: identifyMeta?.count,
         environment: identifyMeta?.environment,
         fishingMethod: identifyMeta?.method,
+        sst: sst ? parseFloat(sst) : undefined,
+        tideDirection: tideDirection || undefined,
+        moonPhase: moonPhase.trim() || undefined,
       }
       const res = await fetch(isEditing ? `/api/catch-log/${catchId}` : '/api/catch-log', {
         method: isEditing ? 'PATCH' : 'POST',
@@ -192,6 +232,10 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
           setIdentifyMeta(null)
           setPhotoPreview(null)
           setPhotoBase64(null)
+          setSst('')
+          setTideDirection('')
+          setMoonPhase('')
+          setConditionsFetched(false)
         }
         onSuccess()
       } else {
@@ -212,7 +256,11 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
       <div>
         <label style={labelStyle}>Catch Location {location ? `— ${location.lat.toFixed(4)}°S, ${location.lng.toFixed(4)}°E` : '— click map to pin'}</label>
         <div style={{ borderRadius: '0.75rem', overflow: 'hidden', border: '1px solid rgba(107,143,163,0.2)' }}>
-          <MapPicker value={location} onChange={loc => { setLocation(loc); setGpsFromPhoto(false) }} />
+          <MapPicker
+            value={location}
+            height={420}
+            onChange={loc => { setLocation(loc); setGpsFromPhoto(false); setConditionsFetched(false) }}
+          />
         </div>
       </div>
 
@@ -304,7 +352,7 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
             type="date"
             value={date}
             max={localDateStr()}
-            onChange={e => setDate(e.target.value)}
+            onChange={e => { setDate(e.target.value); setConditionsFetched(false) }}
           />
         </div>
 
@@ -368,6 +416,51 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
           rows={2}
           style={{ resize: 'vertical' }}
         />
+      </div>
+
+      {/* Conditions */}
+      <div>
+        <label style={labelStyle}>
+          Conditions — optional
+          {conditionsLoading && (
+            <span style={{ marginLeft: '0.5rem', color: 'var(--color-seafoam)', fontSize: '0.75rem', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>
+              fetching…
+            </span>
+          )}
+        </label>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.875rem' }}>
+          <div>
+            <label style={labelStyle}>SST (°C)</label>
+            <input
+              type="number"
+              value={sst}
+              min={-5}
+              max={40}
+              step={0.1}
+              onChange={e => setSst(e.target.value)}
+              placeholder="e.g. 22.4"
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Tide</label>
+            <select value={tideDirection} onChange={e => setTideDirection(e.target.value)}>
+              <option value="">—</option>
+              <option value="incoming">Incoming</option>
+              <option value="outgoing">Outgoing</option>
+              <option value="slack">Slack</option>
+            </select>
+          </div>
+          <div>
+            <label style={labelStyle}>Moon Phase</label>
+            <input
+              type="text"
+              value={moonPhase}
+              onChange={e => setMoonPhase(e.target.value)}
+              placeholder="e.g. Waxing Gibbous"
+              maxLength={50}
+            />
+          </div>
+        </div>
       </div>
 
       {error && (

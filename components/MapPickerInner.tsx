@@ -14,6 +14,7 @@ type MapMode = 'map' | 'satellite'
 interface Props {
   value: { lat: number; lng: number } | null
   onChange: (coords: { lat: number; lng: number }) => void
+  height?: number
 }
 
 const TILES: Record<MapMode, { url: string; attribution: string }[]> = {
@@ -35,7 +36,7 @@ const TILES: Record<MapMode, { url: string; attribution: string }[]> = {
   ],
 }
 
-export default function MapPickerInner({ value, onChange }: Props) {
+export default function MapPickerInner({ value, onChange, height = 640 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef      = useRef<any>(null)
   const markerRef   = useRef<any>(null)
@@ -96,6 +97,7 @@ export default function MapPickerInner({ value, onChange }: Props) {
         if (lat < WA_BOUNDS.minLat || lat > WA_BOUNDS.maxLat ||
             lng < WA_BOUNDS.minLng || lng > WA_BOUNDS.maxLng) return
         onChange({ lat: parseFloat(lat.toFixed(6)), lng: parseFloat(lng.toFixed(6)) })
+        map.flyTo([lat, lng], 5)
       })
 
       setReady(true)
@@ -275,7 +277,7 @@ export default function MapPickerInner({ value, onChange }: Props) {
     <div style={{ position: 'relative' }}>
       <div
         ref={containerRef}
-        style={{ height: '640px', width: '100%', borderRadius: '0.75rem' }}
+        style={{ height: `${height}px`, width: '100%', borderRadius: '0.75rem' }}
       />
 
       {/* Top-right controls */}

@@ -17,6 +17,9 @@ interface CatchEntry {
   captureTime: string | null
   environment: string | null
   fishingMethod: string | null
+  sst: number | null
+  tideDirection: string | null
+  moonPhase: string | null
 }
 
 export default function CatchLogPage() {
@@ -112,6 +115,25 @@ export default function CatchLogPage() {
                     {c.notes && (
                       <p style={{ color: 'rgba(107,143,163,0.7)', fontSize: '0.75rem', marginTop: '0.2rem' }}>{c.notes}</p>
                     )}
+                    {(c.sst != null || c.tideDirection || c.moonPhase) && (
+                      <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+                        {c.sst != null && (
+                          <span style={{ fontSize: '0.72rem', padding: '0.15rem 0.45rem', borderRadius: '999px', background: 'rgba(10,126,164,0.12)', border: '1px solid rgba(10,126,164,0.3)', color: 'var(--color-current, #2196c4)' }}>
+                            {c.sst.toFixed(1)}°C
+                          </span>
+                        )}
+                        {c.tideDirection && (
+                          <span style={{ fontSize: '0.72rem', padding: '0.15rem 0.45rem', borderRadius: '999px', background: 'rgba(60,191,174,0.1)', border: '1px solid rgba(60,191,174,0.3)', color: 'var(--color-seafoam)' }}>
+                            {c.tideDirection.charAt(0).toUpperCase() + c.tideDirection.slice(1)} tide
+                          </span>
+                        )}
+                        {c.moonPhase && (
+                          <span style={{ fontSize: '0.72rem', padding: '0.15rem 0.45rem', borderRadius: '999px', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.3)', color: 'var(--color-sand, #c9a84c)' }}>
+                            {c.moonPhase}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div style={{ display: 'flex', gap: '0.25rem', flexShrink: 0, alignItems: 'center' }}>
                     <button
@@ -151,6 +173,9 @@ export default function CatchLogPage() {
                         captureTime: c.captureTime,
                         environment: c.environment,
                         fishingMethod: c.fishingMethod,
+                        sst: c.sst,
+                        tideDirection: c.tideDirection,
+                        moonPhase: c.moonPhase,
                       }}
                       onSuccess={() => { fetchCatches(); setEditingId(null) }}
                     />

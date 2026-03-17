@@ -108,6 +108,9 @@ model CatchLog {
   fishCount     Int?      // AI-counted fish in photo
   environment   String?   // beach | boat | jetty | rocks | reef | unknown
   fishingMethod String?   // lure | bait | fly | unknown
+  sst           Float?    // Sea surface temperature in °C at time of catch
+  tideDirection String?   // incoming | outgoing | slack
+  moonPhase     String?   // e.g. Waxing Gibbous, Full Moon
   createdAt     DateTime  @default(now())
 
   @@index([userId])
