@@ -673,26 +673,241 @@ export const REGULATIONS: Record<string, BioregionRules> = {
   },
 }
 
+/** Common alternate/colloquial names → canonical REGULATIONS key.
+ *  All keys are lowercase; lookup is case-insensitive.
+ */
+const SPECIES_ALIASES: Record<string, string> = {
+  // Mahi-Mahi
+  'dorado': 'Mahi-Mahi',
+  'dolphinfish': 'Mahi-Mahi',
+  'dolphin fish': 'Mahi-Mahi',
+
+  // Spanish Mackerel
+  'spaniard': 'Spanish Mackerel',
+  'narrow-barred spanish mackerel': 'Spanish Mackerel',
+  'narrow barred spanish mackerel': 'Spanish Mackerel',
+  'narrowbar mackerel': 'Spanish Mackerel',
+  'king mackerel': 'Spanish Mackerel',
+
+  // Wahoo
+  'ono': 'Wahoo',
+  'wahu': 'Wahoo',
+
+  // Yellowfin Tuna
+  'yellowfin': 'Yellowfin Tuna',
+
+  // Albacore Tuna
+  'albacore': 'Albacore Tuna',
+  'longfin tuna': 'Albacore Tuna',
+  'longfin albacore': 'Albacore Tuna',
+
+  // Longtail Tuna
+  'longtail': 'Longtail Tuna',
+  'northern bluefin tuna': 'Longtail Tuna',
+
+  // Southern Bluefin Tuna
+  'southern bluefin': 'Southern Bluefin Tuna',
+  'sbt': 'Southern Bluefin Tuna',
+
+  // Skipjack Tuna
+  'skipjack': 'Skipjack Tuna',
+  'wavyback skipjack': 'Skipjack Tuna',
+  'mackerel tuna': 'Skipjack Tuna',
+
+  // Dogtooth Tuna
+  'dogtooth': 'Dogtooth Tuna',
+  'white tuna': 'Dogtooth Tuna',
+
+  // Giant Trevally
+  'gt': 'Giant Trevally',
+  'ulua': 'Giant Trevally',
+
+  // Yellowtail Kingfish
+  'kingfish': 'Yellowtail Kingfish',
+  'kingie': 'Yellowtail Kingfish',
+  'yellowtail': 'Yellowtail Kingfish',
+
+  // Samson Fish
+  'samsonfish': 'Samson Fish',
+
+  // Amberjack
+  'greater amberjack': 'Amberjack',
+  'amber jack': 'Amberjack',
+
+  // Dhufish
+  'wa dhufish': 'Dhufish',
+  'western dhufish': 'Dhufish',
+  'western australian dhufish': 'Dhufish',
+  'west australian dhufish': 'Dhufish',
+
+  // Pink Snapper
+  'snapper': 'Pink Snapper',
+  'australasian snapper': 'Pink Snapper',
+
+  // Baldchin Groper
+  'baldchin': 'Baldchin Groper',
+  'baldchin grouper': 'Baldchin Groper',
+  'baldchin wrasse': 'Baldchin Groper',
+
+  // Coral Trout
+  'coral cod': 'Coral Trout',
+  'coral grouper': 'Coral Trout',
+  'leopard coral grouper': 'Coral Trout',
+  'coral trout grouper': 'Coral Trout',
+
+  // Red Emperor
+  'red snapper': 'Red Emperor',
+  'large-mouth nannygai': 'Red Emperor',
+  'large mouth nannygai': 'Red Emperor',
+
+  // Australian Salmon
+  'west australian salmon': 'Australian Salmon',
+  'western australian salmon': 'Australian Salmon',
+  'wa salmon': 'Australian Salmon',
+  'kahawai': 'Australian Salmon',
+
+  // Tailor
+  'bluefish': 'Tailor',
+  'elf': 'Tailor',
+  'chopper': 'Tailor',
+  'tailor fish': 'Tailor',
+
+  // Herring (Australian Herring)
+  'australian herring': 'Herring',
+  'tommy ruff': 'Herring',
+  'tommy rough': 'Herring',
+  'ruff': 'Herring',
+
+  // Mulloway
+  'jewfish': 'Mulloway',
+  'jewie': 'Mulloway',
+  'jewies': 'Mulloway',
+  'silver jew': 'Mulloway',
+  'silver jewfish': 'Mulloway',
+  'mulloway (jewfish)': 'Mulloway',
+
+  // Black Jewfish
+  'black jew': 'Black Jewfish',
+  'black jewie': 'Black Jewfish',
+
+  // Cobia
+  'black kingfish': 'Cobia',
+  'lemonfish': 'Cobia',
+  'black king': 'Cobia',
+  'crabeater': 'Cobia',
+  'sergeant fish': 'Cobia',
+
+  // Barramundi Cod
+  'potato cod': 'Barramundi Cod',
+  'potato grouper': 'Barramundi Cod',
+  'potato bass': 'Barramundi Cod',
+
+  // Mangrove Jack
+  'mangrove red snapper': 'Mangrove Jack',
+  'jack': 'Mangrove Jack',
+
+  // Tuskfish
+  'bluebone': 'Tuskfish',
+  'venus tuskfish': 'Tuskfish',
+  'cheeky': 'Tuskfish',
+
+  // Blue-eye Trevalla
+  'blue eye': 'Blue-eye Trevalla',
+  'blue-eye': 'Blue-eye Trevalla',
+  'blueye': 'Blue-eye Trevalla',
+  'blue eye trevalla': 'Blue-eye Trevalla',
+  'deep-sea trevalla': 'Blue-eye Trevalla',
+  'deep sea trevalla': 'Blue-eye Trevalla',
+
+  // Western Blue Groper
+  'blue groper': 'Western Blue Groper',
+  'wa blue groper': 'Western Blue Groper',
+
+  // King Threadfin
+  'king threadfin salmon': 'King Threadfin',
+  'blue salmon': 'King Threadfin',
+
+  // Rankin Cod
+  'rankin': 'Rankin Cod',
+  "rankin's cod": 'Rankin Cod',
+
+  // Coronation Trout
+  'coronation': 'Coronation Trout',
+  'coronation grouper': 'Coronation Trout',
+  'coronation fish': 'Coronation Trout',
+
+  // Harlequin
+  'harlequin fish': 'Harlequin',
+
+  // Sweetlip
+  'sweetlips': 'Sweetlip',
+
+  // Golden Trevally
+  'goldies': 'Golden Trevally',
+  'golden jack': 'Golden Trevally',
+
+  // John Dory
+  "st peter's fish": 'John Dory',
+  'st peters fish': 'John Dory',
+
+  // Goldspotted Rockcod
+  'goldspotted cod': 'Goldspotted Rockcod',
+
+  // Blackspotted Rockcod
+  'blackspot rockcod': 'Blackspotted Rockcod',
+  'black-spot rockcod': 'Blackspotted Rockcod',
+  'black spotted rockcod': 'Blackspotted Rockcod',
+
+  // Flathead
+  'dusky flathead': 'Flathead',
+  'tiger flathead': 'Flathead',
+  'sand flathead': 'Flathead',
+
+  // Bonito
+  'australian bonito': 'Bonito',
+  "watson's leaping bonito": 'Bonito',
+
+  // School Mackerel
+  'queensland mackerel': 'School Mackerel',
+  'schoolie mackerel': 'School Mackerel',
+
+  // Grass Emperor
+  'black snapper': 'Grass Emperor',
+
+  // Bight Redfish
+  'nannygai': 'Bight Redfish',
+
+  // Redthroat Emperor
+  'redthroat': 'Redthroat Emperor',
+
+  // Tarwhine
+  'yellow-finned bream': 'Tarwhine',
+  'yellowfinned bream': 'Tarwhine',
+}
+
 /** Resolve an AI-returned species name to the canonical key used in REGULATIONS.
- *  Handles cases like "Pink Snapper (Australasian Snapper)" → "Pink Snapper"
- *  e.g. "Pink Snapper (Australasian Snapper)" → "Pink Snapper".
+ *  Handles parentheticals, case differences, and common alternate/colloquial names.
  */
 export function normalizeSpeciesName(species: string): string {
   // 1. Exact match
   if (REGULATIONS[species]) return species
 
-  // 2. Strip parenthetical from AI name and try exact match
+  // 2. Alias map lookup (case-insensitive)
+  const alias = SPECIES_ALIASES[species.toLowerCase()]
+  if (alias) return alias
+
+  // 3. Strip parenthetical from AI name and try exact match
   const stripped = species.replace(/\s*\(.*\)\s*$/, '').trim()
   if (stripped !== species && REGULATIONS[stripped]) return stripped
 
-  // 3. Compare base names (strip parentheticals from both sides)
+  // 4. Compare base names (strip parentheticals from both sides)
   const base = (stripped || species).toLowerCase()
   for (const canonical of Object.keys(REGULATIONS)) {
     const canonicalBase = canonical.replace(/\s*\(.*\)\s*$/, '').trim().toLowerCase()
     if (canonicalBase === base) return canonical
   }
 
-  // 4. Case-insensitive full match
+  // 5. Case-insensitive full match
   const lc = species.toLowerCase()
   for (const canonical of Object.keys(REGULATIONS)) {
     if (canonical.toLowerCase() === lc) return canonical

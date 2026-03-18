@@ -97,7 +97,6 @@ export default function MapPickerInner({ value, onChange, height = 640 }: Props)
         if (lat < WA_BOUNDS.minLat || lat > WA_BOUNDS.maxLat ||
             lng < WA_BOUNDS.minLng || lng > WA_BOUNDS.maxLng) return
         onChange({ lat: parseFloat(lat.toFixed(6)), lng: parseFloat(lng.toFixed(6)) })
-        map.flyTo([lat, lng], 5)
       })
 
       setReady(true)
