@@ -69,6 +69,8 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     initialValues?.latitude != null ? { lat: initialValues.latitude, lng: initialValues.longitude } : null
   )
+  const [latStr, setLatStr] = useState(initialValues?.latitude != null ? String(initialValues.latitude) : '')
+  const [lngStr, setLngStr] = useState(initialValues?.longitude != null ? String(initialValues.longitude) : '')
   const [species, setSpecies] = useState(initialValues?.species ?? '')
   const [date, setDate] = useState(initialValues?.date ?? localDateStr())
   const [quantity, setQuantity] = useState(initialValues?.quantity ?? 1)
@@ -134,6 +136,8 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
 
       if (exifData?.latitude != null && exifData?.longitude != null) {
         setLocation({ lat: exifData.latitude, lng: exifData.longitude })
+        setLatStr(exifData.latitude.toFixed(6))
+        setLngStr(exifData.longitude.toFixed(6))
         setGpsFromPhoto(true)
         setConditionsFetched(false)
       }
@@ -227,6 +231,8 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
           setLengthCm('')
           setNotes('')
           setLocation(null)
+          setLatStr('')
+          setLngStr('')
           setGpsFromPhoto(false)
           setCaptureTime('')
           setIdentifyMeta(null)
@@ -254,12 +260,60 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
 
       {/* Map */}
       <div>
-        <label style={labelStyle}>Catch Location {location ? `— ${location.lat.toFixed(4)}°S, ${location.lng.toFixed(4)}°E` : '— click map to pin'}</label>
+        <label style={labelStyle}>Catch Location</label>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '0.5rem' }}>
+          <div>
+            <label style={{ ...labelStyle, fontSize: '0.75rem', marginBottom: '0.25rem' }}>Latitude (°S negative)</label>
+            <input
+              type="number"
+              step="0.000001"
+              min="-90"
+              max="90"
+              placeholder="e.g. -21.889100"
+              value={latStr}
+              onChange={e => {
+                setLatStr(e.target.value)
+                const lat = parseFloat(e.target.value)
+                const lng = parseFloat(lngStr)
+                if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+                  setLocation({ lat, lng })
+                  setConditionsFetched(false)
+                }
+              }}
+            />
+          </div>
+          <div>
+            <label style={{ ...labelStyle, fontSize: '0.75rem', marginBottom: '0.25rem' }}>Longitude (°E positive)</label>
+            <input
+              type="number"
+              step="0.000001"
+              min="-180"
+              max="180"
+              placeholder="e.g. 113.966000"
+              value={lngStr}
+              onChange={e => {
+                setLngStr(e.target.value)
+                const lat = parseFloat(latStr)
+                const lng = parseFloat(e.target.value)
+                if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+                  setLocation({ lat, lng })
+                  setConditionsFetched(false)
+                }
+              }}
+            />
+          </div>
+        </div>
         <div style={{ borderRadius: '0.75rem', overflow: 'hidden', border: '1px solid rgba(107,143,163,0.2)' }}>
           <MapPicker
             value={location}
             height={420}
-            onChange={loc => { setLocation(loc); setGpsFromPhoto(false); setConditionsFetched(false) }}
+            onChange={loc => {
+              setLocation(loc)
+              setLatStr(loc.lat.toFixed(6))
+              setLngStr(loc.lng.toFixed(6))
+              setGpsFromPhoto(false)
+              setConditionsFetched(false)
+            }}
           />
         </div>
       </div>
