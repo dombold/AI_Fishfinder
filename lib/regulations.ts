@@ -53,6 +53,80 @@ const SHARK_BAY_EASTERN_GULF_BOUNDS  = { minLat: -26.5, maxLat: -25.3, minLng: 1
 const SHARK_BAY_FREYCINET_BOUNDS     = { minLat: -26.4, maxLat: -25.8, minLng: 113.9, maxLng: 114.5 }
 const SHARK_BAY_BERNIER_NORTH_BOUNDS = { minLat: -25.0, maxLat: -24.3, minLng: 112.7, maxLng: 113.5 }
 
+interface MarinePark {
+  name: string
+  bounds: { minLat: number; maxLat: number; minLng: number; maxLng: number }
+  severity: 'CLOSED' | 'RESTRICTED'
+  message: string
+}
+
+const MARINE_PARKS: MarinePark[] = [
+  // ── NORTH COAST ────────────────────────────────────────────────────────
+  {
+    name: 'Rowley Shoals Marine Park',
+    bounds: { minLat: -17.5, maxLat: -16.9, minLng: 119.0, maxLng: 119.7 },
+    severity: 'CLOSED',
+    message: 'ROWLEY SHOALS MARINE PARK — Totally protected marine park. All fishing and collecting prohibited in all zones. No take of any species. Source: DBCA WA.',
+  },
+  {
+    name: 'Mermaid Reef Marine Park',
+    bounds: { minLat: -17.45, maxLat: -17.0, minLng: 119.5, maxLng: 120.1 },
+    severity: 'CLOSED',
+    message: 'MERMAID REEF MARINE PARK — Fully protected. All fishing and collecting prohibited. No take of any species. Source: DBCA WA.',
+  },
+  {
+    name: 'Montebello Islands Marine Park',
+    bounds: { minLat: -21.0, maxLat: -20.2, minLng: 115.3, maxLng: 115.9 },
+    severity: 'RESTRICTED',
+    message: 'Montebello Islands Marine Park — Sanctuary zones apply (no fishing in sanctuary areas). Verify your zone before fishing. Source: DBCA WA.',
+  },
+  // ── GASCOYNE COAST ─────────────────────────────────────────────────────
+  {
+    name: 'Ningaloo Marine Park',
+    bounds: { minLat: -23.5, maxLat: -21.8, minLng: 113.1, maxLng: 114.3 },
+    severity: 'RESTRICTED',
+    message: 'Ningaloo Marine Park — 16 sanctuary zones where all fishing is prohibited. Spearfishing for rockcod and wrasse is prohibited throughout the entire park. Spearfishing also prohibited between Tantabiddi and Winderabandi Point. Check zone markers and verify at rules.fish.wa.gov.au before fishing. Source: DBCA WA.',
+  },
+  {
+    name: 'Hamelin Pool Marine Nature Reserve',
+    bounds: { minLat: -26.7, maxLat: -26.2, minLng: 113.9, maxLng: 114.4 },
+    severity: 'CLOSED',
+    message: 'HAMELIN POOL MARINE NATURE RESERVE — Fully protected. Recreational fishing is NOT permitted within marine nature reserves. No take of any species. Source: DBCA WA.',
+  },
+  // ── WEST COAST ─────────────────────────────────────────────────────────
+  {
+    name: 'Jurien Bay Marine Park',
+    bounds: { minLat: -30.5, maxLat: -29.8, minLng: 114.6, maxLng: 115.1 },
+    severity: 'RESTRICTED',
+    message: 'Jurien Bay Marine Park — Sanctuary zones apply (e.g. Boullanger Island waters — no fishing). Zone boundaries marked by yellow buoys. Check markers and verify at rules.fish.wa.gov.au before fishing. Source: DBCA WA.',
+  },
+  {
+    name: 'Marmion Marine Park',
+    bounds: { minLat: -31.85, maxLat: -31.6, minLng: 115.6, maxLng: 115.82 },
+    severity: 'RESTRICTED',
+    message: 'Marmion Marine Park — 3 sanctuary areas (Boyinaboat Reef, Little Island, Lumps): no fishing. Spearfishing prohibited within 1,800m of shore throughout the park. Source: DBCA WA.',
+  },
+  {
+    name: 'Shoalwater Islands Marine Park',
+    bounds: { minLat: -32.45, maxLat: -32.25, minLng: 115.6, maxLng: 115.78 },
+    severity: 'RESTRICTED',
+    message: 'Shoalwater Islands Marine Park — Sanctuary zones at Seal Island and Becher Point: no fishing. Remainder is general use (fishing permitted). Source: DBCA WA.',
+  },
+  // ── SOUTH COAST ────────────────────────────────────────────────────────
+  {
+    name: 'Ngari Capes Marine Park',
+    bounds: { minLat: -34.4, maxLat: -33.5, minLng: 114.5, maxLng: 115.5 },
+    severity: 'RESTRICTED',
+    message: 'Ngari Capes Marine Park — 7 sanctuary zones (East Geographe, Eagle Bay, Cape Naturaliste, Injidup, Cape Freycinet, Cape Leeuwin, East Flinders Bay): no fishing. Remainder is general use. Source: DBCA WA.',
+  },
+  {
+    name: 'Walpole and Nornalup Inlets Marine Park',
+    bounds: { minLat: -35.1, maxLat: -34.9, minLng: 116.3, maxLng: 116.9 },
+    severity: 'RESTRICTED',
+    message: 'Walpole and Nornalup Inlets Marine Park — Sanctuary zones apply. Verify your zone before fishing. Source: DBCA WA.',
+  },
+]
+
 /** Check for active fishery closures based on location, fishing setup, and selected species */
 export function checkFishingClosures(
   lat: number,
@@ -140,6 +214,16 @@ export function checkFishingClosures(
         message:
           'Pink Snapper spawning closure in effect — Northern Bernier Island / Koks Island area (1 Jun – 31 Aug). No fishing for pink snapper by any method. Source: DPIRD WA.',
       })
+    }
+  }
+
+  // Marine park location checks
+  for (const park of MARINE_PARKS) {
+    const inPark =
+      lat >= park.bounds.minLat && lat <= park.bounds.maxLat &&
+      lng >= park.bounds.minLng && lng <= park.bounds.maxLng
+    if (inPark) {
+      warnings.push({ severity: park.severity, message: park.message })
     }
   }
 
@@ -367,7 +451,7 @@ export const REGULATIONS: Record<string, BioregionRules> = {
   },
   'Baldchin Groper': {
     'north-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal mixed bag', seasonalClosures: 'Abrolhos Islands: closed Oct 1 – Dec 31 (spawning)', notes: 'Abrolhos Islands: 1 fish limit.' },
-    gascoyne:      { bagLimit: '2 fish', combinedLimit: '4 fish demersal mixed bag', notes: 'Shark Bay inner gulfs: combined bag limit of 2 for baldchin groper + tuskfish. Release weight required.' },
+    gascoyne:      { bagLimit: '2 fish', combinedLimit: '4 fish demersal mixed bag', notes: 'Shark Bay inner gulfs: combined bag limit of 2 for baldchin groper + tuskfish. No spearfishing in Ningaloo Marine Park (wrasse family). Release weight required.' },
     'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027.', notes: 'Release weight required.' },
     'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal mixed bag', notes: 'Release weight required.' },
   },
@@ -385,13 +469,13 @@ export const REGULATIONS: Record<string, BioregionRules> = {
   },
   'Coral Trout': {
     'north-coast': { minSize: '450mm total length', bagLimit: '1 fish', notes: 'Totally protected in Rowley Shoals Marine Park — no take.' },
-    gascoyne:      { minSize: '450mm total length', bagLimit: '1 fish', notes: 'Check local marine park rules.' },
+    gascoyne:      { minSize: '450mm total length', bagLimit: '1 fish', notes: 'No spearfishing in Ningaloo Marine Park.' },
     'west-coast':  { minSize: '450mm total length', bagLimit: '1 fish (land-based only)', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027.' },
     'south-coast': { minSize: '450mm total length', bagLimit: '1 fish' },
   },
   'Tuskfish': {
     'north-coast': { minSize: 'None (blackspot/blue tuskfish: 400mm)', bagLimit: '3 fish', combinedLimit: '4 fish demersal mixed bag' },
-    gascoyne:      { minSize: 'None (blackspot/blue tuskfish: 400mm)', bagLimit: '2 fish', combinedLimit: '4 fish demersal mixed bag', notes: 'Shark Bay inner gulfs: combined bag limit of 2 for baldchin groper + tuskfish.' },
+    gascoyne:      { minSize: 'None (blackspot/blue tuskfish: 400mm)', bagLimit: '2 fish', combinedLimit: '4 fish demersal mixed bag', notes: 'Shark Bay inner gulfs: combined bag limit of 2 for baldchin groper + tuskfish. No spearfishing in Ningaloo Marine Park (wrasse family).' },
     'west-coast':  { minSize: 'None (blackspot/blue tuskfish: 400mm)', bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027.' },
     'south-coast': { minSize: 'None (blackspot/blue tuskfish: 400mm)', bagLimit: '3 fish', combinedLimit: '4 fish demersal mixed bag' },
   },
@@ -421,13 +505,13 @@ export const REGULATIONS: Record<string, BioregionRules> = {
   },
   'Goldspotted Rockcod': {
     'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'Totally protected in Rowley Shoals Marine Park — no take.' },
-    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'No spearfishing in Ningaloo Marine Park.' },
     'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
     'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
   },
   'Blackspotted Rockcod': {
     'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'Totally protected in Rowley Shoals Marine Park — no take.' },
-    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'No spearfishing in Ningaloo Marine Park.' },
     'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
     'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
   },
@@ -445,7 +529,7 @@ export const REGULATIONS: Record<string, BioregionRules> = {
   },
   'Chinaman Rockcod': {
     'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'Totally protected in Rowley Shoals Marine Park — no take.' },
-    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'No spearfishing in Ningaloo Marine Park.' },
     'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
     'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
   },
@@ -571,7 +655,7 @@ export const REGULATIONS: Record<string, BioregionRules> = {
   },
   'Western Blue Groper': {
     'north-coast': { minSize: '500mm total length', bagLimit: '1 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'Highly valued endemic species. Catch-and-release of large specimens strongly recommended.' },
-    gascoyne:      { minSize: '500mm total length', bagLimit: '1 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    gascoyne:      { minSize: '500mm total length', bagLimit: '1 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'No spearfishing in Ningaloo Marine Park (wrasse family).' },
     'west-coast':  { minSize: '500mm total length', bagLimit: '1 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.', notes: 'Highly protected; consider catch-and-release.' },
     'south-coast': { minSize: '500mm total length', bagLimit: '1 fish', combinedLimit: '4 fish demersal scalefish mixed bag', notes: 'WA endemic species. Release large fish for conservation.' },
   },
