@@ -20,6 +20,7 @@ export const createSchema = z.object({
   sst: z.number().min(-5).max(40).optional(),
   tideDirection: z.enum(['incoming', 'outgoing', 'slack']).optional(),
   moonPhase: z.string().max(50).optional(),
+  waterDepthM: z.number().positive().optional(),
 })
 
 export async function GET() {
@@ -66,6 +67,7 @@ export async function POST(req: NextRequest) {
         sst: parsed.data.sst ?? null,
         tideDirection: parsed.data.tideDirection ?? null,
         moonPhase: parsed.data.moonPhase ?? null,
+        waterDepthM: parsed.data.waterDepthM ?? null,
       },
     })
     return NextResponse.json(entry, { status: 201 })

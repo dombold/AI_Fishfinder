@@ -20,6 +20,7 @@ interface CatchEntry {
   sst: number | null
   tideDirection: string | null
   moonPhase: string | null
+  waterDepthM: number | null
 }
 
 export default function CatchLogPage() {
@@ -115,11 +116,16 @@ export default function CatchLogPage() {
                     {c.notes && (
                       <p style={{ color: 'rgba(107,143,163,0.7)', fontSize: '0.75rem', marginTop: '0.2rem' }}>{c.notes}</p>
                     )}
-                    {(c.sst != null || c.tideDirection || c.moonPhase) && (
+                    {(c.sst != null || c.tideDirection || c.moonPhase || c.waterDepthM != null) && (
                       <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
                         {c.sst != null && (
                           <span style={{ fontSize: '0.72rem', padding: '0.15rem 0.45rem', borderRadius: '999px', background: 'rgba(10,126,164,0.12)', border: '1px solid rgba(10,126,164,0.3)', color: 'var(--color-current, #2196c4)' }}>
                             {c.sst.toFixed(1)}°C
+                          </span>
+                        )}
+                        {c.waterDepthM != null && (
+                          <span style={{ fontSize: '0.72rem', padding: '0.15rem 0.45rem', borderRadius: '999px', background: 'rgba(10,126,164,0.08)', border: '1px solid rgba(10,126,164,0.25)', color: 'var(--color-current, #2196c4)' }}>
+                            {c.waterDepthM % 1 === 0 ? c.waterDepthM : c.waterDepthM.toFixed(1)}m depth
                           </span>
                         )}
                         {c.tideDirection && (
@@ -176,6 +182,7 @@ export default function CatchLogPage() {
                         sst: c.sst,
                         tideDirection: c.tideDirection,
                         moonPhase: c.moonPhase,
+                        waterDepthM: c.waterDepthM,
                       }}
                       onSuccess={() => { fetchCatches(); setEditingId(null) }}
                     />

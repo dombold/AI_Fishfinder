@@ -20,12 +20,15 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Coordinates outside WA' }, { status: 400 })
     }
 
-    // ── Fetch marine data (tides + moon) and SST in parallel ──────────────
-    const [dayDataArr, sstRes] = await Promise.all([
+    // ── Fetch marine data (tides + moon), SST, and bathymetry depth in parallel ─
+    const [dayDataArr, sstRes, depthRes] = await Promise.all([
       fetchAllMarineData(lat, lng, [date]).catch(() => []),
       fetch(
         `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lng}` +
         `&hourly=sea_surface_temperature&start_date=${date}&end_date=${date}`
+      ).catch(() => null),
+      fetch(
+        `https://api.opentopodata.org/v1/gebco2020?locations=${lat},${lng}`
       ).catch(() => null),
     ])
 
@@ -86,14 +89,29 @@ export async function GET(req: NextRequest) {
     // ── Moon phase (date-based, no time required) ──────────────────────────
     const moonPhase = dayData?.moonPhase ?? null
 
+    // ── Water depth from GEBCO bathymetry ──────────────────────────────────
+    let waterDepthM: number | null = null
+    try {
+      if (depthRes?.ok) {
+        const depthJson = await depthRes.json()
+        const elevation: number | null = depthJson.results?.[0]?.elevation ?? null
+        if (elevation !== null && elevation < 0) {
+          waterDepthM = Math.round(Math.abs(elevation) * 10) / 10
+        }
+      }
+    } catch {
+      waterDepthM = null
+    }
+
     return NextResponse.json({
       sst,
       tideDirection,
       moonPhase,
+      waterDepthM,
       stationName: dayData?.nearestStation ?? null,
     })
   } catch (err: any) {
     console.error('[GET /api/catch-conditions]', err)
-    return NextResponse.json({ sst: null, tideDirection: null, moonPhase: null, stationName: null })
+    return NextResponse.json({ sst: null, tideDirection: null, moonPhase: null, waterDepthM: null, stationName: null })
   }
 }

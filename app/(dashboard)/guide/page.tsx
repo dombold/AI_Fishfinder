@@ -141,24 +141,36 @@ export default async function GuidePage() {
             </div>
             <div style={stepRow}>
               <span style={stepNumber}>2</span>
-              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Choose your target species</strong> — select up to 4 species from the dropdown list. The AI will tailor tactics, bite windows, and regulation checks around your chosen species.</p>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Set the date range</strong> — choose a start date and end date for your trip. Plans cover up to 3 consecutive days and can be generated up to 7 days in advance. The AI uses live forecast data for the exact dates you select, so the tides, swell, and wind windows in your plan are specific to those days.</p>
             </div>
             <div style={stepRow}>
               <span style={stepNumber}>3</span>
-              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Click Generate</strong> — the plan is built in real time using live marine data (tides, swell, wind, SST) for your location on today's date.</p>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Choose Boat or Beach</strong> — this tells the AI how you're fishing. <em>Boat</em> unlocks offshore species and frames tactics around trolling, deep dropping, and anchoring over structure. <em>Beach</em> focuses on shore-accessible species and covers surfcasting, rock fishing, and estuary techniques. This choice also filters the species list to only show what's realistically catchable from that platform.</p>
             </div>
             <div style={stepRow}>
               <span style={stepNumber}>4</span>
-              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Read your briefing</strong> — the plan includes optimal bite windows, tide phases, swell & wind conditions, suggested waypoints, species-specific tactics, and any active closure warnings.</p>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Choose Pelagic, Demersal, or Both</strong> — <em>Pelagic</em> targets mid-water and surface species that roam open water: mackerel, tuna, mahi-mahi, samson fish. <em>Demersal</em> targets bottom-dwelling species that live on or near the seabed: dhufish, snapper, baldchin groper, pink snapper. <em>Both</em> gives you a mixed-bag plan that covers the full water column. This selection filters the species dropdown to only show relevant options.</p>
             </div>
             <div style={stepRow}>
               <span style={stepNumber}>5</span>
-              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Save the plan</strong> — click <em>Save Plan</em> at the bottom of the briefing to add it to your Saved Plans library for later reference.</p>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Choose your target species</strong> — select up to 4 species from the filtered list. The AI tailors bite windows, rig recommendations, and regulation checks specifically to the species you pick. Narrowing your selection to 1–2 species gives a more focused, actionable plan.</p>
+            </div>
+            <div style={stepRow}>
+              <span style={stepNumber}>6</span>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Click Generate</strong> — the plan is built in real time using live marine data (tides, swell, wind, SST) fetched for your exact location and dates.</p>
+            </div>
+            <div style={stepRow}>
+              <span style={stepNumber}>7</span>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Read your briefing</strong> — the plan includes optimal bite windows, tide phases, swell & wind conditions, suggested waypoints, species-specific tactics, and any active closure warnings for your area.</p>
+            </div>
+            <div style={stepRow}>
+              <span style={stepNumber}>8</span>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Save the plan</strong> — click <em>Save Plan</em> at the bottom of the briefing to add it to your Saved Plans library for later reference and GPX export.</p>
             </div>
           </div>
           <div style={tipBox}>
             <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', lineHeight: 1.6, margin: 0 }}>
-              <strong style={{ color: 'var(--color-current)' }}>Tip:</strong> Plans are generated fresh each time — re-generate the same location at any point to get updated conditions. Each generation counts against your daily API usage.
+              <strong style={{ color: 'var(--color-current)' }}>Tip:</strong> <strong style={{ color: 'var(--color-foam)' }}>Boat + Demersal</strong> is the most data-rich combination — the AI can suggest specific depth ranges, bottom structure, and reef edges based on your location. <strong style={{ color: 'var(--color-foam)' }}>Beach + Pelagic</strong> plans focus on surf conditions, gutters, and current lines. Plans are generated fresh each time, so re-generating on the day of your trip gives the most accurate forecast.
             </p>
           </div>
           <div className="card" style={{ padding: '1.25rem 1.5rem', marginTop: '1rem' }}>

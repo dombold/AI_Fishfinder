@@ -30,6 +30,7 @@ interface Props {
     sst: number | null
     tideDirection: string | null
     moonPhase: string | null
+    waterDepthM: number | null
   }
 }
 
@@ -94,6 +95,7 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
   const [sst, setSst] = useState<string>(initialValues?.sst != null ? String(initialValues.sst) : '')
   const [tideDirection, setTideDirection] = useState<string>(initialValues?.tideDirection ?? '')
   const [moonPhase, setMoonPhase] = useState<string>(initialValues?.moonPhase ?? '')
+  const [waterDepthM, setWaterDepthM] = useState<string>(initialValues?.waterDepthM != null ? String(initialValues.waterDepthM) : '')
   const [conditionsLoading, setConditionsLoading] = useState(false)
   const [conditionsFetched, setConditionsFetched] = useState(isEditing)
 
@@ -115,6 +117,7 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
         if (data.sst != null) setSst(String(data.sst))
         if (data.tideDirection) setTideDirection(data.tideDirection)
         if (data.moonPhase) setMoonPhase(data.moonPhase)
+        if (data.waterDepthM != null) setWaterDepthM(String(data.waterDepthM))
         setConditionsFetched(true)
       })
       .catch(() => {})
@@ -213,6 +216,7 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
         sst: sst ? parseFloat(sst) : undefined,
         tideDirection: tideDirection || undefined,
         moonPhase: moonPhase.trim() || undefined,
+        waterDepthM: waterDepthM ? parseFloat(waterDepthM) : undefined,
       }
       const res = await fetch(isEditing ? `/api/catch-log/${catchId}` : '/api/catch-log', {
         method: isEditing ? 'PATCH' : 'POST',
@@ -236,6 +240,7 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
           setSst('')
           setTideDirection('')
           setMoonPhase('')
+          setWaterDepthM('')
           setConditionsFetched(false)
         }
         onSuccess()
@@ -442,7 +447,7 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
             </span>
           )}
         </label>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.875rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.875rem' }}>
           <div>
             <label style={labelStyle}>SST (°C)</label>
             <input
@@ -453,6 +458,17 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
               step={0.1}
               onChange={e => setSst(e.target.value)}
               placeholder="e.g. 22.4"
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Water Depth (m)</label>
+            <input
+              type="number"
+              value={waterDepthM}
+              min={0}
+              step={0.1}
+              onChange={e => setWaterDepthM(e.target.value)}
+              placeholder="e.g. 18"
             />
           </div>
           <div>

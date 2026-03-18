@@ -194,9 +194,9 @@ export default function WaypointMapInner({ waypoints, sstGrid }: { waypoints: Wa
       }
 
       // SST gradient overlay
-      if (showSST && sstGrid && sstGrid.length >= 5) {
+      if (showSST && sstGrid && sstGrid.length > 0) {
         const validPoints = sstGrid.filter(p => p.sst !== null) as { lat: number; lng: number; sst: number }[]
-        if (validPoints.length >= 5) {
+        if (validPoints.length >= 1) {
           const minLat = Math.min(...sstGrid.map(p => p.lat))
           const maxLat = Math.max(...sstGrid.map(p => p.lat))
           const minLng = Math.min(...sstGrid.map(p => p.lng))
@@ -317,7 +317,7 @@ export default function WaypointMapInner({ waypoints, sstGrid }: { waypoints: Wa
         </div>
 
         {/* Overlay toggles */}
-        <div style={{ display: 'flex', gap: '4px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <button
             type="button"
             onClick={() => setShowBoatRamps(v => !v)}
@@ -374,7 +374,7 @@ export default function WaypointMapInner({ waypoints, sstGrid }: { waypoints: Wa
               transition: 'background 150ms',
             }}
           >📰</button>
-          {sstGrid && sstGrid.filter(p => p.sst !== null).length >= 5 && (
+          {sstGrid && sstGrid.filter(p => p.sst !== null).length >= 1 && (
             <button
               type="button"
               onClick={() => setShowSST(v => !v)}
@@ -397,7 +397,7 @@ export default function WaypointMapInner({ waypoints, sstGrid }: { waypoints: Wa
       {showSST && sstGrid && (
         (() => {
           const valid = sstGrid.filter(p => p.sst !== null) as { sst: number }[]
-          if (valid.length < 5) return null
+          if (valid.length < 1) return null
           const minSST = Math.min(...valid.map(p => p.sst))
           const maxSST = Math.max(...valid.map(p => p.sst))
           return (

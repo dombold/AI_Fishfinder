@@ -310,7 +310,7 @@ export default function MapPickerInner({ value, onChange, height = 640 }: Props)
         </div>
 
         {/* Overlay toggles */}
-        <div style={{ display: 'flex', gap: '4px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <button
             type="button"
             onClick={() => setShowBoatRamps(v => !v)}

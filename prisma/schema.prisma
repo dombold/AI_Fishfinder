@@ -111,6 +111,7 @@ model CatchLog {
   sst           Float?    // Sea surface temperature in °C at time of catch
   tideDirection String?   // incoming | outgoing | slack
   moonPhase     String?   // e.g. Waxing Gibbous, Full Moon
+  waterDepthM   Float?    // Water depth in metres at catch location (from GEBCO bathymetry)
   createdAt     DateTime  @default(now())
 
   @@index([userId])

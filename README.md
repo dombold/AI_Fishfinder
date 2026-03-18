@@ -14,7 +14,7 @@ An AI-powered fishing briefing card generator for Western Australian waters. Ent
 - **Boat ramp finder** — 124+ public WA boat ramps searchable within 20km of your location; beach launch advice if none found
 - **WA regulations** — Species-specific bag limits, minimum sizes, and active closures per bioregion
 - **Crowd-sourced activity** — iNaturalist citizen-science observations + community catch logs aggregated per bioregion; trends and hotspots fed into each plan
-- **Catch log** — Log your catches with location, species, weight, length, time, and photo; edit entries after saving; browse your full history
+- **Catch log** — Log your catches with location, species, weight, length, water depth, time, and photo; environmental conditions (SST, tide, moon phase, water depth) auto-fill from coordinates; edit entries after saving; browse your full history
 - **Fish Identifier** — Dedicated page to upload a fish photo, have Claude AI identify the species, and immediately see the WA bag limits, size limits, and active closures for the catch location
 - **Flexible coordinate input** — Enter locations on any page (Plan, Identify, Catch Log) in any standard format: signed decimal, cardinal suffix/prefix, degrees-decimal-minutes (DDM), or degrees-minutes-seconds (DMS); map and text field stay in sync
 - **User guide** — In-app help page with table of contents covering every feature
