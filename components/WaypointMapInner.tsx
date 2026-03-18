@@ -4,7 +4,6 @@ import 'leaflet/dist/leaflet.css'
 import { useEffect, useRef, useState } from 'react'
 import BOAT_RAMPS from '@/lib/data/boat-ramps.json'
 import { WA_STATIONS } from '@/lib/marine-api'
-import type { SSTGridPoint } from '@/lib/marine-api'
 
 interface Waypoint {
   name: string
@@ -35,7 +34,7 @@ const TILES: Record<MapMode, { url: string; attribution: string }[]> = {
   ],
 }
 
-export default function WaypointMapInner({ waypoints, sstGrid }: { waypoints: Waypoint[]; sstGrid?: SSTGridPoint[] }) {
+export default function WaypointMapInner({ waypoints }: { waypoints: Waypoint[] }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef       = useRef<any>(null)
   const [ready, setReady] = useState(false)
@@ -44,7 +43,6 @@ export default function WaypointMapInner({ waypoints, sstGrid }: { waypoints: Wa
   const [showWeatherStations, setShowWeatherStations]   = useState(false)
   const [showMyCatches, setShowMyCatches]               = useState(false)
   const [showNewsletterCatches, setShowNewsletterCatches] = useState(false)
-  const [showSST, setShowSST]                           = useState(false)
   const [myCatchData, setMyCatchData]                   = useState<any[] | null>(null)
   const [newsletterCatchData, setNewsletterCatchData]   = useState<any[] | null>(null)
 
@@ -192,92 +190,8 @@ export default function WaypointMapInner({ waypoints, sstGrid }: { waypoints: Wa
             .addTo(map)
         })
       }
-
-      // SST gradient overlay
-      if (showSST && sstGrid && sstGrid.length > 0) {
-        const validPoints = sstGrid.filter(p => p.sst !== null) as { lat: number; lng: number; sst: number }[]
-        if (validPoints.length >= 1) {
-          const minLat = Math.min(...sstGrid.map(p => p.lat))
-          const maxLat = Math.max(...sstGrid.map(p => p.lat))
-          const minLng = Math.min(...sstGrid.map(p => p.lng))
-          const maxLng = Math.max(...sstGrid.map(p => p.lng))
-          const minSST = Math.min(...validPoints.map(p => p.sst))
-          const maxSST = Math.max(...validPoints.map(p => p.sst))
-          const sstRange = maxSST - minSST || 1
-
-          const SIZE = 128
-          const canvas = document.createElement('canvas')
-          canvas.width = SIZE
-          canvas.height = SIZE
-          const ctx = canvas.getContext('2d')!
-          const imageData = ctx.createImageData(SIZE, SIZE)
-
-          // Colour scale: cold=#0052CC → teal=#00A8A8 → yellow=#FFD700 → warm=#FF3300
-          function sstToRGB(t: number): [number, number, number] {
-            const stops: [number, number, number][] = [
-              [0, 82, 204],   // cold
-              [0, 168, 168],  // teal
-              [255, 215, 0],  // yellow
-              [255, 51, 0],   // warm
-            ]
-            const idx = Math.min(t * (stops.length - 1), stops.length - 1 - 0.001)
-            const lo = Math.floor(idx)
-            const frac = idx - lo
-            const [r1, g1, b1] = stops[lo]
-            const [r2, g2, b2] = stops[lo + 1]
-            return [
-              Math.round(r1 + (r2 - r1) * frac),
-              Math.round(g1 + (g2 - g1) * frac),
-              Math.round(b1 + (b2 - b1) * frac),
-            ]
-          }
-
-          // Bilinear interpolation across 3×3 grid
-          function interpolateSST(lat: number, lng: number): number {
-            // Find surrounding 4 grid points
-            const lats = [-0.5, 0, 0.5].map(d => Math.round((sstGrid![4].lat + d) * 100) / 100)
-            const lngs = [-0.5, 0, 0.5].map(d => Math.round((sstGrid![4].lng + d) * 100) / 100)
-            const latFrac = (lat - lats[0]) / (lats[2] - lats[0])
-            const lngFrac = (lng - lngs[0]) / (lngs[2] - lngs[0])
-
-            function getSST(li: number, lji: number): number {
-              const pt = sstGrid!.find(p =>
-                Math.abs(p.lat - lats[Math.max(0, Math.min(2, li))]) < 0.1 &&
-                Math.abs(p.lng - lngs[Math.max(0, Math.min(2, lji))]) < 0.1
-              )
-              return pt?.sst ?? (minSST + maxSST) / 2
-            }
-
-            const row0 = getSST(0, 0) + (getSST(0, 2) - getSST(0, 0)) * lngFrac
-            const row1 = getSST(1, 0) + (getSST(1, 2) - getSST(1, 0)) * lngFrac
-            const row2 = getSST(2, 0) + (getSST(2, 2) - getSST(2, 0)) * lngFrac
-            const col = latFrac < 0.5
-              ? row0 + (row1 - row0) * latFrac * 2
-              : row1 + (row2 - row1) * (latFrac - 0.5) * 2
-            return col
-          }
-
-          for (let y = 0; y < SIZE; y++) {
-            for (let x = 0; x < SIZE; x++) {
-              const lat = maxLat - (y / SIZE) * (maxLat - minLat)
-              const lng = minLng + (x / SIZE) * (maxLng - minLng)
-              const sst = interpolateSST(lat, lng)
-              const t = (sst - minSST) / sstRange
-              const [r, g, b] = sstToRGB(Math.max(0, Math.min(1, t)))
-              const idx = (y * SIZE + x) * 4
-              imageData.data[idx]     = r
-              imageData.data[idx + 1] = g
-              imageData.data[idx + 2] = b
-              imageData.data[idx + 3] = 115  // ~45% opacity
-            }
-          }
-          ctx.putImageData(imageData, 0, 0)
-
-          L.imageOverlay(canvas.toDataURL(), [[minLat, minLng], [maxLat, maxLng]], { opacity: 1 }).addTo(map)
-        }
-      }
     })
-  }, [ready, mode, showBoatRamps, showWeatherStations, showMyCatches, showNewsletterCatches, showSST, myCatchData, newsletterCatchData, sstGrid]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ready, mode, showBoatRamps, showWeatherStations, showMyCatches, showNewsletterCatches, myCatchData, newsletterCatchData]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div style={{ position: 'relative' }}>
@@ -374,53 +288,8 @@ export default function WaypointMapInner({ waypoints, sstGrid }: { waypoints: Wa
               transition: 'background 150ms',
             }}
           >📰</button>
-          {sstGrid && sstGrid.filter(p => p.sst !== null).length >= 1 && (
-            <button
-              type="button"
-              onClick={() => setShowSST(v => !v)}
-              title="Toggle SST gradient"
-              style={{
-                width: '30px', height: '30px', borderRadius: '0.375rem',
-                border: '1px solid rgba(255,255,255,0.25)',
-                background: showSST ? 'rgba(0,168,168,0.85)' : 'rgba(11,25,41,0.85)',
-                color: '#fff', fontSize: '11px', fontWeight: 700, cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'background 150ms',
-              }}
-            >°C</button>
-          )}
         </div>
       </div>
-
-      {/* SST legend */}
-      {showSST && sstGrid && (
-        (() => {
-          const valid = sstGrid.filter(p => p.sst !== null) as { sst: number }[]
-          if (valid.length < 1) return null
-          const minSST = Math.min(...valid.map(p => p.sst))
-          const maxSST = Math.max(...valid.map(p => p.sst))
-          return (
-            <div style={{
-              position: 'absolute', bottom: '10px', left: '10px', zIndex: 1000,
-              background: 'rgba(11,25,41,0.88)', border: '1px solid rgba(107,143,163,0.3)',
-              borderRadius: '0.375rem', padding: '5px 8px',
-            }}>
-              <div style={{ fontSize: '10px', fontWeight: 600, color: 'rgba(200,220,230,0.8)', marginBottom: '3px', letterSpacing: '0.05em' }}>
-                SST (°C)
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <span style={{ fontSize: '10px', color: '#6BA4D4' }}>{minSST.toFixed(1)}</span>
-                <div style={{
-                  width: '60px', height: '8px', borderRadius: '2px',
-                  background: 'linear-gradient(to right, #0052CC, #00A8A8, #FFD700, #FF3300)',
-                }} />
-                <span style={{ fontSize: '10px', color: '#FF7755' }}>{maxSST.toFixed(1)}</span>
-              </div>
-            </div>
-          )
-        })()
-      )}
     </div>
   )
 }

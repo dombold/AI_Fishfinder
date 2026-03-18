@@ -1,7 +1,6 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import type { SSTGridPoint } from '@/lib/marine-api'
 
 const WaypointMapInner = dynamic(() => import('./WaypointMapInner'), {
   ssr: false,
@@ -20,7 +19,7 @@ interface Waypoint {
   notes: string
 }
 
-export default function WaypointMap({ waypoints, sstGrid }: { waypoints: Waypoint[]; sstGrid?: SSTGridPoint[] }) {
+export default function WaypointMap({ waypoints }: { waypoints: Waypoint[] }) {
   if (!waypoints?.length) return null
-  return <WaypointMapInner waypoints={waypoints} sstGrid={sstGrid} />
+  return <WaypointMapInner waypoints={waypoints} />
 }

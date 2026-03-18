@@ -2,7 +2,7 @@ import type { DailyPlan } from '@/lib/claude-api'
 import { getRegulations, getBioregion } from '@/lib/regulations'
 import WaypointMap from '@/components/WaypointMap'
 import ForecastGraphs from '@/components/ForecastGraphs'
-import type { TideEvent, PeriodSummary, WindHourlyPoint, PressureHourlyPoint, SSTGridPoint } from '@/lib/marine-api'
+import type { TideEvent, PeriodSummary, WindHourlyPoint, PressureHourlyPoint } from '@/lib/marine-api'
 import { calculateSolunarWindows } from '@/lib/solunar'
 
 // Period label → hour range mapping (matches PERIODS in marine-api.ts)
@@ -56,7 +56,6 @@ interface Props {
   periods?: PeriodSummary[]
   windHourly?: WindHourlyPoint[]
   pressureHourly?: PressureHourlyPoint[]
-  sstGrid?: SSTGridPoint[]
 }
 
 function SectionHeader({ title }: { title: string }) {
@@ -69,7 +68,7 @@ function SectionHeader({ title }: { title: string }) {
 
 const SOLUNAR_QUALITY_COLOR = { PEAK: '#2ECC8A', STRONG: '#3CBFAE', MODERATE: '#C9A84C' } as const
 
-export default function BriefingCard({ plan, selectedSpecies, latitude, longitude, fishingType, tides, periods, windHourly, pressureHourly, sstGrid }: Props) {
+export default function BriefingCard({ plan, selectedSpecies, latitude, longitude, fishingType, tides, periods, windHourly, pressureHourly }: Props) {
   const date = new Date(plan.date + 'T12:00:00')
   const dateLabel = date.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 
@@ -194,7 +193,7 @@ export default function BriefingCard({ plan, selectedSpecies, latitude, longitud
         <>
           <SectionHeader title="WAYPOINTS MAP" />
           <div className="waypoint-map" style={{ padding: '1rem' }}>
-            <WaypointMap waypoints={plan.waypoints} sstGrid={sstGrid} />
+            <WaypointMap waypoints={plan.waypoints} />
           </div>
         </>
       )}
