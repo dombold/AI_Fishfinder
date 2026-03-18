@@ -137,7 +137,7 @@ export default async function GuidePage() {
           <div className="card" style={{ padding: '1.5rem', marginBottom: '1rem' }}>
             <div style={stepRow}>
               <span style={stepNumber}>1</span>
-              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Drop a pin</strong> — on the Plan page, click the map to place your fishing location. You can drag the marker to adjust it precisely, or type coordinates directly into the input fields.</p>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Set your location</strong> — click the map to drop a pin, or type coordinates into the <em>Or enter coordinates</em> field below the map. Any standard format is accepted — see the coordinate formats box below.</p>
             </div>
             <div style={stepRow}>
               <span style={stepNumber}>2</span>
@@ -161,6 +161,26 @@ export default async function GuidePage() {
               <strong style={{ color: 'var(--color-current)' }}>Tip:</strong> Plans are generated fresh each time — re-generate the same location at any point to get updated conditions. Each generation counts against your daily API usage.
             </p>
           </div>
+          <div className="card" style={{ padding: '1.25rem 1.5rem', marginTop: '1rem' }}>
+            <p style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-mist)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem' }}>Accepted coordinate formats</p>
+            <div style={{ display: 'grid', gap: '0.375rem' }}>
+              {[
+                ['Signed decimal', '-21.8891, 113.9659'],
+                ['Cardinal suffix', '21.8891°S 113.9659°E'],
+                ['Cardinal prefix', 'S21.8891 E113.9659'],
+                ['Degrees decimal-minutes', "21°53.346'S 113°57.954'E"],
+                ['Degrees minutes seconds', '21°53\'20"S 113°57\'57"E'],
+              ].map(([label, example]) => (
+                <div key={label} style={{ display: 'flex', gap: '1rem', alignItems: 'baseline', flexWrap: 'wrap' }}>
+                  <span style={{ color: 'var(--color-mist)', fontSize: '0.8125rem', minWidth: '180px' }}>{label}</span>
+                  <code style={{ background: 'rgba(107,143,163,0.1)', padding: '0.1em 0.5em', borderRadius: '4px', fontSize: '0.8125rem', color: 'var(--color-seafoam)' }}>{example}</code>
+                </div>
+              ))}
+            </div>
+            <p style={{ color: 'rgba(107,143,163,0.6)', fontSize: '0.75rem', marginTop: '0.75rem', marginBottom: 0 }}>
+              Coordinates are always stored and displayed as <code style={{ background: 'rgba(107,143,163,0.1)', padding: '0.1em 0.4em', borderRadius: '4px' }}>21.8891°S 113.9659°E</code> internally.
+            </p>
+          </div>
         </section>
 
         {/* ─── 3. Fish Identifier ─── */}
@@ -177,7 +197,7 @@ export default async function GuidePage() {
             </div>
             <div style={stepRow}>
               <span style={stepNumber}>3</span>
-              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Pin the catch location</strong> — drop a pin on the map to indicate where you caught the fish. This is used to check WA-region-specific regulations for that species at that location.</p>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Set the catch location</strong> — drop a pin on the map, or type coordinates into the field above the map in any standard format. This is used to check WA-region-specific regulations for that species at that location.</p>
             </div>
             <div style={stepRow}>
               <span style={stepNumber}>4</span>
@@ -186,7 +206,7 @@ export default async function GuidePage() {
           </div>
           <div style={tipBox}>
             <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', lineHeight: 1.6, margin: 0 }}>
-              <strong style={{ color: 'var(--color-current)' }}>Tip:</strong> For best results, use a clear photo with good lighting showing the fish's side profile. If EXIF location data is embedded in your photo, the map will auto-fill your coordinates.
+              <strong style={{ color: 'var(--color-current)' }}>Tip:</strong> For best results, use a clear photo with good lighting showing the fish's side profile. If EXIF location data is embedded in your photo, the coordinate field auto-fills. You can also paste coordinates from any GPS device or app — all standard formats are accepted.
             </p>
           </div>
         </section>
@@ -201,7 +221,7 @@ export default async function GuidePage() {
             </div>
             <div style={stepRow}>
               <span style={stepNumber}>2</span>
-              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Add a new entry</strong> — click <em>Log a Catch</em>. Fill in the species, date, location (map pin), quantity, and optionally weight, length, capture time, fishing method, and notes.</p>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Add a new entry</strong> — click <em>Log a Catch</em>. Fill in the species, date, location (type coordinates or click the map), quantity, and optionally weight, length, capture time, fishing method, and notes.</p>
             </div>
             <div style={stepRow}>
               <span style={stepNumber}>3</span>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import MapPicker from '@/components/MapPicker'
+import CoordInput from '@/components/CoordInput'
 import SpeciesSelector from '@/components/SpeciesSelector'
 import DashboardNav from '@/components/DashboardNav'
 import ForecastGraphs from '@/components/ForecastGraphs'
@@ -180,8 +181,12 @@ export default function DashboardPage() {
             {/* Section 1: Location */}
             <section className="card" style={{ padding: '1.5rem' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', color: 'var(--color-foam)', marginBottom: '0.25rem' }}>1. Fishing Location</h2>
-              <p style={{ color: 'var(--color-mist)', fontSize: '0.8125rem', marginBottom: '1rem' }}>Click the map to drop a pin anywhere in Western Australia.</p>
+              <p style={{ color: 'var(--color-mist)', fontSize: '0.8125rem', marginBottom: '1rem' }}>Click the map to drop a pin, or enter coordinates below.</p>
               <MapPicker value={location} onChange={setLocation} />
+              <div style={{ marginTop: '0.75rem' }}>
+                <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-mist)', marginBottom: '0.375rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Or enter coordinates</label>
+                <CoordInput value={location} onChange={setLocation} />
+              </div>
             </section>
 
             {/* Section 2: Dates */}

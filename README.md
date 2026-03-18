@@ -16,6 +16,8 @@ An AI-powered fishing briefing card generator for Western Australian waters. Ent
 - **Crowd-sourced activity** — iNaturalist citizen-science observations + community catch logs aggregated per bioregion; trends and hotspots fed into each plan
 - **Catch log** — Log your catches with location, species, weight, length, time, and photo; edit entries after saving; browse your full history
 - **Fish Identifier** — Dedicated page to upload a fish photo, have Claude AI identify the species, and immediately see the WA bag limits, size limits, and active closures for the catch location
+- **Flexible coordinate input** — Enter locations on any page (Plan, Identify, Catch Log) in any standard format: signed decimal, cardinal suffix/prefix, degrees-decimal-minutes (DDM), or degrees-minutes-seconds (DMS); map and text field stay in sync
+- **User guide** — In-app help page with table of contents covering every feature
 - **GPX export** — Download plan waypoints as a GPX file for your chartplotter or Garmin/Navionics
 - **Weekly fishing digest** — Opt-in email digest summarising species activity and hotspots for your region
 - **Saved plans** — Bookmark plans to your profile for later reference
@@ -137,8 +139,9 @@ app/
   (dashboard)/
     page.tsx             # Dashboard: map picker, species selector, plan submission
     plan/[id]/           # Plan viewer: briefing cards, maps, GPX export
-    catch-log/           # Catch log: entry form with map + photo, editable history list
+    catch-log/           # Catch log: entry form with map + photo + coord input, editable history list
     identify/            # Fish Identifier: photo upload → AI species ID → WA fishing rules
+    guide/               # User guide: table of contents + full feature documentation
     saved-plans/         # Saved plans index
     profile/             # User profile: sounder brand, tolerance, digest opt-in
   api/
@@ -153,7 +156,7 @@ app/
       parse-recfishwest/   # Fetch & parse RecFishWest newsletter
       update-crowd-data/   # Weekly iNaturalist + catch-log aggregation
       send-weekly-digest/  # Weekly email digest to opted-in users
-components/        # Page-level React components (maps, forms, plan display, GPX button)
+components/        # Page-level React components (maps, forms, plan display, GPX button, CoordInput)
 lib/
   claude-api.ts          # AI plan generation prompt + schema; species identification
   marine-api.ts          # WillyWeather + Open-Meteo data fetching
@@ -162,6 +165,7 @@ lib/
   boat-ramps.ts          # Nearest WA boat ramp lookup (124+ ramps)
   regulations.ts         # WA fishing closure and bag limit logic
   species.ts             # Species knowledge base
+  parse-coords.ts        # Multi-format coordinate parser (DD, DDM, DMS, cardinal prefix/suffix)
   inaturalist-api.ts     # iNaturalist citizen-science observation fetcher
   crowd-source-aggregator.ts  # Combines iNaturalist + catch logs → CrowdSummary
   email.ts               # Nodemailer transport + branded HTML email templates

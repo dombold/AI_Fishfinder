@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import exifr from 'exifr'
 import DashboardNav from '@/components/DashboardNav'
+import CoordInput from '@/components/CoordInput'
 
 const MapPicker = dynamic(() => import('@/components/MapPicker'), { ssr: false })
 
@@ -261,9 +262,10 @@ export default function IdentifyPage() {
 
             {/* Map */}
             <div>
-              <label style={labelStyle}>
-                Catch Location{location ? ` — ${Math.abs(location.lat).toFixed(4)}°S, ${location.lng.toFixed(4)}°E` : ' — click map to pin'}
-              </label>
+              <label style={labelStyle}>Catch Location</label>
+              <div style={{ marginBottom: '0.5rem' }}>
+                <CoordInput value={location} onChange={loc => { setLocation(loc); if (loc) setGpsFromPhoto(false) }} />
+              </div>
               <div style={{ borderRadius: '0.75rem', overflow: 'hidden', border: '1px solid rgba(107,143,163,0.2)' }}>
                 <MapPicker value={location} height={420} onChange={loc => { setLocation(loc); setGpsFromPhoto(false) }} />
               </div>
