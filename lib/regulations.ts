@@ -36,6 +36,13 @@ export function getBioregion(lat: number, lng: number): Bioregion {
 const DEMERSAL_SPECIES = new Set([
   'Dhufish', 'Pink Snapper', 'Baldchin Groper', 'Redthroat Emperor',
   'Spangled Emperor', 'Coral Trout', 'Tuskfish', 'Grass Emperor',
+  'Blue Morwong', 'Goldspotted Rockcod', 'Blackspotted Rockcod', 'Western Wirrah',
+  'Harlequin', 'Chinaman Rockcod', 'Rankin Cod', 'Coronation Trout',
+  "Robinson's Sea Bream", 'Foxfish', 'Pigfish', 'Hapuku', 'Bass Groper',
+  'John Dory', 'Mirror Dory', 'Boarfish', 'Barramundi Cod', 'Blue-eye Trevalla',
+  'Pearl Perch', 'Crimson Snapper', 'Saddletail Snapper', 'Jobfish',
+  'Ruby Snapper', 'Goldband Snapper', 'Golden Snapper', 'Stripey Snapper',
+  'Western Blue Groper', 'Sweetlip',
 ])
 
 // Approximate bounding box for Cockburn Sound + Warnbro Sound
@@ -400,11 +407,221 @@ export const REGULATIONS: Record<string, BioregionRules> = {
     'west-coast':  { minSize: '300mm total length', bagLimit: '8 fish (max 2 over 500mm)', notes: 'Wire trace prohibited near Perth metro, Busselton and Esperance jetties' },
     'south-coast': { minSize: '300mm total length', bagLimit: '8 fish (max 2 over 500mm)', notes: 'Wire trace prohibited near Esperance Jetty' },
   },
-  'Australian Salmon (Western Australian Salmon)': {
+  'Australian Salmon': {
     'north-coast': { minSize: '300mm total length', bagLimit: '4 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
     gascoyne:      { minSize: '300mm total length', bagLimit: '4 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
     'west-coast':  { minSize: '300mm total length', bagLimit: '4 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
     'south-coast': { minSize: '300mm total length', bagLimit: '4 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+  },
+  'Blue Morwong': {
+    'north-coast': { minSize: '410mm total length', bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    gascoyne:      { minSize: '410mm total length', bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    'west-coast':  { minSize: '410mm total length', bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
+    'south-coast': { minSize: '410mm total length', bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
+  },
+  'Goldspotted Rockcod': {
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'Totally protected in Rowley Shoals Marine Park — no take.' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
+  },
+  'Blackspotted Rockcod': {
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'Totally protected in Rowley Shoals Marine Park — no take.' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
+  },
+  'Western Wirrah': {
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
+  },
+  'Harlequin': {
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
+  },
+  'Chinaman Rockcod': {
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'Totally protected in Rowley Shoals Marine Park — no take.' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
+  },
+  'Rankin Cod': {
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag (counts toward Pink Snapper combined limit — verify at fish.wa.gov.au)', notes: 'Rankin Cod counts in the Shark Bay combined demersal bag — check DPIRD for current area rules.' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
+  },
+  'Coronation Trout': {
+    'north-coast': { bagLimit: '1 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'Totally protected in Rowley Shoals Marine Park — no take. Offshore reef species; handle carefully for release.' },
+    gascoyne:      { bagLimit: '1 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    'west-coast':  { bagLimit: '1 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
+    'south-coast': { bagLimit: '1 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
+  },
+  "Robinson's Sea Bream": {
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
+  },
+  'Foxfish': {
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
+  },
+  'Pigfish': {
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
+  },
+  'Hapuku': {
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'Deep water species (80–400m); release weight essential for barotrauma.' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'Release weight required for barotrauma.' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.', notes: 'Release weight required.' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag', notes: 'Release weight required for barotrauma. Deep water species — most common south coast.' },
+  },
+  'Bass Groper': {
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'Release weight required for barotrauma. Deep water species.' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'Release weight required.' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag', notes: 'Release weight required. Most common in deeper south coast waters.' },
+  },
+  'John Dory': {
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
+  },
+  'Mirror Dory': {
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
+  },
+  'Boarfish': {
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
+  },
+  'Barramundi Cod': {
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'Fish over 1m total length are protected — must be released. Totally protected in Rowley Shoals Marine Park.' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'Fish over 1m protected — must be released.' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.', notes: 'Fish over 1m protected.' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag', notes: 'Fish over 1m protected — must be released.' },
+  },
+  'Blue-eye Trevalla': {
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'Deep water species (100–600m); release weight essential for barotrauma.' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'Release weight required for barotrauma.' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.', notes: 'Release weight required.' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag', notes: 'Release weight required for barotrauma.' },
+  },
+  'Pearl Perch': {
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
+  },
+  'Crimson Snapper': {
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
+  },
+  'Saddletail Snapper': {
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
+  },
+  'Jobfish': {
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'Totally protected in Rowley Shoals Marine Park — no take.' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
+  },
+  'Ruby Snapper': {
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'Deep water species (100–400m); release weight essential for barotrauma.' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'Release weight required.' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
+  },
+  'Goldband Snapper': {
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag (counts in Shark Bay Pink Snapper combined demersal limit — verify at fish.wa.gov.au)', notes: 'Check DPIRD for Shark Bay combined bag rules.' },
+    'west-coast':  { bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
+  },
+  'Golden Snapper': {
+    'north-coast': { minSize: '300mm total length', bagLimit: '4 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag', notes: 'Also known as Fingermark or Golden Snapper. Tropical estuarine species.' },
+    gascoyne:      { minSize: '300mm total length', bagLimit: '4 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'west-coast':  { minSize: '300mm total length', bagLimit: '4 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag', notes: 'Rare in West Coast Bioregion.' },
+    'south-coast': { minSize: '300mm total length', bagLimit: '4 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag', notes: 'Rare in South Coast Bioregion.' },
+  },
+  'Stripey Snapper': {
+    'north-coast': { minSize: '300mm total length', bagLimit: '4 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    gascoyne:      { minSize: '300mm total length', bagLimit: '4 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'west-coast':  { minSize: '300mm total length', bagLimit: '4 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'south-coast': { minSize: '300mm total length', bagLimit: '4 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+  },
+  'Western Blue Groper': {
+    'north-coast': { minSize: '500mm total length', bagLimit: '1 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'Highly valued endemic species. Catch-and-release of large specimens strongly recommended.' },
+    gascoyne:      { minSize: '500mm total length', bagLimit: '1 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    'west-coast':  { minSize: '500mm total length', bagLimit: '1 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.', notes: 'Highly protected; consider catch-and-release.' },
+    'south-coast': { minSize: '500mm total length', bagLimit: '1 fish', combinedLimit: '4 fish demersal scalefish mixed bag', notes: 'WA endemic species. Release large fish for conservation.' },
+  },
+  'Sweetlip': {
+    'north-coast': { minSize: '300mm total length', bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag', notes: 'Multiple sweetlip species in WA — Painted, Slatey, Trout sweetlip. Check DPIRD for current listings.' },
+    gascoyne:      { minSize: '300mm total length', bagLimit: '3 fish', combinedLimit: '5 fish demersal scalefish mixed bag' },
+    'west-coast':  { minSize: '300mm total length', bagLimit: '2 fish (land-based only)', combinedLimit: '4 fish demersal mixed bag', closureActive: true, closureReason: 'BOAT FISHING CLOSED — West Coast Bioregion boat demersal closure until approx Sept 2027. Land-based fishing permitted.' },
+    'south-coast': { minSize: '300mm total length', bagLimit: '3 fish', combinedLimit: '4 fish demersal scalefish mixed bag' },
+  },
+  'Cobia': {
+    'north-coast': { minSize: '750mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    gascoyne:      { minSize: '750mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'west-coast':  { minSize: '750mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'south-coast': { minSize: '750mm total length', bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+  },
+  'Golden Trevally': {
+    'north-coast': { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    gascoyne:      { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'west-coast':  { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+    'south-coast': { bagLimit: '3 fish', combinedLimit: '3 fish large pelagic mixed bag' },
+  },
+  'Black Bream': {
+    'north-coast': { minSize: '250mm total length', bagLimit: '6 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    gascoyne:      { minSize: '250mm total length', bagLimit: '6 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'west-coast':  { minSize: '250mm total length', bagLimit: '6 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag', notes: 'Swan and Canning rivers: max 2 black bream over 400mm. Peel Inlet and Mandurah Estuary: premier locations.' },
+    'south-coast': { minSize: '250mm total length', bagLimit: '6 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+  },
+  'Yellowtail Bream': {
+    'north-coast': { minSize: '300mm total length', bagLimit: '6 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    gascoyne:      { minSize: '300mm total length', bagLimit: '6 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'west-coast':  { minSize: '300mm total length', bagLimit: '6 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'south-coast': { minSize: '300mm total length', bagLimit: '6 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+  },
+  'Tarwhine': {
+    'north-coast': { minSize: '250mm total length', bagLimit: '16 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    gascoyne:      { minSize: '250mm total length', bagLimit: '16 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'west-coast':  { minSize: '250mm total length', bagLimit: '16 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'south-coast': { minSize: '250mm total length', bagLimit: '16 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+  },
+  'Bonito': {
+    'north-coast': { bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    gascoyne:      { bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'west-coast':  { bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'south-coast': { bagLimit: '8 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+  },
+  'Tripletail': {
+    'north-coast': { minSize: '300mm total length', bagLimit: '2 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    gascoyne:      { minSize: '300mm total length', bagLimit: '2 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'west-coast':  { minSize: '300mm total length', bagLimit: '2 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
+    'south-coast': { minSize: '300mm total length', bagLimit: '2 fish', combinedLimit: '16 fish nearshore/estuarine mixed bag' },
   },
   'Yellowfin Whiting': {
     'north-coast': { bagLimit: '30 fish', combinedLimit: '30 fish whiting mixed bag' },
@@ -458,7 +675,7 @@ export const REGULATIONS: Record<string, BioregionRules> = {
 
 /** Resolve an AI-returned species name to the canonical key used in REGULATIONS.
  *  Handles cases like "Pink Snapper (Australasian Snapper)" → "Pink Snapper"
- *  and "Australian Salmon" → "Australian Salmon (Western Australian Salmon)".
+ *  e.g. "Pink Snapper (Australasian Snapper)" → "Pink Snapper".
  */
 export function normalizeSpeciesName(species: string): string {
   // 1. Exact match

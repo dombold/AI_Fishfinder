@@ -35,12 +35,22 @@ const KNOWN_SPECIES = [
   'Coral Trout', 'Amberjack', 'Tuskfish',
   'Grass Emperor', 'Bight Redfish',
   'Barramundi', 'Black Jewfish', 'King Threadfin',
+  'Blue Morwong', 'Goldspotted Rockcod', 'Blackspotted Rockcod', 'Western Wirrah',
+  'Harlequin', 'Chinaman Rockcod', 'Rankin Cod', 'Coronation Trout',
+  "Robinson's Sea Bream", 'Foxfish', 'Pigfish', 'Hapuku', 'Bass Groper',
+  'John Dory', 'Mirror Dory', 'Boarfish', 'Barramundi Cod', 'Blue-eye Trevalla',
+  'Pearl Perch', 'Crimson Snapper', 'Saddletail Snapper', 'Jobfish',
+  'Ruby Snapper', 'Goldband Snapper', 'Western Blue Groper', 'Sweetlip',
+  // boat pelagic additions
+  'Cobia', 'Golden Trevally', 'Bonito',
   // beach pelagic
-  'Tailor', 'Australian Salmon (Western Australian Salmon)',
+  'Tailor', 'Australian Salmon',
   'Yellowfin Whiting', 'Trevally', 'Australian Herring', 'Garfish',
   // beach demersal
   'Bream', 'Silver Bream', 'King George Whiting', 'Whiting',
   'Flathead', 'Mulloway', 'Flounder', 'Mangrove Jack',
+  'Black Bream', 'Yellowtail Bream', 'Tarwhine', 'Sweetlip', 'Tripletail',
+  'Stripey Snapper', 'Golden Snapper',
 ]
 
 export interface ParsedObservation {
