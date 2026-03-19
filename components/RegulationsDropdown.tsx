@@ -7,6 +7,7 @@ const LINKS = [
   { href: '/regulations/closures',          label: 'Closures' },
   { href: '/regulations/safety',            label: 'Safety Equipment' },
   { href: '/regulations/possession-limits', label: 'Possession Limits' },
+  { href: '/regulations/species-limits',    label: 'Species Limits' },
 ]
 
 export default function RegulationsDropdown() {
