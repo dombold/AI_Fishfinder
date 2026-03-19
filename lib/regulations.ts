@@ -760,7 +760,7 @@ export const REGULATIONS: Record<string, BioregionRules> = {
 /** Common alternate/colloquial names → canonical REGULATIONS key.
  *  All keys are lowercase; lookup is case-insensitive.
  */
-const SPECIES_ALIASES: Record<string, string> = {
+export const SPECIES_ALIASES: Record<string, string> = {
   // Mahi-Mahi
   'dorado': 'Mahi-Mahi',
   'dolphinfish': 'Mahi-Mahi',

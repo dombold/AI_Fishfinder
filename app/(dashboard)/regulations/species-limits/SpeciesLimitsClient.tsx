@@ -1,9 +1,16 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { REGULATIONS, SpeciesRegulation } from '@/lib/regulations'
+import { REGULATIONS, SPECIES_ALIASES, SpeciesRegulation } from '@/lib/regulations'
 
 const SPECIES_LIST = Object.keys(REGULATIONS).sort()
+
+// Reverse lookup: canonical name → all aliases that map to it
+const CANONICAL_ALIASES: Record<string, string[]> = {}
+for (const [alias, canonical] of Object.entries(SPECIES_ALIASES)) {
+  if (!CANONICAL_ALIASES[canonical]) CANONICAL_ALIASES[canonical] = []
+  CANONICAL_ALIASES[canonical].push(alias)
+}
 
 const BIOREGIONS: { key: 'north-coast' | 'gascoyne' | 'west-coast' | 'south-coast'; label: string }[] = [
   { key: 'north-coast', label: 'North Coast' },
@@ -72,9 +79,23 @@ export default function SpeciesLimitsClient() {
   const inputRef                    = useRef<HTMLInputElement>(null)
   const containerRef                = useRef<HTMLDivElement>(null)
 
-  const filtered = query.trim().length === 0
+  const q = query.trim().toLowerCase()
+  const filtered = q.length === 0
     ? SPECIES_LIST
-    : SPECIES_LIST.filter(s => s.toLowerCase().includes(query.toLowerCase()))
+    : SPECIES_LIST.filter(s =>
+        s.toLowerCase().includes(q) ||
+        (CANONICAL_ALIASES[s] ?? []).some(alias => alias.includes(q))
+      )
+
+  const aliasMatchLabel: Record<string, string> = {}
+  if (q.length > 0) {
+    for (const s of filtered) {
+      if (!s.toLowerCase().includes(q)) {
+        const matched = (CANONICAL_ALIASES[s] ?? []).find(a => a.includes(q))
+        if (matched) aliasMatchLabel[s] = matched
+      }
+    }
+  }
 
   function pick(species: string) {
     setSelected(species)
@@ -217,6 +238,11 @@ export default function SpeciesLimitsClient() {
                 onMouseLeave={e => { if (s !== selected) (e.currentTarget as HTMLElement).style.background = 'transparent' }}
               >
                 {s}
+                {aliasMatchLabel[s] && (
+                  <span style={{ fontSize: '0.75rem', color: 'rgba(107,143,163,0.55)', marginLeft: '0.5rem' }}>
+                    aka {aliasMatchLabel[s]}
+                  </span>
+                )}
               </li>
             ))}
           </ul>
