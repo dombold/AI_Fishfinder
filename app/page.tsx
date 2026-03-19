@@ -24,7 +24,7 @@ export default function LandingPage() {
           {/* Subheadline */}
           <p style={{ color: 'var(--color-mist)', fontSize: '1.0625rem', lineHeight: 1.7, maxWidth: '560px', margin: '0 auto 2.5rem' }}>
             Personalised daily briefings covering tides, swell, wind, bite windows and species guidance —
-            built specifically for Western Australia anglers.
+            built specifically for Western Australian anglers. Works offline on the boat.
           </p>
 
           {/* CTAs */}
@@ -137,7 +137,22 @@ export default function LandingPage() {
                     </div>
                     <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.0625rem', color: 'var(--color-foam)', marginBottom: '0.5rem' }}>Catch Log & Photo ID</h3>
                     <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', lineHeight: 1.6 }}>
-                      Log every catch with location, weight and photo. Claude identifies the species from your photo in seconds.
+                      Log catches with location, weight, and photo — works offline on the boat. Photos are stored permanently. Claude identifies the species in seconds when online.
+                    </p>
+                  </div>
+
+                  <div className="card" style={{ padding: '1.75rem', textAlign: 'left', width: '280px', flexShrink: 0 }}>
+                    <div style={{ marginBottom: '1rem' }}>
+                      <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+                        <rect x="5" y="5" width="26" height="26" rx="4" stroke="#3CBFAE" strokeWidth="1.5" fill="none"/>
+                        <path d="M13 18 L16.5 21.5 L23 14" stroke="#3CBFAE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M28 7 C30 7, 32 9, 32 11 C32 13, 30 14, 28 14" stroke="#C9A84C" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+                        <path d="M4 25 C2 25, 2 29, 4 29 L10 29" stroke="rgba(59,191,174,0.4)" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+                      </svg>
+                    </div>
+                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.0625rem', color: 'var(--color-foam)', marginBottom: '0.5rem' }}>Works Offline</h3>
+                    <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', lineHeight: 1.6 }}>
+                      Install as a PWA. Save plans before departure and log catches at sea with no signal. GPS and camera work without data. Everything syncs when you return to port.
                     </p>
                   </div>
 

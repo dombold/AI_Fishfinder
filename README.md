@@ -14,13 +14,14 @@ An AI-powered fishing briefing card generator for Western Australian waters. Ent
 - **Boat ramp finder** — 124+ public WA boat ramps searchable within 20km of your location; beach launch advice if none found
 - **WA regulations** — Species-specific bag limits, minimum sizes, and active closures per bioregion
 - **Crowd-sourced activity** — iNaturalist citizen-science observations + community catch logs aggregated per bioregion; trends and hotspots fed into each plan
-- **Catch log** — Log your catches with location, species, weight, length, water depth, time, and photo; environmental conditions (SST, tide, moon phase, water depth) auto-fill from coordinates; edit entries after saving; browse your full history
+- **Catch log** — Log your catches with location, species, weight, length, water depth, time, and photo; environmental conditions (SST, tide, moon phase, water depth) auto-fill from coordinates; photos stored permanently and shown as thumbnails; edit entries after saving; browse your full history
+- **Offline mode (PWA)** — Install as a native-style app on any phone; save plans for offline access before departure; log catches with photo and GPS while at sea with no signal — catches queue locally and auto-sync when you reconnect; works as a Progressive Web App with a service worker and IndexedDB cache
 - **Fish Identifier** — Dedicated page to upload a fish photo, have Claude AI identify the species, and immediately see the WA bag limits, size limits, and active closures for the catch location
 - **Flexible coordinate input** — Enter locations on any page (Plan, Identify, Catch Log) in any standard format: signed decimal, cardinal suffix/prefix, degrees-decimal-minutes (DDM), or degrees-minutes-seconds (DMS); map and text field stay in sync
 - **User guide** — In-app help page with table of contents covering every feature
 - **GPX export** — Download plan waypoints as a GPX file for your chartplotter or Garmin/Navionics
 - **Weekly fishing digest** — Opt-in email digest summarising species activity and hotspots for your region
-- **Saved plans** — Bookmark plans to your profile for later reference
+- **Saved plans** — Bookmark plans to your profile for later reference; download any plan for offline access with a single tap
 - **User profile** — Store sounder brand (Garmin, Simrad, Lowrance, etc.) and sea conditions tolerance for personalised plans
 - **User accounts** — Secure registration and login with NextAuth
 
@@ -38,6 +39,7 @@ An AI-powered fishing briefing card generator for Western Australian waters. Ent
 | Bathymetry | OpenTopoData GEBCO 2020 (free, no auth) |
 | Citizen science | iNaturalist API (research-grade observations) |
 | Maps | React Leaflet — CartoDB Voyager + Esri Satellite |
+| Offline storage | IndexedDB via `idb` + Service Worker (Cache Storage) |
 | Email | Nodemailer (any SMTP provider) |
 | Styling | Tailwind CSS (CDN) |
 | Deployment | PM2 |

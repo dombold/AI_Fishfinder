@@ -104,9 +104,24 @@ export default async function AboutPage() {
                   <circle cx="30" cy="12" r="2" fill="#C9A84C"/>
                 </svg>
               </div>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--color-foam)', marginBottom: '0.5rem' }}>Catch Log</h3>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--color-foam)', marginBottom: '0.5rem' }}>Catch Log & Photo Storage</h3>
               <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', lineHeight: 1.6 }}>
-                Log every catch with location, species, weight, length, time, and notes. Edit entries after saving, and browse your full fishing history on a map.
+                Log every catch with location, species, weight, length, time, and a photo. Environmental conditions auto-fill from your coordinates. Photos are stored permanently and shown as thumbnails alongside each entry.
+              </p>
+            </div>
+
+            <div className="card" style={{ padding: '1.5rem' }}>
+              <div style={{ marginBottom: '0.875rem' }}>
+                <svg width="32" height="32" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+                  <rect x="5" y="5" width="26" height="26" rx="4" stroke="#3CBFAE" strokeWidth="1.5" fill="none"/>
+                  <path d="M18 12 L18 24 M12 18 L24 18" stroke="#3CBFAE" strokeWidth="1.5" strokeLinecap="round"/>
+                  <circle cx="28" cy="10" r="4" fill="#0B1929" stroke="#C9A84C" strokeWidth="1.5"/>
+                  <path d="M26 10 L27.5 11.5 L30.5 8.5" stroke="#C9A84C" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--color-foam)', marginBottom: '0.5rem' }}>Works Offline</h3>
+              <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', lineHeight: 1.6 }}>
+                Install as a PWA and take it to sea. Save plans for offline reading before departure, log catches with GPS and camera while out of range, and sync everything automatically when you return to port.
               </p>
             </div>
 

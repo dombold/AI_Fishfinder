@@ -11,6 +11,7 @@ const toc = [
   { id: 'fish-identifier',  label: 'Fish Identifier' },
   { id: 'catch-log',        label: 'Catch Log' },
   { id: 'saved-plans',      label: 'Saved Plans & GPX Export' },
+  { id: 'offline-mode',     label: 'Offline Mode' },
   { id: 'regulations',      label: 'Regulations Hub' },
   { id: 'profile',          label: 'Profile & Account' },
 ]
@@ -233,24 +234,28 @@ export default async function GuidePage() {
             </div>
             <div style={stepRow}>
               <span style={stepNumber}>2</span>
-              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Add a new entry</strong> — click <em>Log a Catch</em>. Fill in the species, date, location (type coordinates or click the map), quantity, and optionally weight, length, capture time, fishing method, and notes.</p>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Add a new entry</strong> — click <em>+ Log a Catch</em>. Fill in the species, date, location (type coordinates or click the map), quantity, and optionally weight, length, capture time, and notes.</p>
             </div>
             <div style={stepRow}>
               <span style={stepNumber}>3</span>
-              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Environmental data is auto-filled</strong> — sea surface temperature, tide direction, and moon phase are recorded automatically from marine data at the time of entry.</p>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Add a photo</strong> — tap <em>Camera</em> to shoot with your phone camera directly, or <em>Gallery</em> to pick an existing photo. If the photo has GPS data in its EXIF, the location pins automatically. The photo is stored permanently and shown as a thumbnail on your catch history.</p>
             </div>
             <div style={stepRow}>
               <span style={stepNumber}>4</span>
-              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Edit or delete</strong> — each log entry has Edit and Delete buttons. Edit updates any field; delete permanently removes the record after confirmation.</p>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Use My Location</strong> — tap the <em>📍 Use My Location</em> button to pin your current GPS position without needing to drop a pin on the map. This works even without mobile data — the phone's GPS hardware is used directly.</p>
             </div>
             <div style={stepRow}>
               <span style={stepNumber}>5</span>
-              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Browse on map</strong> — all logged catches are plotted on a map so you can review your fishing history geographically.</p>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Environmental data is auto-filled</strong> — when online, sea surface temperature, tide direction, moon phase, and water depth are fetched automatically for your location and date.</p>
+            </div>
+            <div style={stepRow}>
+              <span style={stepNumber}>6</span>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Edit or delete</strong> — each log entry has Edit and Delete buttons. Edit updates any field; delete permanently removes the record.</p>
             </div>
           </div>
           <div style={tipBox}>
             <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', lineHeight: 1.6, margin: 0 }}>
-              <strong style={{ color: 'var(--color-current)' }}>Tip:</strong> Log a catch immediately after landing it so the auto-filled environmental data reflects actual conditions at the time.
+              <strong style={{ color: 'var(--color-current)' }}>Tip:</strong> The catch log works fully offline — log a catch on the boat and it will sync to your account automatically when you get back to port. See <a href="#offline-mode" style={{ color: 'var(--color-seafoam)' }}>Offline Mode</a> for details.
             </p>
           </div>
         </section>
@@ -261,31 +266,80 @@ export default async function GuidePage() {
           <div className="card" style={{ padding: '1.5rem', marginBottom: '1rem' }}>
             <div style={stepRow}>
               <span style={stepNumber}>1</span>
-              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Save a plan</strong> — after generating a fishing plan, scroll to the bottom and click <em>Save Plan</em>. The plan is stored to your account library.</p>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Save a plan</strong> — after generating a fishing plan, click the <em>★ Save Plan</em> button in the actions bar. The plan is stored to your account library.</p>
             </div>
             <div style={stepRow}>
               <span style={stepNumber}>2</span>
-              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Access saved plans</strong> — click <em>Saved Plans</em> in the user menu. Each saved plan shows the date, location, and target species at a glance.</p>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Save for offline</strong> — click the <em>Save Offline</em> button (next to ★ Save Plan) before leaving port. The full plan is downloaded to your device so you can read it at sea with no signal. Plans available offline show a teal <em>Offline</em> badge on the Saved Plans screen.</p>
             </div>
             <div style={stepRow}>
               <span style={stepNumber}>3</span>
-              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Open a plan</strong> — click any saved plan to view the full briefing again including all waypoints and tactics.</p>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Access saved plans</strong> — click <em>Saved Plans</em> in the user menu. Each saved plan shows the date, location, and target species at a glance.</p>
             </div>
             <div style={stepRow}>
               <span style={stepNumber}>4</span>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Open a plan</strong> — click any saved plan to view the full briefing again including all waypoints and tactics. If you saved it offline, it will load from your device even without a connection.</p>
+            </div>
+            <div style={stepRow}>
+              <span style={stepNumber}>5</span>
               <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Export as GPX</strong> — on the plan page, click <em>Download GPX</em>. The file contains all suggested waypoints and can be loaded directly into Garmin, Simrad, Lowrance, Raymarine, and other chartplotter systems.</p>
             </div>
           </div>
           <div style={tipBox}>
             <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', lineHeight: 1.6, margin: 0 }}>
-              <strong style={{ color: 'var(--color-current)' }}>Tip:</strong> Transfer the GPX file to your chartplotter via SD card or USB before heading out. Most chartplotters accept GPX via their <em>Import Waypoints</em> menu.
+              <strong style={{ color: 'var(--color-current)' }}>Tip:</strong> Do both — save the plan to your account (<em>★ Save Plan</em>) and download it for offline (<em>Save Offline</em>) before you leave the marina. That way you have access on the water and the waypoints for your chartplotter.
             </p>
           </div>
         </section>
 
-        {/* ─── 6. Regulations Hub ─── */}
+        {/* ─── 6. Offline Mode ─── */}
+        <section id="offline-mode" style={sectionStyle}>
+          <h2 style={h2Style}>6. Offline Mode</h2>
+          <div className="card" style={{ padding: '1.5rem', marginBottom: '1rem' }}>
+            <p style={{ color: 'var(--color-mist)', fontSize: '0.9375rem', lineHeight: 1.7, marginBottom: '1.25rem' }}>
+              AI Fishfinder is a Progressive Web App (PWA) — it can be installed on your phone and used at sea with no mobile data.
+            </p>
+            <div style={stepRow}>
+              <span style={stepNumber}>1</span>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Install the app</strong> — on iPhone, open AI Fishfinder in Safari and tap <em>Share → Add to Home Screen</em>. On Android, open in Chrome and tap <em>Install app</em> from the menu. The icon appears on your home screen like any native app.</p>
+            </div>
+            <div style={stepRow}>
+              <span style={stepNumber}>2</span>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Save a plan before you leave port</strong> — open any plan and click <em>Save Offline</em>. The plan and all its briefing data are cached to your device. This takes a few seconds on Wi-Fi — do it before you cast off.</p>
+            </div>
+            <div style={stepRow}>
+              <span style={stepNumber}>3</span>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Log catches at sea</strong> — the Catch Log form works fully offline. Tap <em>📍 Use My Location</em> to pin your GPS position (works without data), take a photo with the Camera button, fill in species and quantity, then submit. The catch is saved to your device instantly.</p>
+            </div>
+            <div style={stepRow}>
+              <span style={stepNumber}>4</span>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Pending catches in the nav</strong> — a gold badge in the top navigation shows how many catches are waiting to sync. Tap it to see the list and sync manually if needed.</p>
+            </div>
+            <div style={stepRow}>
+              <span style={stepNumber}>5</span>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Auto-sync on reconnect</strong> — when you return to port and regain signal, all pending catches upload automatically. Your photos, measurements, and GPS coordinates are preserved exactly as you entered them.</p>
+            </div>
+          </div>
+          <div style={{ display: 'grid', gap: '0.625rem', marginBottom: '1rem' }}>
+            <div style={{ padding: '1rem 1.25rem', background: 'rgba(60,191,174,0.06)', borderRadius: '8px', border: '1px solid rgba(60,191,174,0.15)' }}>
+              <p style={{ fontWeight: 600, color: 'var(--color-seafoam)', fontSize: '0.875rem', marginBottom: '0.25rem' }}>What works offline</p>
+              <p style={{ color: 'var(--color-mist)', fontSize: '0.8125rem', lineHeight: 1.6, margin: 0 }}>Viewing saved plans · Logging catches (species, GPS, photo, measurements) · GPS location button · Viewing your existing catch history</p>
+            </div>
+            <div style={{ padding: '1rem 1.25rem', background: 'rgba(107,143,163,0.06)', borderRadius: '8px', border: '1px solid rgba(107,143,163,0.12)' }}>
+              <p style={{ fontWeight: 600, color: 'var(--color-mist)', fontSize: '0.875rem', marginBottom: '0.25rem' }}>Requires a connection</p>
+              <p style={{ color: 'var(--color-mist)', fontSize: '0.8125rem', lineHeight: 1.6, margin: 0 }}>Generating new plans · AI species identification · Environmental conditions auto-fill (SST, tide, depth) · Map tiles (interactive map is hidden offline — use coordinate entry instead)</p>
+            </div>
+          </div>
+          <div style={tipBox}>
+            <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', lineHeight: 1.6, margin: 0 }}>
+              <strong style={{ color: 'var(--color-current)' }}>Tip:</strong> Prepare before you leave — generate your plan the night before, click <em>Save Offline</em>, and make sure it shows the teal <em>Offline</em> badge on the Saved Plans screen. Then you&apos;re set for a full day on the water regardless of signal.
+            </p>
+          </div>
+        </section>
+
+        {/* ─── 7. Regulations Hub ─── */}
         <section id="regulations" style={sectionStyle}>
-          <h2 style={h2Style}>6. Regulations Hub</h2>
+          <h2 style={h2Style}>7. Regulations Hub</h2>
           <div className="card" style={{ padding: '1.5rem', marginBottom: '1rem' }}>
             <p style={{ color: 'var(--color-mist)', fontSize: '0.9375rem', lineHeight: 1.7, marginBottom: '1.25rem' }}>
               The Regulations dropdown in the top navigation provides three dedicated tools for staying compliant on the water.
@@ -312,9 +366,9 @@ export default async function GuidePage() {
           </div>
         </section>
 
-        {/* ─── 7. Profile & Account ─── */}
+        {/* ─── 8. Profile & Account ─── */}
         <section id="profile" style={sectionStyle}>
-          <h2 style={h2Style}>7. Profile & Account</h2>
+          <h2 style={h2Style}>8. Profile & Account</h2>
           <div className="card" style={{ padding: '1.5rem', marginBottom: '1rem' }}>
             <div style={stepRow}>
               <span style={stepNumber}>1</span>
