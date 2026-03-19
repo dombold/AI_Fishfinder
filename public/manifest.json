@@ -1,6 +1,6 @@
 {
-  "name": "AI Fishfinder",
-  "short_name": "Fishfinder",
+  "name": "AI Fishfinder WA",
+  "short_name": "Fishfinder WA",
   "description": "AI-powered fishing plans for Western Australia",
   "start_url": "/dashboard",
   "scope": "/",
