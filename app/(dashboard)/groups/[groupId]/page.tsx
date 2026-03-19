@@ -174,7 +174,7 @@ export default function GroupDetailPage() {
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at 20% 20%, #0E2A45 0%, #0B1929 60%, #061018 100%)' }}>
-        <DashboardNav backHref="/groups" backLabel="← Groups" />
+        <DashboardNav />
         <div style={{ display: 'flex', gap: '4px', padding: '4rem', justifyContent: 'center' }}>
           <span className="wave-bar" /><span className="wave-bar" /><span className="wave-bar" />
         </div>
@@ -184,7 +184,7 @@ export default function GroupDetailPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at 20% 20%, #0E2A45 0%, #0B1929 60%, #061018 100%)' }}>
-      <DashboardNav backHref="/groups" backLabel="← Groups" />
+      <DashboardNav />
 
       <div style={{ maxWidth: '680px', margin: '3rem auto', padding: '0 1.5rem' }}>
 
