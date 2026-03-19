@@ -22,9 +22,6 @@ export default function AppFooter() {
         flexWrap: 'wrap',
         gap: '0.75rem',
       }}>
-        <p style={{ margin: 0, fontSize: '0.8125rem', color: 'rgba(107,143,163,0.5)' }}>
-          © {year} AI Fishfinder. All rights reserved.
-        </p>
         <div style={{ display: 'flex', gap: '1.5rem' }}>
           <Link
             href="/contact"
@@ -39,6 +36,9 @@ export default function AppFooter() {
             onMouseLeave={e => { e.currentTarget.style.color = 'rgba(107,143,163,0.65)' }}
           >About</Link>
         </div>
+        <p style={{ margin: 0, fontSize: '0.8125rem', color: 'rgba(107,143,163,0.5)' }}>
+          © {year} AI Fishfinder. All rights reserved.
+        </p>
       </div>
     </footer>
   )

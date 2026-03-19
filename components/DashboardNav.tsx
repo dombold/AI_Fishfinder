@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { signOut } from 'next-auth/react'
 import Link from 'next/link'
 import UserDropdown from '@/components/UserDropdown'
 import RegulationsDropdown from '@/components/RegulationsDropdown'
@@ -26,6 +27,7 @@ export default function DashboardNav({ backHref, backLabel = '← Dashboard' }: 
         @media (max-width: 768px) {
           .dnav-links { display: none; }
           .dnav-hamburger { display: flex; }
+          .dnav-desktop-only { display: none !important; }
         }
         @media (min-width: 769px) {
           .dnav-mobile-panel { display: none !important; }
@@ -56,8 +58,10 @@ export default function DashboardNav({ backHref, backLabel = '← Dashboard' }: 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <InviteBadge />
           <PendingSyncBadge onClick={() => setSyncOpen(true)} />
-          <RegulationsDropdown />
-          <UserDropdown />
+          <div className="dnav-desktop-only" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <RegulationsDropdown />
+            <UserDropdown />
+          </div>
 
           {/* Hamburger button — hidden on desktop */}
           <button
@@ -115,7 +119,25 @@ export default function DashboardNav({ backHref, backLabel = '← Dashboard' }: 
         <Link href="/dashboard" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: 'var(--color-mist)', fontSize: '0.9375rem', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid rgba(107,143,163,0.1)' }}>Plan</Link>
         <Link href="/groups" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: 'var(--color-mist)', fontSize: '0.9375rem', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid rgba(107,143,163,0.1)' }}>Groups</Link>
         <Link href="/identify" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: 'var(--color-mist)', fontSize: '0.9375rem', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid rgba(107,143,163,0.1)' }}>Identify</Link>
-        <Link href="/guide" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: 'var(--color-mist)', fontSize: '0.9375rem', fontWeight: 500, textDecoration: 'none' }}>Guide</Link>
+        <Link href="/guide" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: 'var(--color-mist)', fontSize: '0.9375rem', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid rgba(107,143,163,0.1)' }}>Guide</Link>
+
+        <p style={{ margin: '0.75rem 0 0.25rem', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(107,143,163,0.45)' }}>Regulations</p>
+        <Link href="/regulations/closures" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: 'var(--color-mist)', fontSize: '0.9375rem', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid rgba(107,143,163,0.1)' }}>Closures</Link>
+        <Link href="/regulations/safety" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: 'var(--color-mist)', fontSize: '0.9375rem', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid rgba(107,143,163,0.1)' }}>Safety Equipment</Link>
+        <Link href="/regulations/possession-limits" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: 'var(--color-mist)', fontSize: '0.9375rem', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid rgba(107,143,163,0.1)' }}>Possession Limits</Link>
+        <Link href="/regulations/species-limits" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: 'var(--color-mist)', fontSize: '0.9375rem', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid rgba(107,143,163,0.1)' }}>Species Limits</Link>
+
+        <p style={{ margin: '0.75rem 0 0.25rem', fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(107,143,163,0.45)' }}>Account</p>
+        <Link href="/profile" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: 'var(--color-mist)', fontSize: '0.9375rem', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid rgba(107,143,163,0.1)' }}>Profile</Link>
+        <Link href="/saved-plans" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: 'var(--color-mist)', fontSize: '0.9375rem', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid rgba(107,143,163,0.1)' }}>Saved Plans</Link>
+        <Link href="/catch-log" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: 'var(--color-mist)', fontSize: '0.9375rem', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid rgba(107,143,163,0.1)' }}>Catch Logs</Link>
+        <Link href="/groups" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: 'var(--color-mist)', fontSize: '0.9375rem', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid rgba(107,143,163,0.1)' }}>Groups</Link>
+        <Link href="/invites" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: 'var(--color-mist)', fontSize: '0.9375rem', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid rgba(107,143,163,0.1)' }}>Invites</Link>
+        <button
+          type="button"
+          onClick={() => signOut({ callbackUrl: '/' })}
+          style={{ display: 'block', width: '100%', textAlign: 'left', padding: '0.75rem 0', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-warning)', fontSize: '0.9375rem', fontWeight: 500 }}
+        >Sign Out</button>
       </div>
 
       <SyncStatusModal open={syncOpen} onClose={() => setSyncOpen(false)} />
