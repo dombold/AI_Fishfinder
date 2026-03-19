@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { REGULATIONS, SPECIES_ALIASES, SpeciesRegulation } from '@/lib/regulations'
+import { SPECIES_KNOWLEDGE, SpeciesKnowledge } from '@/lib/species'
 
 const SPECIES_LIST = Object.keys(REGULATIONS).sort()
 
@@ -72,6 +73,57 @@ function BioregionCard({ label, reg }: { label: string; reg: SpeciesRegulation }
   )
 }
 
+function KnowledgeField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ paddingBottom: '1rem', borderBottom: '1px solid rgba(107,143,163,0.1)' }}>
+      <span style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-seafoam)' }}>
+        {label}
+      </span>
+      <div style={{ color: 'var(--color-mist)', fontSize: '0.875rem', marginTop: '0.25rem', lineHeight: 1.65 }}>
+        {children}
+      </div>
+    </div>
+  )
+}
+
+function KnowledgeSection({ species, k }: { species: string; k: SpeciesKnowledge }) {
+  // Parse bait preferences "1. … 2. …" into individual items
+  const baits = k.baitPreferences
+    .split(/\d+\.\s+/)
+    .map(s => s.trim())
+    .filter(Boolean)
+
+  return (
+    <section style={{ marginTop: '2.5rem' }}>
+      <p style={{ color: 'rgba(107,143,163,0.55)', fontSize: '0.8125rem', marginBottom: '1rem' }}>
+        Species profile — {species}
+      </p>
+      <div style={{
+        padding: '1.5rem',
+        background: 'rgba(107,143,163,0.05)',
+        border: '1px solid rgba(107,143,163,0.15)',
+        borderRadius: '0.75rem',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+        gap: '1rem 2rem',
+      }}>
+        <KnowledgeField label="Feeding Behaviour">{k.feedingBehaviour}</KnowledgeField>
+        <KnowledgeField label="Preferred Conditions">{k.preferredConditions}</KnowledgeField>
+        <KnowledgeField label="Depth Range">{k.depth}</KnowledgeField>
+        <KnowledgeField label="Seasonality">{k.seasonality}</KnowledgeField>
+        <KnowledgeField label="Best Tide Phase">{k.tidePhase}</KnowledgeField>
+        <KnowledgeField label="Techniques">{k.techniques}</KnowledgeField>
+        <KnowledgeField label="Sounder Signatures">{k.sounderSignatures}</KnowledgeField>
+        <KnowledgeField label="Bait & Lure Preferences">
+          <ol style={{ margin: '0.25rem 0 0', paddingLeft: '1.25rem' }}>
+            {baits.map((b, i) => <li key={i} style={{ marginBottom: '0.2rem' }}>{b}</li>)}
+          </ol>
+        </KnowledgeField>
+      </div>
+    </section>
+  )
+}
+
 export default function SpeciesLimitsClient() {
   const [query, setQuery]           = useState('')
   const [open, setOpen]             = useState(false)
@@ -134,6 +186,7 @@ export default function SpeciesLimitsClient() {
   }, [open])
 
   const regulations = selected ? REGULATIONS[selected] : null
+  const knowledge   = selected ? SPECIES_KNOWLEDGE[selected] ?? null : null
 
   return (
     <div style={{ maxWidth: '960px', margin: '0 auto', padding: '2rem 1.5rem 5rem' }}>
@@ -284,6 +337,8 @@ export default function SpeciesLimitsClient() {
               <BioregionCard key={key} label={label} reg={regulations[key]} />
             ))}
           </div>
+
+          {knowledge && <KnowledgeSection species={selected} k={knowledge} />}
         </section>
       )}
 

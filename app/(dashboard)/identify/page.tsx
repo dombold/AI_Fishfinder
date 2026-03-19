@@ -151,7 +151,7 @@ export default function IdentifyPage() {
   }
 
   async function handleIdentify() {
-    if (!photoBase64 || !location) return
+    if (!photoBase64) return
     setPhase('loading')
     setError('')
     setIdentified(null)
@@ -174,16 +174,18 @@ export default function IdentifyPage() {
       setIdentified(idData)
       setPhase('results')
 
-      setRulesLoading(true)
-      fetch('/api/fish-rules', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ species: idData.species, latitude: location.lat, longitude: location.lng }),
-      })
-        .then(r => r.json())
-        .then(d => setRules(d))
-        .catch(() => {})
-        .finally(() => setRulesLoading(false))
+      if (location) {
+        setRulesLoading(true)
+        fetch('/api/fish-rules', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ species: idData.species, latitude: location.lat, longitude: location.lng }),
+        })
+          .then(r => r.json())
+          .then(d => setRules(d))
+          .catch(() => {})
+          .finally(() => setRulesLoading(false))
+      }
     } catch {
       setError('Network error')
       setPhase('upload')
@@ -204,7 +206,7 @@ export default function IdentifyPage() {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  const canIdentify = !!photoBase64 && !!location
+  const canIdentify = !!photoBase64
 
   return (
     <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at 20% 20%, #0E2A45 0%, #0B1929 60%, #061018 100%)' }}>
@@ -217,7 +219,7 @@ export default function IdentifyPage() {
             Fish Identifier
           </h1>
           <p style={{ color: 'var(--color-mist)', fontSize: '0.9rem', lineHeight: 1.7 }}>
-            Upload a photo and pin your location — AI will identify the species and show the WA fishing rules for where you caught it.
+            Upload a photo — AI will identify the species. Optionally pin your location to see WA fishing rules for where you caught it.
           </p>
         </div>
 
@@ -262,7 +264,7 @@ export default function IdentifyPage() {
 
             {/* Map */}
             <div>
-              <label style={labelStyle}>Catch Location</label>
+              <label style={labelStyle}>Catch Location <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, color: 'rgba(107,143,163,0.6)' }}>(optional)</span></label>
               <div style={{ marginBottom: '0.5rem' }}>
                 <CoordInput value={location} onChange={loc => { setLocation(loc); if (loc) setGpsFromPhoto(false) }} />
               </div>
@@ -273,7 +275,7 @@ export default function IdentifyPage() {
 
             {/* Date */}
             <div style={{ maxWidth: '220px' }}>
-              <label style={labelStyle}>Date caught</label>
+              <label style={labelStyle}>Date caught <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, color: 'rgba(107,143,163,0.6)' }}>(optional)</span></label>
               <input
                 type="date"
                 value={date}
@@ -351,11 +353,17 @@ export default function IdentifyPage() {
               </button>
             </div>
 
-            {/* Rules card */}
+            {/* Rules card — only show if location was provided */}
             <div className="card" style={{ padding: '1.5rem' }}>
               <p style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-seafoam)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '1rem' }}>
                 WA Fishing Rules
               </p>
+
+              {!location && !rulesLoading && (
+                <div style={{ background: 'rgba(107,143,163,0.08)', border: '1px solid rgba(107,143,163,0.2)', borderRadius: '0.5rem', padding: '0.875rem 1rem', color: 'var(--color-mist)', fontSize: '0.875rem', lineHeight: 1.6 }}>
+                  Pin your catch location above to see WA fishing regulations for this species.
+                </div>
+              )}
 
               {rulesLoading && (
                 <div style={{ display: 'flex', gap: '4px', padding: '1rem', justifyContent: 'center' }}>
