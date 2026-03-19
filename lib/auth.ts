@@ -32,7 +32,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: user.email,
           sounderType: user.sounderType,
           seasicknessTolerance: user.seasicknessTolerance,
-          avatar: user.avatar ?? null,
         }
       },
     }),

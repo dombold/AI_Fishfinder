@@ -12,7 +12,6 @@ export const authConfig = {
         token.username = user.name
         token.sounderType = (user as any).sounderType
         token.seasicknessTolerance = (user as any).seasicknessTolerance
-        token.avatar = (user as any).avatar ?? null
       }
       return token
     },
@@ -21,7 +20,6 @@ export const authConfig = {
       session.user.name = token.username as string
       ;(session.user as any).sounderType = token.sounderType
       ;(session.user as any).seasicknessTolerance = token.seasicknessTolerance
-      ;(session.user as any).avatar = token.avatar ?? null
       return session
     },
   },
