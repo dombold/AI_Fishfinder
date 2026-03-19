@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import DashboardNav from '@/components/DashboardNav'
 import CatchLogForm from '@/components/CatchLogForm'
+import { listPendingCatches, type PendingCatch } from '@/lib/offline-db'
+import { syncPendingCatches } from '@/lib/sync-manager'
 
 interface CatchEntry {
   id: string
@@ -21,6 +23,7 @@ interface CatchEntry {
   tideDirection: string | null
   moonPhase: string | null
   waterDepthM: number | null
+  photoBase64: string | null
 }
 
 export default function CatchLogPage() {
@@ -29,6 +32,7 @@ export default function CatchLogPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [pendingCatches, setPendingCatches] = useState<PendingCatch[]>([])
 
   const fetchCatches = useCallback(() => {
     fetch('/api/catch-log')
@@ -40,7 +44,44 @@ export default function CatchLogPage() {
       .catch(() => setLoading(false))
   }, [])
 
-  useEffect(() => { fetchCatches() }, [fetchCatches])
+  const refreshPending = useCallback(async () => {
+    const items = await listPendingCatches()
+    setPendingCatches(items)
+  }, [])
+
+  useEffect(() => {
+    fetchCatches()
+    refreshPending()
+
+    // Auto-sync when page loads (if online)
+    if (navigator.onLine) {
+      syncPendingCatches().then(() => {
+        fetchCatches()
+        refreshPending()
+      })
+    }
+
+    const handleOnline = () => {
+      syncPendingCatches().then(() => {
+        fetchCatches()
+        refreshPending()
+      })
+    }
+    const handleSynced = () => {
+      fetchCatches()
+      refreshPending()
+    }
+    const handlePending = () => refreshPending()
+
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('catches-synced', handleSynced)
+    window.addEventListener('pending-catches-changed', handlePending)
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('catches-synced', handleSynced)
+      window.removeEventListener('pending-catches-changed', handlePending)
+    }
+  }, [fetchCatches, refreshPending])
 
   async function deleteCatch(id: string) {
     setDeletingId(id)
@@ -84,11 +125,34 @@ export default function CatchLogPage() {
           </div>
         )}
 
+        {/* Pending offline catches */}
+        {pendingCatches.length > 0 && (
+          <div style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {pendingCatches.map(c => (
+              <div key={c.localId} className="card" style={{ padding: '0.875rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', borderColor: 'rgba(201,168,76,0.3)' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ color: 'var(--color-foam)', fontSize: '0.9375rem', fontWeight: 600, marginBottom: '0.15rem' }}>
+                    {c.formData.species}{' '}
+                    <span style={{ color: 'var(--color-mist)', fontWeight: 400, fontSize: '0.875rem' }}>× {c.formData.quantity}</span>
+                  </p>
+                  <p style={{ color: 'var(--color-mist)', fontSize: '0.8125rem' }}>
+                    {new Date(c.formData.date + 'T12:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    {' · '}{Math.abs(c.formData.latitude).toFixed(3)}°S, {c.formData.longitude.toFixed(3)}°E
+                  </p>
+                </div>
+                <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#C9A84C', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.25)', borderRadius: '20px', padding: '0.2rem 0.5rem', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                  Pending sync
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
         {loading ? (
           <div style={{ display: 'flex', gap: '4px', padding: '2rem', justifyContent: 'center' }}>
             <span className="wave-bar" /><span className="wave-bar" /><span className="wave-bar" />
           </div>
-        ) : catches.length === 0 ? (
+        ) : catches.length === 0 && pendingCatches.length === 0 ? (
           <div className="card" style={{ padding: '2rem', textAlign: 'center' }}>
             <p style={{ color: 'var(--color-mist)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
               No catches logged yet.
@@ -102,6 +166,13 @@ export default function CatchLogPage() {
             {catches.map(c => (
               <div key={c.id} style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                 <div className="card" style={{ padding: '0.875rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+                  {c.photoBase64 && (
+                    <img
+                      src={`data:image/jpeg;base64,${c.photoBase64}`}
+                      alt={`${c.species} catch photo`}
+                      style={{ width: '56px', height: '56px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0, border: '1px solid rgba(107,143,163,0.2)' }}
+                    />
+                  )}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ color: 'var(--color-foam)', fontSize: '0.9375rem', fontWeight: 600, marginBottom: '0.15rem' }}>
                       {c.species}{' '}

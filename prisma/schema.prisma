@@ -112,6 +112,7 @@ model CatchLog {
   tideDirection String?   // incoming | outgoing | slack
   moonPhase     String?   // e.g. Waxing Gibbous, Full Moon
   waterDepthM   Float?    // Water depth in metres at catch location (from GEBCO bathymetry)
+  photoBase64   String?   // Resized JPEG/PNG as base64, captured at time of logging
   createdAt     DateTime  @default(now())
 
   @@index([userId])

@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import exifr from 'exifr'
 import CoordInput from './CoordInput'
+import { resizeImage } from '@/lib/image-utils'
+import { addPendingCatch, addPendingEdit } from '@/lib/offline-db'
 
 const MapPicker = dynamic(() => import('./MapPicker'), { ssr: false })
 
@@ -44,30 +46,22 @@ const labelStyle: React.CSSProperties = {
   letterSpacing: '0.06em',
 }
 
-/** Resize an image file to max 1024px, returning { base64, mimeType } */
-async function resizeImage(file: File): Promise<{ base64: string; mimeType: string }> {
-  return new Promise((resolve, reject) => {
-    const img = new Image()
-    const objectUrl = URL.createObjectURL(file)
-    img.onload = () => {
-      URL.revokeObjectURL(objectUrl)
-      const MAX = 1024
-      const scale = Math.min(1, MAX / Math.max(img.width, img.height))
-      const canvas = document.createElement('canvas')
-      canvas.width  = Math.round(img.width  * scale)
-      canvas.height = Math.round(img.height * scale)
-      canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height)
-      const mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg'
-      const dataUrl = canvas.toDataURL(mimeType, 0.85)
-      resolve({ base64: dataUrl.split(',')[1], mimeType })
-    }
-    img.onerror = reject
-    img.src = objectUrl
-  })
-}
-
 export default function CatchLogForm({ onSuccess, catchId, initialValues }: Props) {
   const isEditing = !!catchId
+
+  const [isOnline, setIsOnline] = useState(true)
+  useEffect(() => {
+    setIsOnline(navigator.onLine)
+    const handleOnline  = () => setIsOnline(true)
+    const handleOffline = () => setIsOnline(false)
+    window.addEventListener('online',  handleOnline)
+    window.addEventListener('offline', handleOffline)
+    return () => {
+      window.removeEventListener('online',  handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [])
+
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     initialValues?.latitude != null ? { lat: initialValues.latitude, lng: initialValues.longitude } : null
   )
@@ -79,17 +73,24 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
   const [notes, setNotes] = useState(initialValues?.notes ?? '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [offlineSaved, setOfflineSaved] = useState(false)
 
-  // Photo ID state
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  // Photo state
+  const fileInputRef      = useRef<HTMLInputElement>(null)
+  const cameraInputRef    = useRef<HTMLInputElement>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [photoBase64, setPhotoBase64] = useState<string | null>(null)
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [photoMime, setPhotoMime] = useState<string>('image/jpeg')
   const [identifying, setIdentifying] = useState(false)
   const [identifyError, setIdentifyError] = useState('')
   const [gpsFromPhoto, setGpsFromPhoto] = useState(false)
   const [captureTime, setCaptureTime] = useState(initialValues?.captureTime ?? '')
   const [identifyMeta, setIdentifyMeta] = useState<{ count: number; environment: string; method: string } | null>(null)
+
+  // GPS button state
+  const [gpsLoading, setGpsLoading] = useState(false)
+  const [gpsError, setGpsError] = useState('')
 
   // Conditions state
   const [sst, setSst] = useState<string>(initialValues?.sst != null ? String(initialValues.sst) : '')
@@ -99,9 +100,9 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
   const [conditionsLoading, setConditionsLoading] = useState(false)
   const [conditionsFetched, setConditionsFetched] = useState(isEditing)
 
-  // Auto-fetch conditions when location + date are set
+  // Auto-fetch conditions when online + location + date are set
   useEffect(() => {
-    if (!location || !date || conditionsFetched) return
+    if (!location || !date || conditionsFetched || !isOnline) return
     let cancelled = false
     setConditionsLoading(true)
     const params = new URLSearchParams({
@@ -123,17 +124,15 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
       .catch(() => {})
       .finally(() => { if (!cancelled) setConditionsLoading(false) })
     return () => { cancelled = true }
-  }, [location, date, captureTime, conditionsFetched])
+  }, [location, date, captureTime, conditionsFetched, isOnline])
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
+  async function processFile(file: File) {
     setIdentifyError('')
     setGpsFromPhoto(false)
     setCaptureTime('')
     setIdentifyMeta(null)
+    setPhotoFile(file)
     try {
-      // Read GPS + EXIF time from raw file BEFORE canvas resize (which strips EXIF)
       const exifData = await exifr.parse(file, { tiff: true, exif: true, gps: true, iptc: false, xmp: false, icc: false }).catch(() => null)
 
       if (exifData?.latitude != null && exifData?.longitude != null) {
@@ -148,10 +147,10 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
         const match = offset.match(/([+-])(\d{2}):(\d{2})/)
         const offsetMins = match ? (match[1] === '+' ? 1 : -1) * (parseInt(match[2]) * 60 + parseInt(match[3])) : 0
         const local = new Date(dt.getTime() + offsetMins * 60_000)
-        const y = local.getUTCFullYear()
+        const y  = local.getUTCFullYear()
         const mo = String(local.getUTCMonth() + 1).padStart(2, '0')
-        const d = String(local.getUTCDate()).padStart(2, '0')
-        const h = String(local.getUTCHours()).padStart(2, '0')
+        const d  = String(local.getUTCDate()).padStart(2, '0')
+        const h  = String(local.getUTCHours()).padStart(2, '0')
         const min = String(local.getUTCMinutes()).padStart(2, '0')
         setDate(`${y}-${mo}-${d}`)
         setCaptureTime(`${h}:${min}`)
@@ -165,6 +164,11 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
     } catch {
       setIdentifyError('Could not read image')
     }
+  }
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (file) await processFile(file)
   }
 
   async function handleIdentify() {
@@ -192,31 +196,95 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
     }
   }
 
+  function handleUseMyLocation() {
+    setGpsError('')
+    setGpsLoading(true)
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+        setConditionsFetched(false)
+        setGpsLoading(false)
+      },
+      () => {
+        setGpsError('Could not get GPS location')
+        setGpsLoading(false)
+      },
+      { enableHighAccuracy: true, timeout: 15000 }
+    )
+  }
+
+  function resetForm() {
+    setSpecies('')
+    setDate(localDateStr())
+    setQuantity(1)
+    setWeightKg('')
+    setLengthCm('')
+    setNotes('')
+    setLocation(null)
+    setGpsFromPhoto(false)
+    setCaptureTime('')
+    setIdentifyMeta(null)
+    setPhotoPreview(null)
+    setPhotoBase64(null)
+    setPhotoFile(null)
+    setSst('')
+    setTideDirection('')
+    setMoonPhase('')
+    setWaterDepthM('')
+    setConditionsFetched(false)
+    setOfflineSaved(false)
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!location) { setError('Pin your catch location on the map'); return }
+    if (!location) { setError('Pin your catch location on the map or use "Use My Location"'); return }
     if (!species.trim()) { setError('Species is required'); return }
 
     setLoading(true)
     setError('')
+
+    const formData = {
+      date,
+      latitude: location.lat,
+      longitude: location.lng,
+      species: species.trim(),
+      quantity,
+      ...(weightKg ? { weightKg: parseFloat(weightKg) } : {}),
+      ...(lengthCm ? { lengthCm: parseFloat(lengthCm) } : {}),
+      ...(notes.trim() ? { notes: notes.trim() } : {}),
+      ...(captureTime ? { captureTime } : {}),
+      ...(identifyMeta ? { fishCount: identifyMeta.count, environment: identifyMeta.environment, fishingMethod: identifyMeta.method } : {}),
+      ...(sst ? { sst: parseFloat(sst) } : {}),
+      ...(tideDirection ? { tideDirection } : {}),
+      ...(moonPhase.trim() ? { moonPhase: moonPhase.trim() } : {}),
+      ...(waterDepthM ? { waterDepthM: parseFloat(waterDepthM) } : {}),
+    }
+
+    // ─── Offline path ──────────────────────────────────────────────────────
+    if (!isOnline) {
+      try {
+        if (isEditing) {
+          await addPendingEdit({ type: 'patch', catchId: catchId!, queuedAt: Date.now(), data: formData })
+        } else {
+          await addPendingCatch({ queuedAt: Date.now(), photoBlob: photoFile ?? null, formData })
+        }
+        window.dispatchEvent(new CustomEvent('pending-catches-changed'))
+        setOfflineSaved(true)
+        if (!isEditing) resetForm()
+        onSuccess()
+      } catch {
+        setError('Could not save offline. Try again.')
+      } finally {
+        setLoading(false)
+      }
+      return
+    }
+
+    // ─── Online path ───────────────────────────────────────────────────────
     try {
       const payload = {
-        date,
-        latitude: location.lat,
-        longitude: location.lng,
-        species: species.trim(),
-        quantity,
-        weightKg: weightKg ? parseFloat(weightKg) : undefined,
-        lengthCm: lengthCm ? parseFloat(lengthCm) : undefined,
-        notes: notes.trim() || undefined,
-        captureTime: captureTime || undefined,
-        fishCount: identifyMeta?.count,
-        environment: identifyMeta?.environment,
-        fishingMethod: identifyMeta?.method,
-        sst: sst ? parseFloat(sst) : undefined,
-        tideDirection: tideDirection || undefined,
-        moonPhase: moonPhase.trim() || undefined,
-        waterDepthM: waterDepthM ? parseFloat(waterDepthM) : undefined,
+        ...formData,
+        ...(photoBase64 ? { photoBase64 } : {}),
       }
       const res = await fetch(isEditing ? `/api/catch-log/${catchId}` : '/api/catch-log', {
         method: isEditing ? 'PATCH' : 'POST',
@@ -224,25 +292,7 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
         body: JSON.stringify(payload),
       })
       if (res.ok) {
-        if (!isEditing) {
-          setSpecies('')
-          setDate(localDateStr())
-          setQuantity(1)
-          setWeightKg('')
-          setLengthCm('')
-          setNotes('')
-          setLocation(null)
-          setGpsFromPhoto(false)
-          setCaptureTime('')
-          setIdentifyMeta(null)
-          setPhotoPreview(null)
-          setPhotoBase64(null)
-          setSst('')
-          setTideDirection('')
-          setMoonPhase('')
-          setWaterDepthM('')
-          setConditionsFetched(false)
-        }
+        if (!isEditing) resetForm()
         onSuccess()
       } else {
         const data = await res.json().catch(() => ({}))
@@ -255,63 +305,103 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
     }
   }
 
+  if (offlineSaved) {
+    return (
+      <div style={{ padding: '1.5rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+        <div style={{ fontSize: '2rem' }}>📶</div>
+        <p style={{ color: 'var(--color-foam)', fontWeight: 600 }}>Catch saved offline</p>
+        <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem' }}>
+          It will upload automatically when you&apos;re back online.
+        </p>
+        <button type="button" className="btn-secondary" onClick={() => setOfflineSaved(false)}>Log Another</button>
+      </div>
+    )
+  }
+
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
-      {/* Map */}
+      {!isOnline && (
+        <div style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.3)', borderRadius: '8px', padding: '0.625rem 0.875rem', fontSize: '0.8125rem', color: '#C9A84C' }}>
+          You&apos;re offline. Your catch will be saved locally and synced when you reconnect.
+        </div>
+      )}
+
+      {/* Location */}
       <div>
         <label style={labelStyle}>Catch Location</label>
-        <div style={{ marginBottom: '0.5rem' }}>
-          <CoordInput
-            value={location}
-            onChange={loc => {
-              setLocation(loc)
-              if (loc) setConditionsFetched(false)
-            }}
-          />
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: '220px' }}>
+            <CoordInput
+              value={location}
+              onChange={loc => {
+                setLocation(loc)
+                if (loc) setConditionsFetched(false)
+              }}
+            />
+          </div>
+          {/* GPS button — works offline */}
+          {'geolocation' in navigator && (
+            <button
+              type="button"
+              onClick={handleUseMyLocation}
+              disabled={gpsLoading}
+              className="btn-ghost"
+              style={{ fontSize: '0.8125rem', whiteSpace: 'nowrap', opacity: gpsLoading ? 0.6 : 1 }}
+            >
+              {gpsLoading ? '…' : '📍 Use My Location'}
+            </button>
+          )}
         </div>
-        <div style={{ borderRadius: '0.75rem', overflow: 'hidden', border: '1px solid rgba(107,143,163,0.2)' }}>
-          <MapPicker
-            value={location}
-            height={420}
-            onChange={loc => {
-              setLocation(loc)
-              setGpsFromPhoto(false)
-              setConditionsFetched(false)
-            }}
-          />
-        </div>
+        {gpsError && (
+          <p style={{ fontSize: '0.75rem', color: 'var(--color-warning)', marginBottom: '0.5rem' }}>{gpsError}</p>
+        )}
+
+        {/* Map — hidden when offline (no tiles) */}
+        {isOnline ? (
+          <div style={{ borderRadius: '0.75rem', overflow: 'hidden', border: '1px solid rgba(107,143,163,0.2)' }}>
+            <MapPicker
+              value={location}
+              height={420}
+              onChange={loc => {
+                setLocation(loc)
+                setGpsFromPhoto(false)
+                setConditionsFetched(false)
+              }}
+            />
+          </div>
+        ) : (
+          <p style={{ fontSize: '0.8125rem', color: 'var(--color-mist)', padding: '0.5rem 0' }}>
+            Map unavailable offline — use coordinates above or &quot;Use My Location&quot;
+          </p>
+        )}
       </div>
 
-      {/* Photo ID */}
+      {/* Photo */}
       <div>
-        <label style={labelStyle}>Photo ID — optional</label>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-          style={{ display: 'none' }}
-          aria-hidden="true"
-        />
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="btn-ghost"
-            style={{ fontSize: '0.8125rem' }}
-          >
-            {photoPreview ? '📷 Change Photo' : '📷 Add Photo'}
+        <label style={labelStyle}>Photo — optional</label>
+        {/* Hidden inputs */}
+        <input ref={fileInputRef}   type="file" accept="image/*"                           onChange={handleFileChange} style={{ display: 'none' }} aria-hidden="true" />
+        <input ref={cameraInputRef} type="file" accept="image/*" capture="environment"     onChange={handleFileChange} style={{ display: 'none' }} aria-hidden="true" />
+
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <button type="button" onClick={() => cameraInputRef.current?.click()} className="btn-ghost" style={{ fontSize: '0.8125rem' }}>
+            📷 Camera
+          </button>
+          <button type="button" onClick={() => fileInputRef.current?.click()}   className="btn-ghost" style={{ fontSize: '0.8125rem' }}>
+            {photoPreview ? '🖼 Change Photo' : '🖼 Gallery'}
           </button>
           {photoBase64 && (
             <button
               type="button"
               onClick={handleIdentify}
-              disabled={identifying}
+              disabled={identifying || !isOnline}
               className="btn-ghost"
-              style={{ fontSize: '0.8125rem', color: 'var(--color-seafoam)', borderColor: 'rgba(61,184,200,0.4)' }}
+              title={!isOnline ? 'Available when online' : undefined}
+              style={{ fontSize: '0.8125rem', color: isOnline ? 'var(--color-seafoam)' : 'var(--color-mist)', borderColor: isOnline ? 'rgba(61,184,200,0.4)' : 'rgba(107,143,163,0.2)', cursor: !isOnline ? 'not-allowed' : undefined }}
             >
               {identifying ? '…Identifying' : '✦ Identify Species'}
+              {!isOnline && ' (offline)'}
             </button>
           )}
           {photoPreview && (
@@ -352,89 +442,35 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.875rem' }}>
-        {/* Species */}
         <div>
           <label style={labelStyle}>Species</label>
-          <input
-            type="text"
-            value={species}
-            onChange={e => setSpecies(e.target.value)}
-            placeholder="e.g. Dhufish"
-            maxLength={100}
-          />
+          <input type="text" value={species} onChange={e => setSpecies(e.target.value)} placeholder="e.g. Dhufish" maxLength={100} />
         </div>
-
-        {/* Date */}
         <div>
           <label style={labelStyle}>Date</label>
-          <input
-            type="date"
-            value={date}
-            max={localDateStr()}
-            onChange={e => { setDate(e.target.value); setConditionsFetched(false) }}
-          />
+          <input type="date" value={date} max={localDateStr()} onChange={e => { setDate(e.target.value); setConditionsFetched(false) }} />
         </div>
-
-        {/* Time */}
         <div>
           <label style={labelStyle}>Time — optional</label>
-          <input
-            type="time"
-            value={captureTime}
-            onChange={e => setCaptureTime(e.target.value)}
-          />
+          <input type="time" value={captureTime} onChange={e => setCaptureTime(e.target.value)} />
         </div>
-
-        {/* Quantity */}
         <div>
           <label style={labelStyle}>Quantity</label>
-          <input
-            type="number"
-            value={quantity}
-            min={1}
-            max={1000}
-            onChange={e => setQuantity(Number(e.target.value))}
-          />
+          <input type="number" value={quantity} min={1} max={1000} onChange={e => setQuantity(Number(e.target.value))} />
         </div>
-
-        {/* Weight */}
         <div>
           <label style={labelStyle}>Weight (kg) — optional</label>
-          <input
-            type="number"
-            value={weightKg}
-            min={0}
-            step={0.1}
-            onChange={e => setWeightKg(e.target.value)}
-            placeholder="e.g. 2.4"
-          />
+          <input type="number" value={weightKg} min={0} step={0.1} onChange={e => setWeightKg(e.target.value)} placeholder="e.g. 2.4" />
         </div>
-
-        {/* Length */}
         <div>
           <label style={labelStyle}>Length (cm) — optional</label>
-          <input
-            type="number"
-            value={lengthCm}
-            min={0}
-            step={1}
-            onChange={e => setLengthCm(e.target.value)}
-            placeholder="e.g. 65"
-          />
+          <input type="number" value={lengthCm} min={0} step={1} onChange={e => setLengthCm(e.target.value)} placeholder="e.g. 65" />
         </div>
       </div>
 
-      {/* Notes */}
       <div>
         <label style={labelStyle}>Notes — optional</label>
-        <textarea
-          value={notes}
-          onChange={e => setNotes(e.target.value)}
-          placeholder="Bait used, conditions, technique…"
-          maxLength={500}
-          rows={2}
-          style={{ resize: 'vertical' }}
-        />
+        <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Bait used, conditions, technique…" maxLength={500} rows={2} style={{ resize: 'vertical' }} />
       </div>
 
       {/* Conditions */}
@@ -446,30 +482,20 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
               fetching…
             </span>
           )}
+          {!isOnline && !conditionsFetched && (
+            <span style={{ marginLeft: '0.5rem', color: 'rgba(201,168,76,0.7)', fontSize: '0.75rem', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>
+              auto-fill unavailable offline
+            </span>
+          )}
         </label>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.875rem' }}>
           <div>
             <label style={labelStyle}>SST (°C)</label>
-            <input
-              type="number"
-              value={sst}
-              min={-5}
-              max={40}
-              step={0.1}
-              onChange={e => setSst(e.target.value)}
-              placeholder="e.g. 22.4"
-            />
+            <input type="number" value={sst} min={-5} max={40} step={0.1} onChange={e => setSst(e.target.value)} placeholder="e.g. 22.4" />
           </div>
           <div>
             <label style={labelStyle}>Water Depth (m)</label>
-            <input
-              type="number"
-              value={waterDepthM}
-              min={0}
-              step={0.1}
-              onChange={e => setWaterDepthM(e.target.value)}
-              placeholder="e.g. 18"
-            />
+            <input type="number" value={waterDepthM} min={0} step={0.1} onChange={e => setWaterDepthM(e.target.value)} placeholder="e.g. 18" />
           </div>
           <div>
             <label style={labelStyle}>Tide</label>
@@ -482,13 +508,7 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
           </div>
           <div>
             <label style={labelStyle}>Moon Phase</label>
-            <input
-              type="text"
-              value={moonPhase}
-              onChange={e => setMoonPhase(e.target.value)}
-              placeholder="e.g. Waxing Gibbous"
-              maxLength={50}
-            />
+            <input type="text" value={moonPhase} onChange={e => setMoonPhase(e.target.value)} placeholder="e.g. Waxing Gibbous" maxLength={50} />
           </div>
         </div>
       </div>
@@ -500,7 +520,7 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
       )}
 
       <button type="submit" className="btn-primary" disabled={loading} style={{ justifyContent: 'center' }}>
-        {loading ? '…' : isEditing ? 'Save Changes' : 'Log Catch'}
+        {loading ? '…' : isEditing ? 'Save Changes' : isOnline ? 'Log Catch' : 'Save Offline'}
       </button>
     </form>
   )

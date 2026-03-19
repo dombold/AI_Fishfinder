@@ -3,6 +3,33 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params
+    const session = await auth()
+    if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const fishingSession = await prisma.fishingSession.findUnique({
+      where: { id, userId: session.user.id },
+      include: {
+        selectedSpecies: true,
+        fishingPlans: true,
+        marineData: true,
+      },
+    })
+
+    if (!fishingSession) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    }
+
+    return NextResponse.json(fishingSession)
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Server error'
+    console.error('[GET /api/sessions/[id]]', err)
+    return NextResponse.json({ error: msg }, { status: 500 })
+  }
+}
+
 const patchSchema = z.object({
   saved: z.boolean(),
 })

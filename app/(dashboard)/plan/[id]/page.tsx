@@ -6,6 +6,7 @@ import BriefingCard from '@/components/BriefingCard'
 import PlanPoller from '@/components/PlanPoller'
 import PrintButton from '@/components/PrintButton'
 import SavePlanButton from '@/components/SavePlanButton'
+import SaveForOfflineButton from '@/components/SaveForOfflineButton'
 import DataSourcesModal from '@/components/DataSourcesModal'
 import ExportGPXButton from '@/components/ExportGPXButton'
 import DashboardNav from '@/components/DashboardNav'
@@ -113,6 +114,7 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
         {/* Actions */}
         <div className="no-print" style={{ display: 'flex', gap: '0.75rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
           <SavePlanButton sessionId={id} initialSaved={saved} />
+          <SaveForOfflineButton sessionId={id} />
           <PrintButton />
           <DataSourcesModal contextData={contextData ?? null} latitude={latitude} longitude={longitude} />
           <ExportGPXButton plans={plans} locationName={locationName ?? null} startDate={startDate} endDate={endDate} />

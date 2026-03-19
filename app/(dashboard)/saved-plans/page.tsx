@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import DashboardNav from '@/components/DashboardNav'
+import { listOfflinePlanIds } from '@/lib/offline-db'
 
 interface SavedPlan {
   id: string
@@ -20,6 +21,7 @@ export default function SavedPlansPage() {
   const [plans, setPlans] = useState<SavedPlan[]>([])
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [offlineIds, setOfflineIds] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     fetch('/api/profile')
@@ -29,6 +31,8 @@ export default function SavedPlansPage() {
         setLoading(false)
       })
       .catch(() => setLoading(false))
+
+    listOfflinePlanIds().then((ids) => setOfflineIds(new Set(ids)))
   }, [])
 
   async function deletePlan(id: string) {
@@ -91,6 +95,11 @@ export default function SavedPlansPage() {
                     </p>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+                    {offlineIds.has(plan.id) && (
+                      <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#3CBFAE', background: 'rgba(60,191,174,0.1)', border: '1px solid rgba(60,191,174,0.25)', borderRadius: '20px', padding: '0.15rem 0.5rem', whiteSpace: 'nowrap' }}>
+                        Offline
+                      </span>
+                    )}
                     <Link href={`/plan/${plan.id}`} style={{ color: 'var(--color-seafoam)', fontSize: '0.8125rem', textDecoration: 'none', whiteSpace: 'nowrap' }}>
                       View →
                     </Link>

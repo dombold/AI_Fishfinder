@@ -21,6 +21,7 @@ export const createSchema = z.object({
   tideDirection: z.enum(['incoming', 'outgoing', 'slack']).optional(),
   moonPhase: z.string().max(50).optional(),
   waterDepthM: z.number().positive().optional(),
+  photoBase64: z.string().max(750000).optional(),
 })
 
 export async function GET() {
@@ -68,6 +69,7 @@ export async function POST(req: NextRequest) {
         tideDirection: parsed.data.tideDirection ?? null,
         moonPhase: parsed.data.moonPhase ?? null,
         waterDepthM: parsed.data.waterDepthM ?? null,
+        photoBase64: parsed.data.photoBase64 ?? null,
       },
     })
     return NextResponse.json(entry, { status: 201 })
