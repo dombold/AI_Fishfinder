@@ -18,6 +18,8 @@ model User {
   seasicknessTolerance Int               @default(3)
   weeklyDigestOptIn    Boolean           @default(false)
   avatar               String?
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
   sessions             FishingSession[]

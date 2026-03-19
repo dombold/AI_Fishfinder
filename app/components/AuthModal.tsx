@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
-type View = 'signin' | 'register'
+type View = 'signin' | 'register' | 'forgot'
 
 interface AuthModalProps {
   defaultView?: View
@@ -25,6 +25,12 @@ export default function AuthModal({ defaultView = 'signin' }: AuthModalProps) {
   const [registerError, setRegisterError] = useState('')
   const [registerLoading, setRegisterLoading] = useState(false)
   const [registered, setRegistered] = useState(false)
+
+  // Forgot password state
+  const [forgotEmail, setForgotEmail] = useState('')
+  const [forgotLoading, setForgotLoading] = useState(false)
+  const [forgotError, setForgotError] = useState('')
+  const [forgotSent, setForgotSent] = useState(false)
 
   const firstInputRef = useRef<HTMLInputElement>(null)
 
@@ -50,6 +56,9 @@ export default function AuthModal({ defaultView = 'signin' }: AuthModalProps) {
     setRegisterError('')
     setRegisterForm({ username: '', email: '', password: '' })
     setRegistered(false)
+    setForgotEmail('')
+    setForgotError('')
+    setForgotSent(false)
     setIsOpen(true)
   }
 
@@ -61,7 +70,32 @@ export default function AuthModal({ defaultView = 'signin' }: AuthModalProps) {
   function switchView(v: View) {
     setSignInError('')
     setRegisterError('')
+    setForgotError('')
+    setForgotSent(false)
     setView(v)
+  }
+
+  async function handleForgotPassword(e: React.FormEvent) {
+    e.preventDefault()
+    setForgotError('')
+    setForgotLoading(true)
+    try {
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotEmail }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        setForgotError(data.error ?? 'Something went wrong')
+      } else {
+        setForgotSent(true)
+      }
+    } catch {
+      setForgotError('Network error — please try again')
+    } finally {
+      setForgotLoading(false)
+    }
   }
 
   async function handleSignIn(e: React.FormEvent) {
@@ -227,7 +261,16 @@ export default function AuthModal({ defaultView = 'signin' }: AuthModalProps) {
                         />
                       </div>
                       <div>
-                        <label style={labelStyle}>Password</label>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.375rem' }}>
+                          <label style={{ ...labelStyle, marginBottom: 0 }}>Password</label>
+                          <button
+                            type="button"
+                            onClick={() => switchView('forgot')}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-seafoam)', fontSize: '0.75rem', padding: 0, fontFamily: 'var(--font-body)' }}
+                          >
+                            Forgot password?
+                          </button>
+                        </div>
                         <input
                           type="password"
                           value={signInForm.password}
@@ -333,6 +376,75 @@ export default function AuthModal({ defaultView = 'signin' }: AuthModalProps) {
                       Sign in
                     </button>
                   </p>
+                </>
+              )}
+
+              {/* ── Forgot password view ── */}
+              {view === 'forgot' && (
+                <>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', marginBottom: '0.5rem', color: 'var(--color-foam)' }}>
+                    Reset Password
+                  </h2>
+                  <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', marginBottom: '1.5rem', lineHeight: 1.6 }}>
+                    Enter your email and we'll send you a reset link.
+                  </p>
+
+                  {forgotError && (
+                    <div role="alert" style={{ background: 'rgba(224,92,42,0.15)', border: '1px solid rgba(224,92,42,0.4)', borderRadius: '0.5rem', padding: '0.75rem 1rem', marginBottom: '1.25rem', color: 'var(--color-warning)', fontSize: '0.875rem' }}>
+                      {forgotError}
+                    </div>
+                  )}
+
+                  {forgotSent ? (
+                    <>
+                      <div style={{ background: 'rgba(46,204,138,0.12)', border: '1px solid rgba(46,204,138,0.3)', borderRadius: '0.5rem', padding: '0.875rem 1rem', marginBottom: '1.25rem', color: 'var(--color-success)', fontSize: '0.875rem', lineHeight: 1.6 }}>
+                        If that email is registered, a reset link has been sent. Check your inbox.
+                      </div>
+                      <p style={{ textAlign: 'center' }}>
+                        <button onClick={() => switchView('signin')} style={switchBtnStyle}>
+                          ← Back to sign in
+                        </button>
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <form onSubmit={handleForgotPassword} noValidate>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                          <div>
+                            <label style={labelStyle}>Email</label>
+                            <input
+                              ref={firstInputRef}
+                              type="email"
+                              value={forgotEmail}
+                              onChange={e => setForgotEmail(e.target.value)}
+                              placeholder="you@example.com"
+                              required
+                              autoComplete="email"
+                            />
+                          </div>
+                          <button
+                            type="submit"
+                            className="btn-primary"
+                            disabled={forgotLoading || !forgotEmail.trim()}
+                            style={{ width: '100%', justifyContent: 'center', marginTop: '0.5rem' }}
+                          >
+                            {forgotLoading ? (
+                              <span style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                                <span className="wave-bar" /><span className="wave-bar" /><span className="wave-bar" />
+                                &nbsp;Sending…
+                              </span>
+                            ) : 'Send Reset Link'}
+                          </button>
+                        </div>
+                      </form>
+
+                      <p style={{ marginTop: '1.25rem', textAlign: 'center', color: 'var(--color-mist)', fontSize: '0.875rem' }}>
+                        <button onClick={() => switchView('signin')} style={switchBtnStyle}>
+                          ← Back to sign in
+                        </button>
+                      </p>
+                    </>
+                  )}
                 </>
               )}
 

@@ -36,6 +36,12 @@ export default function ProfilePage() {
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
 
+  // Change password state
+  const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' })
+  const [pwSaving, setPwSaving] = useState(false)
+  const [pwSuccess, setPwSuccess] = useState(false)
+  const [pwError, setPwError] = useState('')
+
   useEffect(() => {
     fetch('/api/profile')
       .then(r => r.json())
@@ -69,6 +75,40 @@ export default function ProfilePage() {
     setAvatar(null)
     setAvatarChanged(true)
     if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  async function handleChangePassword(e: React.FormEvent) {
+    e.preventDefault()
+    setPwError('')
+    setPwSuccess(false)
+    if (pwForm.newPassword.length < 8) {
+      setPwError('New password must be at least 8 characters')
+      return
+    }
+    if (pwForm.newPassword !== pwForm.confirmPassword) {
+      setPwError('New passwords do not match')
+      return
+    }
+    setPwSaving(true)
+    try {
+      const res = await fetch('/api/profile/password', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword: pwForm.currentPassword, newPassword: pwForm.newPassword }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setPwError(data.error ?? 'Failed to change password')
+      } else {
+        setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
+        setPwSuccess(true)
+        setTimeout(() => setPwSuccess(false), 3000)
+      }
+    } catch {
+      setPwError('Network error — please try again')
+    } finally {
+      setPwSaving(false)
+    }
   }
 
   async function handleSave(e: React.FormEvent) {
@@ -344,6 +384,75 @@ export default function ProfilePage() {
                 </button>
               </div>
             </form>
+
+            {/* Divider */}
+            <div style={{ borderTop: '1px solid rgba(107,143,163,0.15)', margin: '2rem 0' }} />
+
+            {/* Change Password */}
+            <form onSubmit={handleChangePassword} noValidate>
+              <p style={{ ...labelStyle, marginBottom: '1.25rem', fontSize: '0.9rem', textTransform: 'none', letterSpacing: 'normal', color: 'var(--color-foam)', fontWeight: 600 }}>
+                Change Password
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div>
+                  <label style={labelStyle}>Current Password</label>
+                  <input
+                    type="password"
+                    value={pwForm.currentPassword}
+                    onChange={e => setPwForm(f => ({ ...f, currentPassword: e.target.value }))}
+                    placeholder="Enter current password"
+                    autoComplete="current-password"
+                  />
+                </div>
+                <div>
+                  <label style={labelStyle}>New Password</label>
+                  <input
+                    type="password"
+                    value={pwForm.newPassword}
+                    onChange={e => setPwForm(f => ({ ...f, newPassword: e.target.value }))}
+                    placeholder="Min 8 characters"
+                    autoComplete="new-password"
+                  />
+                </div>
+                <div>
+                  <label style={labelStyle}>Confirm New Password</label>
+                  <input
+                    type="password"
+                    value={pwForm.confirmPassword}
+                    onChange={e => setPwForm(f => ({ ...f, confirmPassword: e.target.value }))}
+                    placeholder="Repeat new password"
+                    autoComplete="new-password"
+                  />
+                </div>
+
+                {pwError && (
+                  <div role="alert" style={{ background: 'rgba(224,92,42,0.15)', border: '1px solid rgba(224,92,42,0.4)', borderRadius: '0.5rem', padding: '0.75rem 1rem', color: 'var(--color-warning)', fontSize: '0.875rem' }}>
+                    {pwError}
+                  </div>
+                )}
+
+                {pwSuccess && (
+                  <div style={{ background: 'rgba(46,204,138,0.12)', border: '1px solid rgba(46,204,138,0.3)', borderRadius: '0.5rem', padding: '0.75rem 1rem', color: 'var(--color-success)', fontSize: '0.875rem' }}>
+                    Password changed successfully.
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className="btn-ghost"
+                  disabled={pwSaving}
+                  style={{ width: '100%', justifyContent: 'center' }}
+                >
+                  {pwSaving ? (
+                    <span style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                      <span className="wave-bar" /><span className="wave-bar" /><span className="wave-bar" />
+                      &nbsp;Updating…
+                    </span>
+                  ) : 'Update Password'}
+                </button>
+              </div>
+            </form>
+
           </div>
         )}
       </div>

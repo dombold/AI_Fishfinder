@@ -56,6 +56,10 @@ export default function GroupDetailPage() {
   const [showInvite, setShowInvite] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [removingId, setRemovingId] = useState<string | null>(null)
+  const [editingName, setEditingName] = useState(false)
+  const [nameInput, setNameInput] = useState('')
+  const [renaming, setRenaming] = useState(false)
+  const [renameError, setRenameError] = useState('')
 
   const fetchAll = useCallback(async () => {
     try {
@@ -139,6 +143,32 @@ export default function GroupDetailPage() {
     finally { setRemovingId(null) }
   }
 
+  async function handleRename(e: React.FormEvent) {
+    e.preventDefault()
+    const trimmed = nameInput.trim()
+    if (!trimmed || trimmed === group?.name) { setEditingName(false); return }
+    setRenaming(true)
+    setRenameError('')
+    try {
+      const res = await fetch(`/api/groups/${groupId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: trimmed }),
+      })
+      if (res.ok) {
+        setGroup(prev => prev ? { ...prev, name: trimmed } : prev)
+        setEditingName(false)
+      } else {
+        const data = await res.json()
+        setRenameError(data.error ?? 'Failed to rename group')
+      }
+    } catch {
+      setRenameError('Network error')
+    } finally {
+      setRenaming(false)
+    }
+  }
+
   const isOwner = group?.ownerId === currentUserId
 
   if (loading) {
@@ -161,10 +191,47 @@ export default function GroupDetailPage() {
         {/* Group header */}
         <div style={{ marginBottom: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
-            <div>
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--color-foam)', marginBottom: '0.25rem' }}>
-                {group?.name ?? '…'}
-              </h1>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {editingName ? (
+                <form onSubmit={handleRename} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', marginBottom: '0.25rem' }}>
+                  <input
+                    type="text"
+                    value={nameInput}
+                    onChange={e => setNameInput(e.target.value)}
+                    maxLength={60}
+                    autoFocus
+                    style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', flex: 1, minWidth: '160px' }}
+                  />
+                  <button type="submit" className="btn-primary" disabled={renaming} style={{ flexShrink: 0, fontSize: '0.8125rem', padding: '0.4rem 0.9rem' }}>
+                    {renaming ? '…' : 'Save'}
+                  </button>
+                  <button type="button" className="btn-ghost" onClick={() => { setEditingName(false); setRenameError('') }} style={{ flexShrink: 0, fontSize: '0.8125rem', padding: '0.4rem 0.75rem' }}>
+                    Cancel
+                  </button>
+                  {renameError && <p style={{ width: '100%', fontSize: '0.8125rem', color: 'var(--color-warning)', margin: 0 }}>{renameError}</p>}
+                </form>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '0.25rem' }}>
+                  <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--color-foam)', margin: 0 }}>
+                    {group?.name ?? '…'}
+                  </h1>
+                  {isOwner && (
+                    <button
+                      type="button"
+                      onClick={() => { setNameInput(group?.name ?? ''); setEditingName(true) }}
+                      title="Rename group"
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(107,143,163,0.6)', padding: '0.25rem', lineHeight: 1, flexShrink: 0 }}
+                      onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-seafoam)')}
+                      onMouseLeave={e => (e.currentTarget.style.color = 'rgba(107,143,163,0.6)')}
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              )}
               <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem' }}>
                 {members.length} member{members.length !== 1 ? 's' : ''} · owned by {group?.owner.username}
               </p>

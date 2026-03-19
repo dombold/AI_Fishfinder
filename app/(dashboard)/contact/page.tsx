@@ -41,9 +41,9 @@ export default async function ContactPage() {
                 <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', lineHeight: 1.6, marginBottom: '0.75rem' }}>
                   Use GitHub Issues to report bugs or suggest improvements. Include steps to reproduce and what you expected to happen.
                 </p>
-                <p style={{ fontSize: '0.8125rem', color: 'var(--color-mist)', background: 'rgba(107,143,163,0.08)', border: '1px solid rgba(107,143,163,0.15)', borderRadius: '0.375rem', padding: '0.5rem 0.75rem', display: 'inline-block' }}>
+                <a href="https://github.com/dombold/AI_Fishfinder/issues" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8125rem', color: 'var(--color-seafoam)', background: 'rgba(107,143,163,0.08)', border: '1px solid rgba(107,143,163,0.15)', borderRadius: '0.375rem', padding: '0.5rem 0.75rem', display: 'inline-block', textDecoration: 'none' }}>
                   github.com/dombold/AI_Fishfinder/issues
-                </p>
+                </a>
               </div>
             </div>
           </div>
@@ -60,9 +60,9 @@ export default async function ContactPage() {
                 <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', lineHeight: 1.6, marginBottom: '0.75rem' }}>
                   Spotted an outdated bag limit, incorrect size, or missing closure? Email us with the species, bioregion, and the correct rule from an official DPIRD source.
                 </p>
-                <p style={{ fontSize: '0.8125rem', color: 'var(--color-mist)', background: 'rgba(107,143,163,0.08)', border: '1px solid rgba(107,143,163,0.15)', borderRadius: '0.375rem', padding: '0.5rem 0.75rem', display: 'inline-block' }}>
-                  contact@aifishfinder.com.au
-                </p>
+                <a href="mailto:dominic_bolding@hotmail.com" style={{ fontSize: '0.8125rem', color: 'var(--color-seafoam)', background: 'rgba(107,143,163,0.08)', border: '1px solid rgba(107,143,163,0.15)', borderRadius: '0.375rem', padding: '0.5rem 0.75rem', display: 'inline-block', textDecoration: 'none' }}>
+                  dominic_bolding@hotmail.com
+                </a>
               </div>
             </div>
           </div>

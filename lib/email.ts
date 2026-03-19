@@ -213,6 +213,50 @@ export async function sendWelcomeEmail(username: string, email: string): Promise
 }
 
 // ---------------------------------------------------------------------------
+// Password reset email
+// ---------------------------------------------------------------------------
+
+function passwordResetEmailHtml(username: string, resetUrl: string): string {
+  const body = `
+    <h1 style="margin:0 0 8px 0;font-family:Georgia,serif;font-size:26px;font-weight:700;
+      color:${SEAFOAM};letter-spacing:-0.03em;">
+      Reset your password
+    </h1>
+    <p style="margin:0 0 24px 0;font-size:14px;color:${MIST};">
+      Hi ${username}, we received a request to reset your AI Fishfinder password.
+    </p>
+
+    <p style="margin:0 0 20px 0;font-size:15px;color:${FOAM};line-height:1.7;">
+      Click the button below to choose a new password. This link expires in
+      <strong style="color:${SEAFOAM};">1 hour</strong>.
+    </p>
+
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:32px auto 0;">
+      <tr>
+        <td align="center" style="background-color:${CURRENT};border-radius:8px;">
+          <a href="${resetUrl}"
+            style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:700;
+            color:${FOAM};text-decoration:none;letter-spacing:0.02em;">Reset Password</a>
+        </td>
+      </tr>
+    </table>
+
+    ${divider()}
+
+    <p style="margin:0;font-size:13px;color:${MIST};line-height:1.6;">
+      If you didn't request a password reset, you can safely ignore this email —
+      your password won't change. If you're concerned, contact us.
+    </p>
+  `
+  return emailWrapper(body)
+}
+
+export async function sendPasswordResetEmail(to: string, username: string, resetUrl: string): Promise<void> {
+  const html = passwordResetEmailHtml(username, resetUrl)
+  await sendEmail(to, 'Reset your AI Fishfinder password', html)
+}
+
+// ---------------------------------------------------------------------------
 // Weekly crowd digest
 // ---------------------------------------------------------------------------
 
