@@ -50,8 +50,6 @@ export default function DashboardNav({ backHref, backLabel = '← Dashboard' }: 
           <Link href="/groups" style={{ color: 'var(--color-mist)', fontSize: '0.875rem', textDecoration: 'none' }}>Groups</Link>
           <Link href="/identify" style={{ color: 'var(--color-mist)', fontSize: '0.875rem', textDecoration: 'none' }}>Identify</Link>
           <Link href="/guide" style={{ color: 'var(--color-mist)', fontSize: '0.875rem', textDecoration: 'none' }}>Guide</Link>
-          <Link href="/contact" style={{ color: 'var(--color-mist)', fontSize: '0.875rem', textDecoration: 'none' }}>Contact</Link>
-          <Link href="/about" style={{ color: 'var(--color-mist)', fontSize: '0.875rem', textDecoration: 'none' }}>About</Link>
         </div>
 
         {/* Right cluster — always visible */}
@@ -117,9 +115,7 @@ export default function DashboardNav({ backHref, backLabel = '← Dashboard' }: 
         <Link href="/dashboard" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: 'var(--color-mist)', fontSize: '0.9375rem', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid rgba(107,143,163,0.1)' }}>Plan</Link>
         <Link href="/groups" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: 'var(--color-mist)', fontSize: '0.9375rem', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid rgba(107,143,163,0.1)' }}>Groups</Link>
         <Link href="/identify" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: 'var(--color-mist)', fontSize: '0.9375rem', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid rgba(107,143,163,0.1)' }}>Identify</Link>
-        <Link href="/guide" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: 'var(--color-mist)', fontSize: '0.9375rem', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid rgba(107,143,163,0.1)' }}>Guide</Link>
-        <Link href="/contact" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: 'var(--color-mist)', fontSize: '0.9375rem', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid rgba(107,143,163,0.1)' }}>Contact</Link>
-        <Link href="/about" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: 'var(--color-mist)', fontSize: '0.9375rem', fontWeight: 500, textDecoration: 'none' }}>About</Link>
+        <Link href="/guide" onClick={() => setMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: 'var(--color-mist)', fontSize: '0.9375rem', fontWeight: 500, textDecoration: 'none' }}>Guide</Link>
       </div>
 
       <SyncStatusModal open={syncOpen} onClose={() => setSyncOpen(false)} />
