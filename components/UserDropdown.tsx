@@ -8,12 +8,26 @@ const NAV_ITEMS = [
   { href: '/profile', label: 'Profile' },
   { href: '/saved-plans', label: 'Saved Plans' },
   { href: '/catch-log', label: 'Catch Logs' },
+  { href: '/groups', label: 'Groups' },
 ]
 
 export default function UserDropdown() {
   const { data: session } = useSession()
   const [open, setOpen] = useState(false)
+  const [avatar, setAvatar] = useState<string | null>(null)
+  const [inviteCount, setInviteCount] = useState(0)
   const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    fetch('/api/profile')
+      .then(r => r.json())
+      .then(data => { if (data.avatar) setAvatar(data.avatar) })
+      .catch(() => {})
+    fetch('/api/invites')
+      .then(r => r.json())
+      .then(data => { setInviteCount(data.invites?.length ?? 0) })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (!open) return
@@ -52,6 +66,30 @@ export default function UserDropdown() {
           transition: 'background 200ms',
         }}
       >
+        {avatar ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={avatar}
+            alt="Your avatar"
+            style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(60,191,174,0.5)', flexShrink: 0 }}
+          />
+        ) : (
+          <div style={{
+            width: '24px',
+            height: '24px',
+            borderRadius: '50%',
+            background: 'var(--color-current)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.7rem',
+            fontFamily: 'var(--font-display)',
+            color: 'var(--color-foam)',
+            flexShrink: 0,
+          }}>
+            {(session?.user?.name ?? '?').charAt(0).toUpperCase()}
+          </div>
+        )}
         <span style={{ color: 'var(--color-mist)' }}>{session?.user?.name ?? '…'}</span>
         <svg
           width="10"
@@ -98,12 +136,34 @@ export default function UserDropdown() {
                 color: 'var(--color-foam)',
                 fontSize: '0.875rem',
                 textDecoration: 'none',
-                borderBottom: i < NAV_ITEMS.length - 1 ? '1px solid rgba(107,143,163,0.1)' : 'none',
+                borderBottom: '1px solid rgba(107,143,163,0.1)',
               }}
             >
               {item.label}
             </Link>
           ))}
+          <Link
+            href="/invites"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className="dropdown-item"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '0.625rem 1rem',
+              color: 'var(--color-foam)',
+              fontSize: '0.875rem',
+              textDecoration: 'none',
+            }}
+          >
+            <span>Invites</span>
+            {inviteCount > 0 && (
+              <span style={{ fontSize: '0.6875rem', fontWeight: 700, color: 'var(--color-seafoam)', background: 'rgba(61,184,200,0.12)', border: '1px solid rgba(61,184,200,0.3)', borderRadius: '20px', padding: '0.1rem 0.45rem', lineHeight: 1.4 }}>
+                {inviteCount}
+              </span>
+            )}
+          </Link>
 
           <div style={{ borderTop: '1px solid rgba(107,143,163,0.2)' }}>
             <button

@@ -33,6 +33,7 @@ interface Props {
     tideDirection: string | null
     moonPhase: string | null
     waterDepthM: number | null
+    shared: boolean
   }
 }
 
@@ -91,6 +92,8 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
   // GPS button state
   const [gpsLoading, setGpsLoading] = useState(false)
   const [gpsError, setGpsError] = useState('')
+
+  const [shared, setShared] = useState(initialValues?.shared ?? true)
 
   // Conditions state
   const [sst, setSst] = useState<string>(initialValues?.sst != null ? String(initialValues.sst) : '')
@@ -231,6 +234,7 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
     setTideDirection('')
     setMoonPhase('')
     setWaterDepthM('')
+    setShared(true)
     setConditionsFetched(false)
     setOfflineSaved(false)
   }
@@ -258,6 +262,7 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
       ...(tideDirection ? { tideDirection } : {}),
       ...(moonPhase.trim() ? { moonPhase: moonPhase.trim() } : {}),
       ...(waterDepthM ? { waterDepthM: parseFloat(waterDepthM) } : {}),
+      shared,
     }
 
     // ─── Offline path ──────────────────────────────────────────────────────
@@ -512,6 +517,32 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
           </div>
         </div>
       </div>
+
+      {/* Share with groups */}
+      <label style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', cursor: 'pointer', userSelect: 'none' }}>
+        <div
+          onClick={() => setShared(v => !v)}
+          style={{
+            width: '18px',
+            height: '18px',
+            borderRadius: '4px',
+            border: `1.5px solid ${shared ? 'var(--color-seafoam)' : 'rgba(107,143,163,0.4)'}`,
+            background: shared ? 'rgba(61,184,200,0.15)' : 'transparent',
+            flexShrink: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'border-color 150ms, background 150ms',
+          }}
+        >
+          {shared && (
+            <svg width="11" height="9" viewBox="0 0 11 9" fill="none" aria-hidden="true">
+              <path d="M1 4.5L4 7.5L10 1.5" stroke="var(--color-seafoam)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </div>
+        <span style={{ fontSize: '0.875rem', color: 'var(--color-mist)' }}>Share with groups</span>
+      </label>
 
       {error && (
         <div style={{ background: 'rgba(224,92,42,0.12)', border: '1px solid rgba(224,92,42,0.35)', borderRadius: '0.5rem', padding: '0.625rem 0.875rem', color: 'var(--color-warning)', fontSize: '0.8125rem' }}>

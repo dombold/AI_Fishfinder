@@ -8,6 +8,7 @@ const updateSchema = z.object({
   sounderType: z.enum(['NONE', 'GARMIN', 'SIMRAD', 'LOWRANCE', 'HUMMINBIRD', 'RAYMARINE', 'FURUNO', 'B&G']).optional(),
   seasicknessTolerance: z.number().int().min(1).max(5).optional(),
   weeklyDigestOptIn: z.boolean().optional(),
+  avatar: z.string().max(800000).nullable().optional(),
 })
 
 export async function GET() {
@@ -16,7 +17,7 @@ export async function GET() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { username: true, email: true, sounderType: true, seasicknessTolerance: true, weeklyDigestOptIn: true, createdAt: true },
+    select: { username: true, email: true, sounderType: true, seasicknessTolerance: true, weeklyDigestOptIn: true, avatar: true, createdAt: true },
   })
 
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
@@ -67,7 +68,7 @@ export async function PATCH(req: NextRequest) {
   const updated = await prisma.user.update({
     where: { id: session.user.id },
     data: parsed.data,
-    select: { username: true, email: true, sounderType: true, seasicknessTolerance: true, weeklyDigestOptIn: true },
+    select: { username: true, email: true, sounderType: true, seasicknessTolerance: true, weeklyDigestOptIn: true, avatar: true },
   })
 
   return NextResponse.json(updated)

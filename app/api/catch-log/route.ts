@@ -22,6 +22,7 @@ export const createSchema = z.object({
   moonPhase: z.string().max(50).optional(),
   waterDepthM: z.number().positive().optional(),
   photoBase64: z.string().max(750000).optional(),
+  shared: z.boolean().default(true),
 })
 
 export async function GET() {
@@ -70,6 +71,7 @@ export async function POST(req: NextRequest) {
         moonPhase: parsed.data.moonPhase ?? null,
         waterDepthM: parsed.data.waterDepthM ?? null,
         photoBase64: parsed.data.photoBase64 ?? null,
+        shared: parsed.data.shared,
       },
     })
     return NextResponse.json(entry, { status: 201 })

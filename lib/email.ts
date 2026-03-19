@@ -331,6 +331,43 @@ function weeklyDigestHtml(summaries: CrowdSummary[]): string {
   return emailWrapper(body)
 }
 
+// ---------------------------------------------------------------------------
+// Group invite email
+// ---------------------------------------------------------------------------
+
+export async function sendGroupInviteEmail(
+  to: string,
+  groupName: string,
+  inviterUsername: string,
+): Promise<void> {
+  const subject = `${inviterUsername} invited you to join "${groupName}" on AI Fishfinder`
+  const body = `
+    <h1 style="margin:0 0 8px 0;font-family:Georgia,serif;font-size:24px;font-weight:700;
+      color:${SEAFOAM};letter-spacing:-0.03em;">
+      You've been invited!
+    </h1>
+    <p style="margin:0 0 24px 0;font-size:14px;color:${MIST};">
+      A fellow AI Fishfinder angler wants you to join their crew.
+    </p>
+
+    <p style="margin:0 0 20px 0;font-size:15px;color:${FOAM};line-height:1.7;">
+      <strong style="color:${SEAFOAM};">${inviterUsername}</strong> has invited you to join
+      the fishing group <strong style="color:${SEAFOAM};">${groupName}</strong>.
+      Group members can share catch logs with each other to keep tabs on what's biting.
+    </p>
+
+    ${ctaButton('/invites', 'View Invite')}
+
+    ${divider()}
+
+    <p style="margin:0;font-size:13px;color:${MIST};line-height:1.6;">
+      Log in and visit <em>Invites</em> in the menu to accept or decline. You can also
+      ignore this email — the invite will remain pending until you respond.
+    </p>
+  `
+  await sendEmail(to, subject, emailWrapper(body))
+}
+
 export async function sendWeeklyDigest(
   users: Array<{ username: string; email: string }>,
   summaries: CrowdSummary[],

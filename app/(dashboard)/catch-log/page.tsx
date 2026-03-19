@@ -24,6 +24,7 @@ interface CatchEntry {
   moonPhase: string | null
   waterDepthM: number | null
   photoBase64: string | null
+  shared: boolean
 }
 
 export default function CatchLogPage() {
@@ -82,6 +83,19 @@ export default function CatchLogPage() {
       window.removeEventListener('pending-catches-changed', handlePending)
     }
   }, [fetchCatches, refreshPending])
+
+  async function toggleShared(id: string, currentShared: boolean) {
+    try {
+      const res = await fetch(`/api/catch-log/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shared: !currentShared }),
+      })
+      if (res.ok) {
+        setCatches(prev => prev.map(c => c.id === id ? { ...c, shared: !currentShared } : c))
+      }
+    } catch {}
+  }
 
   async function deleteCatch(id: string) {
     setDeletingId(id)
@@ -215,6 +229,26 @@ export default function CatchLogPage() {
                   <div style={{ display: 'flex', gap: '0.25rem', flexShrink: 0, alignItems: 'center' }}>
                     <button
                       type="button"
+                      onClick={() => toggleShared(c.id, c.shared)}
+                      title={c.shared ? 'Visible to groups — click to make private' : 'Private — click to share with groups'}
+                      style={{
+                        background: c.shared ? 'rgba(61,184,200,0.1)' : 'rgba(107,143,163,0.08)',
+                        border: `1px solid ${c.shared ? 'rgba(61,184,200,0.3)' : 'rgba(107,143,163,0.25)'}`,
+                        borderRadius: '20px',
+                        padding: '0.15rem 0.5rem',
+                        cursor: 'pointer',
+                        color: c.shared ? 'var(--color-seafoam)' : 'var(--color-mist)',
+                        fontSize: '0.6875rem',
+                        fontWeight: 600,
+                        lineHeight: 1.4,
+                        flexShrink: 0,
+                        letterSpacing: '0.03em',
+                      }}
+                    >
+                      {c.shared ? 'Shared' : 'Private'}
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => setEditingId(editingId === c.id ? null : c.id)}
                       style={{ background: 'none', border: 'none', padding: '0.25rem', cursor: 'pointer', color: 'var(--color-seafoam)', fontSize: '1rem', lineHeight: 1, opacity: editingId === c.id ? 1 : 0.55, flexShrink: 0 }}
                       title="Edit catch"
@@ -254,6 +288,7 @@ export default function CatchLogPage() {
                         tideDirection: c.tideDirection,
                         moonPhase: c.moonPhase,
                         waterDepthM: c.waterDepthM,
+                        shared: c.shared,
                       }}
                       onSuccess={() => { fetchCatches(); setEditingId(null) }}
                     />

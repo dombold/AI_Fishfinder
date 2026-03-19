@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import DashboardNav from '@/components/DashboardNav'
+import { resizeImage } from '@/lib/image-utils'
 
 const SOUNDER_OPTIONS = ['NONE', 'GARMIN', 'SIMRAD', 'LOWRANCE', 'HUMMINBIRD', 'RAYMARINE', 'FURUNO', 'B&G']
 
@@ -26,6 +27,10 @@ const labelStyle: React.CSSProperties = {
 export default function ProfilePage() {
   const [form, setForm] = useState({ email: '', sounderType: 'NONE', seasicknessTolerance: 3, weeklyDigestOptIn: false })
   const [username, setUsername] = useState('')
+  const [avatar, setAvatar] = useState<string | null>(null)
+  const [avatarChanged, setAvatarChanged] = useState(false)
+  const [avatarHover, setAvatarHover] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -36,6 +41,7 @@ export default function ProfilePage() {
       .then(r => r.json())
       .then(data => {
         setUsername(data.username ?? '')
+        setAvatar(data.avatar ?? null)
         setForm({
           email: data.email ?? '',
           sounderType: data.sounderType ?? 'NONE',
@@ -47,21 +53,42 @@ export default function ProfilePage() {
       .catch(() => setLoading(false))
   }, [])
 
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      const { base64, mimeType } = await resizeImage(file)
+      setAvatar(`data:${mimeType};base64,${base64}`)
+      setAvatarChanged(true)
+    } catch {
+      setError('Failed to process image — please try another file')
+    }
+  }
+
+  function handleRemoveAvatar() {
+    setAvatar(null)
+    setAvatarChanged(true)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
     setError('')
     setSuccess(false)
     try {
+      const body: Record<string, unknown> = { ...form }
+      if (avatarChanged) body.avatar = avatar
       const res = await fetch('/api/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(body),
       })
       const data = await res.json()
       if (!res.ok) {
         setError(data.error ?? 'Failed to save')
       } else {
+        setAvatarChanged(false)
         setSuccess(true)
         setTimeout(() => setSuccess(false), 3000)
       }
@@ -91,6 +118,96 @@ export default function ProfilePage() {
           </div>
         ) : (
           <div className="card" style={{ padding: '2rem' }}>
+
+            {/* Avatar */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid rgba(107,143,163,0.15)' }}>
+              <div style={{ position: 'relative', flexShrink: 0 }}>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  onMouseEnter={() => setAvatarHover(true)}
+                  onMouseLeave={() => setAvatarHover(false)}
+                  aria-label="Upload avatar"
+                  style={{
+                    width: '80px',
+                    height: '80px',
+                    borderRadius: '50%',
+                    border: '2px solid var(--color-seafoam)',
+                    boxShadow: '0 0 0 4px rgba(60,191,174,0.15), 0 4px 16px rgba(0,0,0,0.3)',
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+                    padding: 0,
+                    background: 'none',
+                    position: 'relative',
+                    display: 'block',
+                    opacity: avatarHover ? 0.8 : 1,
+                    transition: 'opacity 0.2s',
+                  }}
+                >
+                  {avatar ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={avatar} alt="Your avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  ) : (
+                    <div style={{
+                      width: '100%',
+                      height: '100%',
+                      background: 'var(--color-current)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontFamily: 'var(--font-display)',
+                      fontSize: '1.75rem',
+                      color: 'var(--color-foam)',
+                      letterSpacing: '-0.03em',
+                    }}>
+                      {username.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  {avatarHover && (
+                    <div style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'rgba(11,25,41,0.55)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-foam)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                        <circle cx="12" cy="13" r="4"/>
+                      </svg>
+                    </div>
+                  )}
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  style={{ display: 'none' }}
+                  aria-hidden="true"
+                />
+              </div>
+              <div>
+                <p style={{ fontSize: '0.875rem', color: 'var(--color-foam)', fontWeight: 500, marginBottom: '0.25rem' }}>
+                  Profile photo
+                </p>
+                <p style={{ fontSize: '0.8rem', color: 'var(--color-mist)', lineHeight: 1.5 }}>
+                  Click to upload. JPEG or PNG, max 1024px.
+                </p>
+                {avatar && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveAvatar}
+                    style={{ marginTop: '0.375rem', fontSize: '0.8rem', color: 'var(--color-warning)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', opacity: 0.8, transition: 'opacity 0.2s' }}
+                    onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+                    onMouseLeave={e => (e.currentTarget.style.opacity = '0.8')}
+                  >
+                    Remove photo
+                  </button>
+                )}
+              </div>
+            </div>
 
             {/* Username (read-only) */}
             <div style={{ marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid rgba(107,143,163,0.15)' }}>

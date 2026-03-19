@@ -10,17 +10,20 @@ datasource db {
 // Note: SQLite does not support enums; stored as String with validation in app layer
 
 model User {
-  id                   String           @id @default(cuid())
-  username             String           @unique
-  email                String           @unique
+  id                   String            @id @default(cuid())
+  username             String            @unique
+  email                String            @unique
   passwordHash         String
-  sounderType          String           @default("NONE")
-  seasicknessTolerance Int              @default(3)
-  weeklyDigestOptIn    Boolean          @default(false)
-  createdAt            DateTime         @default(now())
-  updatedAt            DateTime         @updatedAt
+  sounderType          String            @default("NONE")
+  seasicknessTolerance Int               @default(3)
+  weeklyDigestOptIn    Boolean           @default(false)
+  avatar               String?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
   sessions             FishingSession[]
   catchLogs            CatchLog[]
+  ownedGroups          Group[]           @relation("GroupOwner")
+  memberships          GroupMembership[] @relation("GroupMemberships")
 
   @@map("users")
 }
@@ -113,12 +116,40 @@ model CatchLog {
   moonPhase     String?   // e.g. Waxing Gibbous, Full Moon
   waterDepthM   Float?    // Water depth in metres at catch location (from GEBCO bathymetry)
   photoBase64   String?   // Resized JPEG/PNG as base64, captured at time of logging
+  shared        Boolean   @default(true)
   createdAt     DateTime  @default(now())
 
   @@index([userId])
   @@index([bioregion])
   @@index([bioregion, species])
   @@map("catch_logs")
+}
+
+model Group {
+  id          String            @id @default(cuid())
+  name        String
+  ownerId     String
+  owner       User              @relation("GroupOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  memberships GroupMembership[]
+  createdAt   DateTime          @default(now())
+
+  @@index([ownerId])
+  @@map("groups")
+}
+
+model GroupMembership {
+  id        String   @id @default(cuid())
+  groupId   String
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation("GroupMemberships", fields: [userId], references: [id], onDelete: Cascade)
+  status    String   @default("PENDING")  // "PENDING" | "ACTIVE"
+  createdAt DateTime @default(now())
+
+  @@unique([groupId, userId])
+  @@index([userId])
+  @@index([groupId])
+  @@map("group_memberships")
 }
 
 model NewsletterFetch {

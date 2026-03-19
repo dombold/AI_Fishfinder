@@ -32,11 +32,12 @@ Thumbs.db
 CLAUDE.md
 
 # Project-specific large files
-Catch_Log_Test_Image.JPG
+waypoints_dedup_v2.xlsx
 temporary screenshots/
 
 # Dev utilities (not needed on production server)
 screenshot.mjs
+scripts/
 
 # PM2 runtime
 .pm2/
