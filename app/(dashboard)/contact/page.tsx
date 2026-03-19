@@ -60,8 +60,8 @@ export default async function ContactPage() {
                 <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', lineHeight: 1.6, marginBottom: '0.75rem' }}>
                   Spotted an outdated bag limit, incorrect size, or missing closure? Email us with the species, bioregion, and the correct rule from an official DPIRD source.
                 </p>
-                <a href="mailto:dominic_bolding@hotmail.com" style={{ fontSize: '0.8125rem', color: 'var(--color-seafoam)', background: 'rgba(107,143,163,0.08)', border: '1px solid rgba(107,143,163,0.15)', borderRadius: '0.375rem', padding: '0.5rem 0.75rem', display: 'inline-block', textDecoration: 'none' }}>
-                  dominic_bolding@hotmail.com
+                <a href={`mailto:${process.env.CONTACT_EMAIL ?? ''}`} style={{ fontSize: '0.8125rem', color: 'var(--color-seafoam)', background: 'rgba(107,143,163,0.08)', border: '1px solid rgba(107,143,163,0.15)', borderRadius: '0.375rem', padding: '0.5rem 0.75rem', display: 'inline-block', textDecoration: 'none' }}>
+                  {process.env.CONTACT_EMAIL ?? ''}
                 </a>
               </div>
             </div>
