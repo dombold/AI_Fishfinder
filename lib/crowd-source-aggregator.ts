@@ -1,5 +1,5 @@
 /**
- * Crowd-source aggregation: combines iNaturalist observations + user CatchLog entries
+ * Crowd-source aggregation: combines community catch log entries and newsletter reports
  * per bioregion into a CrowdSummary object, then persists it to CrowdSourceSummary.
  *
  * Called by the weekly cron job. Results are read at plan-generation time.

@@ -13,7 +13,7 @@ An AI-powered fishing briefing card generator for Western Australian waters. Ent
 - **Solunar windows** — Major and minor feeding window calculations factored into each plan
 - **Boat ramp finder** — 124+ public WA boat ramps searchable within 20km of your location; beach launch advice if none found
 - **WA regulations** — Species-specific bag limits, minimum sizes, and active closures per bioregion
-- **Crowd-sourced activity** — iNaturalist citizen-science observations + community catch logs aggregated per bioregion; trends and hotspots fed into each plan
+- **Crowd-sourced activity** — Community catch logs and RecFishWest newsletter data aggregated per bioregion; trends and hotspots fed into each plan
 - **Catch log** — Log your catches with location, species, weight, length, water depth, time, and photo; environmental conditions (SST, tide, moon phase, water depth) auto-fill from coordinates; photos stored permanently and shown as thumbnails; edit entries after saving; browse your full history
 - **Offline mode (PWA)** — Install as a native-style app on any phone; save plans for offline access before departure; log catches with photo and GPS while at sea with no signal — catches queue locally and auto-sync when you reconnect; works as a Progressive Web App with a service worker and IndexedDB cache
 - **Fish Identifier** — Dedicated page to upload a fish photo, have Claude AI identify the species, and immediately see the WA bag limits, size limits, and active closures for the catch location
@@ -23,6 +23,9 @@ An AI-powered fishing briefing card generator for Western Australian waters. Ent
 - **Weekly fishing digest** — Opt-in email digest summarising species activity and hotspots for your region
 - **Saved plans** — Bookmark plans to your profile for later reference; download any plan for offline access with a single tap
 - **User profile** — Store sounder brand (Garmin, Simrad, Lowrance, etc.) and sea conditions tolerance for personalised plans
+- **Fishing Groups** — Create or join private fishing groups to share catch logs with your crew; owner-managed invites; shared catches visible to all active group members
+- **Password reset** — Forgot-password email flow with secure token-based reset link
+- **User avatars** — Upload a profile avatar shown across the app
 - **User accounts** — Secure registration and login with NextAuth
 
 ---
@@ -37,7 +40,6 @@ An AI-powered fishing briefing card generator for Western Australian waters. Ent
 | AI | Anthropic Claude (claude-sonnet-4-6) |
 | Marine data | WillyWeather API + Open-Meteo Marine |
 | Bathymetry | OpenTopoData GEBCO 2020 (free, no auth) |
-| Citizen science | iNaturalist API (research-grade observations) |
 | Maps | React Leaflet — CartoDB Voyager + Esri Satellite |
 | Offline storage | IndexedDB via `idb` + Service Worker (Cache Storage) |
 | Email | Nodemailer (any SMTP provider) |
@@ -120,7 +122,7 @@ Three background jobs run every Friday, triggered via HTTP (cron, systemd timer,
 | Endpoint | Schedule | Purpose |
 |----------|----------|---------|
 | `POST /api/cron/parse-recfishwest` | Friday 02:00 | Fetch & parse the RecFishWest Statewide Fishing Report newsletter; insert catch observations into the DB |
-| `POST /api/cron/update-crowd-data` | Friday 03:00 | Aggregate all catch logs into per-bioregion crowd summaries |
+| `POST /api/cron/update-crowd-data` | Friday 03:00 | Aggregate community catch logs and newsletter reports into per-bioregion crowd summaries |
 | `POST /api/cron/send-weekly-digest` | Friday 04:00 | Email opted-in users the weekly fishing intelligence digest |
 
 Example crontab (run on the server):
@@ -145,15 +147,26 @@ app/
     identify/            # Fish Identifier: photo upload → AI species ID → WA fishing rules
     guide/               # User guide: table of contents + full feature documentation
     saved-plans/         # Saved plans index
-    profile/             # User profile: sounder brand, tolerance, digest opt-in
+    profile/             # User profile: sounder brand, tolerance, digest opt-in, avatar
+    about/               # About page: feature overview, data sources, WA bioregion coverage
+    groups/              # Fishing groups: create/manage groups, view shared crew catches
+    groups/[groupId]/    # Individual group detail: member list, shared catch log
+    invites/             # Pending group invitations
   api/
     generate-plan/       # Claude plan generation
     marine-data/         # WillyWeather + Open-Meteo data aggregation
     identify-species/    # Claude vision species identification from photo
     fish-rules/          # WA regulation lookup by species + location (bag limits, closures)
     catch-log/           # CRUD for catch log entries (GET, POST, PATCH, DELETE)
-    profile/             # User profile read/update
+    profile/             # User profile read/update (sounder brand, tolerance, avatar, digest opt-in)
     plans/               # Saved plan read/update/delete
+    groups/              # CRUD for groups (GET, POST, DELETE)
+    groups/[groupId]/members/  # Member management and invite by username
+    groups/[groupId]/catches/  # Shared catches from active members
+    invites/             # List and accept/decline pending invites
+    auth/
+      forgot-password/   # Send password reset email
+      reset-password/    # Complete password reset with token
     cron/
       parse-recfishwest/   # Fetch & parse RecFishWest newsletter
       update-crowd-data/   # Weekly iNaturalist + catch-log aggregation
@@ -168,8 +181,7 @@ lib/
   regulations.ts         # WA fishing closure and bag limit logic
   species.ts             # Species knowledge base
   parse-coords.ts        # Multi-format coordinate parser (DD, DDM, DMS, cardinal prefix/suffix)
-  inaturalist-api.ts     # iNaturalist citizen-science observation fetcher
-  crowd-source-aggregator.ts  # Combines iNaturalist + catch logs → CrowdSummary
+  crowd-source-aggregator.ts  # Combines catch logs and newsletter observations → CrowdSummary per bioregion
   email.ts               # Nodemailer transport + branded HTML email templates
   data/                  # Static JSON: boat ramps, reef features
 prisma/

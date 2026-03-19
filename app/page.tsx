@@ -170,6 +170,21 @@ export default function LandingPage() {
                     </p>
                   </div>
 
+                  <div className="card" style={{ padding: '1.75rem', textAlign: 'left', width: '280px', flexShrink: 0 }}>
+                    <div style={{ marginBottom: '1rem' }}>
+                      <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+                        <circle cx="12" cy="13" r="4" stroke="#3CBFAE" strokeWidth="1.5" fill="none"/>
+                        <circle cx="24" cy="13" r="4" stroke="#0A7EA4" strokeWidth="1.5" fill="none"/>
+                        <path d="M4 27 C4 22, 20 22, 20 27" stroke="#3CBFAE" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+                        <path d="M16 27 C16 22, 32 22, 32 27" stroke="#0A7EA4" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+                      </svg>
+                    </div>
+                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.0625rem', color: 'var(--color-foam)', marginBottom: '0.5rem' }}>Fishing Groups</h3>
+                    <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', lineHeight: 1.6 }}>
+                      Create a private group for your crew and share catch logs with members. Invite-only — your catches stay with the people you fish with.
+                    </p>
+                  </div>
+
                 </div>
               ))}
             </div>

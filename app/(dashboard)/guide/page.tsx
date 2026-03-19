@@ -14,6 +14,7 @@ const toc = [
   { id: 'offline-mode',     label: 'Offline Mode' },
   { id: 'regulations',      label: 'Regulations Hub' },
   { id: 'profile',          label: 'Profile & Account' },
+  { id: 'groups',           label: 'Fishing Groups' },
 ]
 
 const tipBox: React.CSSProperties = {
@@ -122,7 +123,7 @@ export default async function GuidePage() {
             </div>
             <div style={stepRow}>
               <span style={stepNumber}>3</span>
-              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Navigate the app</strong> — the top navigation bar gives you access to every feature: <em>Plan, Identify, Guide, Contact, About, Regulations</em>, and your user menu.</p>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Navigate the app</strong> — the top navigation bar gives you access to every feature: <em>Plan, Groups, Identify, Guide, Contact, About, Regulations</em>, and your user menu. A gold badge on the nav bar shows pending group invitations.</p>
             </div>
             <div style={tipBox}>
               <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', lineHeight: 1.6, margin: 0 }}>
@@ -380,12 +381,48 @@ export default async function GuidePage() {
             </div>
             <div style={stepRow}>
               <span style={stepNumber}>3</span>
-              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Change password</strong> — enter your current password and a new password, then click <em>Update Password</em>. Use a strong, unique password.</p>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Forgot your password</strong> — on the login screen, click <em>Forgot password</em>, enter your email address, and follow the reset link sent to your inbox.</p>
             </div>
             <div style={stepRow}>
               <span style={stepNumber}>4</span>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Change password</strong> — enter your current password and a new password, then click <em>Update Password</em>. Use a strong, unique password.</p>
+            </div>
+            <div style={stepRow}>
+              <span style={stepNumber}>5</span>
               <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Sign out</strong> — select <em>Sign out</em> from the user dropdown in the top navigation. Your saved plans and catch log remain stored when you return.</p>
             </div>
+          </div>
+        </section>
+
+        {/* ─── 9. Fishing Groups ─── */}
+        <section id="groups" style={sectionStyle}>
+          <h2 style={h2Style}>9. Fishing Groups</h2>
+          <div className="card" style={{ padding: '1.5rem', marginBottom: '1rem' }}>
+            <div style={stepRow}>
+              <span style={stepNumber}>1</span>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Create a group</strong> — click <em>Groups</em> in the top navigation, then <em>+ Create Group</em>. Give the group a name. You become the group owner.</p>
+            </div>
+            <div style={stepRow}>
+              <span style={stepNumber}>2</span>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Invite members</strong> — as owner, open your group page and enter a member&apos;s username to send them an invite. They receive a gold badge notification in the top navigation bar.</p>
+            </div>
+            <div style={stepRow}>
+              <span style={stepNumber}>3</span>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Accept an invite</strong> — click the gold badge in the nav bar, or go to <em>Groups → Invites</em>. Accept or decline each pending invitation.</p>
+            </div>
+            <div style={stepRow}>
+              <span style={stepNumber}>4</span>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>View shared catches</strong> — the group page shows catch logs shared by all active members. Catches are shared with the group by default; members can opt individual catches out.</p>
+            </div>
+            <div style={stepRow}>
+              <span style={stepNumber}>5</span>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Leave or manage a group</strong> — members can leave via the group page. Owners can remove individual members or delete the group entirely.</p>
+            </div>
+          </div>
+          <div style={tipBox}>
+            <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', lineHeight: 1.6, margin: 0 }}>
+              <strong style={{ color: 'var(--color-current)' }}>Tip:</strong> Catches are shared with your groups by default. Each catch log entry has a share toggle if you want to keep a specific catch private.
+            </p>
           </div>
         </section>
 
