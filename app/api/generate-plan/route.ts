@@ -5,7 +5,8 @@ import { generateFishingPlan } from '@/lib/claude-api'
 import type { DayMarineData, TideEvent, PeriodSummary, PressureHourlyPoint } from '@/lib/marine-api'
 import { getNearestBoatRamps } from '@/lib/boat-ramps'
 import { getDepthAt, getNearbyReefs } from '@/lib/seafloor'
-import { getChlorophyll, getSalinity } from '@/lib/ocean-data'
+import { getChlorophyll, getSalinity, getSshAnomaly } from '@/lib/ocean-data'
+import { getSubsurfaceTemps } from '@/lib/subsurface-temp'
 import { getCrowdSummaryForBioregion } from '@/lib/crowd-source-aggregator'
 
 export async function POST(req: NextRequest) {
@@ -61,12 +62,14 @@ export async function POST(req: NextRequest) {
     // Sort by date
     marineDataByDay.sort((a, b) => a.date.localeCompare(b.date))
 
-    const [nearbyBoatRamps, locationDepth, nearbyReefs, chlorophyll, salinity, crowdSummary] = await Promise.all([
+    const [nearbyBoatRamps, locationDepth, nearbyReefs, chlorophyll, salinity, sshAnomaly, subsurfaceTemps, crowdSummary] = await Promise.all([
       getNearestBoatRamps(fishingSession.latitude, fishingSession.longitude),
       getDepthAt(fishingSession.latitude, fishingSession.longitude),
       getNearbyReefs(fishingSession.latitude, fishingSession.longitude),
       getChlorophyll(fishingSession.latitude, fishingSession.longitude),
       getSalinity(fishingSession.latitude, fishingSession.longitude),
+      getSshAnomaly(fishingSession.latitude, fishingSession.longitude),
+      getSubsurfaceTemps(fishingSession.latitude, fishingSession.longitude),
       getCrowdSummaryForBioregion(fishingSession.latitude, fishingSession.longitude),
     ])
 
@@ -75,6 +78,8 @@ export async function POST(req: NextRequest) {
       locationDepthM: locationDepth,
       chlorophyllMgM3: chlorophyll,
       salinityPSU: salinity,
+      sshAnomalyM: sshAnomaly,
+      subsurfaceTemps,
       nearbyBoatRamps,
       nearbyReefs,
       fetchedAt: new Date().toISOString(),
@@ -100,6 +105,8 @@ export async function POST(req: NextRequest) {
       nearbyReefs,
       chlorophyll,
       salinity,
+      sshAnomaly,
+      subsurfaceTemps,
       crowdSummary,
     })
 

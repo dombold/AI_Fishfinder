@@ -200,6 +200,43 @@ function welcomeEmailHtml(username: string): string {
           </p>
         </td>
       </tr>
+      <tr>
+        <td style="padding:10px 0;vertical-align:top;width:32px;">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;
+            background-color:${SEAFOAM};margin-top:6px;"></span>
+        </td>
+        <td style="padding:10px 0;">
+          <p style="margin:0;font-size:14px;color:${FOAM};line-height:1.6;">
+            <strong style="color:${SEAFOAM};">Catch Log</strong> &mdash;
+            Record every catch with photo, weight, length, and conditions. Logs sync
+            automatically &mdash; even when you're offline.
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:10px 0;vertical-align:top;width:32px;">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;
+            background-color:${SEAFOAM};margin-top:6px;"></span>
+        </td>
+        <td style="padding:10px 0;">
+          <p style="margin:0;font-size:14px;color:${FOAM};line-height:1.6;">
+            <strong style="color:${SEAFOAM};">Fishing Groups</strong> &mdash;
+            Create a crew, invite your mates, and share catches within the group.
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:10px 0;vertical-align:top;width:32px;">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;
+            background-color:${SEAFOAM};margin-top:6px;"></span>
+        </td>
+        <td style="padding:10px 0;">
+          <p style="margin:0;font-size:14px;color:${FOAM};line-height:1.6;">
+            <strong style="color:${SEAFOAM};">Species Identify</strong> &mdash;
+            Snap a photo to instantly identify an unknown catch and check WA regulations.
+          </p>
+        </td>
+      </tr>
     </table>
 
     ${ctaButton('', 'Plan Your First Trip')}

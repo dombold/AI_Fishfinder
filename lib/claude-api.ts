@@ -4,6 +4,7 @@ import { getRegulations, getBioregion } from '@/lib/regulations'
 import type { DayMarineData, TideEvent, PeriodSummary } from '@/lib/marine-api'
 import { validateWaypoints } from '@/lib/seafloor'
 import type { CrowdSummary } from '@/lib/crowd-source-aggregator'
+import type { SubsurfaceTemps } from '@/lib/subsurface-temp'
 import { calculateSolunarWindows } from '@/lib/solunar'
 
 export interface WindPeriodRow {
@@ -183,6 +184,8 @@ export async function generateFishingPlan(params: {
   nearbyReefs: Array<{ name: string; type: string; distanceKm: number; depth_min?: number; depth_max?: number; substrate?: string; features?: string[]; species?: string[]; notes?: string }>
   chlorophyll: number | null
   salinity: number | null
+  sshAnomaly: number | null
+  subsurfaceTemps: SubsurfaceTemps | null
   crowdSummary: CrowdSummary | null
 }): Promise<DailyPlan[]> {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
@@ -210,7 +213,9 @@ Key WA fishing knowledge:
 - Demersal species require bottom structure — anchor waypoints to named reefs or banks when provided in context
 - TECHNIQUE EXCLUSIVITY: Within any single fishingPlan phase, only ONE primary fishing method may be active. Trolling (moving at speed) is physically incompatible with stationary techniques (bait fishing, jigging, bottom fishing, anchoring, drifting) — never recommend both simultaneously within the same phase
 - If the target species mix requires different techniques (e.g. trolling for pelagics + jigging for demersals), allocate them to SEPARATE phases with explicit transition instructions (e.g. "finish trolling run → cut engines → anchor → switch to bait rigs")
-- Use chlorophyll-a level to assess bait concentrations: high (>1 mg/m³) = productive green water likely holding baitfish schools; moderate (0.3–1 mg/m³) = normal open-water conditions; low (<0.3 mg/m³) = clear bluewater requiring wider trolling patterns and attractors`
+- Use chlorophyll-a level to assess bait concentrations: high (>1 mg/m³) = productive green water likely holding baitfish schools; moderate (0.3–1 mg/m³) = normal open-water conditions; low (<0.3 mg/m³) = clear bluewater requiring wider trolling patterns and attractors
+- Sea Level Anomaly interpretation: positive SLA (>+10cm) = warm-core anticyclonic eddy with raised surface, concentrate trolling on the periphery where cold and warm water meet; negative SLA (<-10cm) = cyclonic eddy / upwelling, cold nutrient-rich water that attracts baitfish and the pelagics that chase them
+- Sub-surface temperature drop >3°C between depth levels signals a thermocline — pelagics (Spanish mackerel, tuna, mahi-mahi, wahoo) stack just above the thermocline; set trolling lures and downriggers to within 5m of thermocline top`
 
   const userPrompt = `Generate a complete daily fishing briefing card plan for this session. Return a JSON array of DailyPlan objects.
 
@@ -235,6 +240,25 @@ ${params.nearbyBoatRamps.length > 0
   ? `${params.chlorophyll} mg/m³ — ${params.chlorophyll > 1.0 ? 'elevated (productive green water, active food chain, likely baitfish aggregations)' : params.chlorophyll > 0.3 ? 'moderate (normal open-water conditions)' : 'low (clear bluewater — use wider trolling patterns and attractors)'}`
   : 'Unavailable'}
 - Surface Salinity: ${params.salinity !== null ? `${params.salinity} PSU` : 'Unavailable (nearshore or no data)'}
+- Sea Level Anomaly: ${params.sshAnomaly !== null
+  ? `${(params.sshAnomaly * 100).toFixed(1)} cm — ${params.sshAnomaly > 0.10 ? 'elevated (anticyclonic warm-core eddy — pelagics likely aggregating on periphery)' : params.sshAnomaly < -0.10 ? 'depressed (cyclonic eddy / upwelling — cold nutrient-rich water, may concentrate baitfish)' : 'near-normal (no strong eddy influence at this location)'}`
+  : 'Unavailable'}
+- Water Column Temperatures: ${(() => {
+  const t = params.subsurfaceTemps
+  if (!t) return 'Unavailable (set CMEMS credentials to enable)'
+  const fmt = (v: number | null, label: string) => v !== null ? `${label}: ${v}°C` : `${label}: N/A`
+  const parts = [fmt(t.depth25m, '-25m'), fmt(t.depth50m, '-50m'), fmt(t.depth100m, '-100m')]
+  // Detect thermocline: temp drop > 3°C between adjacent depth levels
+  let thermocline = ''
+  if (t.depth25m !== null && t.depth50m !== null && (t.depth25m - t.depth50m) > 3) {
+    thermocline = ` — thermocline at 25–50m; pelagics above 25m`
+  } else if (t.depth50m !== null && t.depth100m !== null && (t.depth50m - t.depth100m) > 3) {
+    thermocline = ` — thermocline at 50–100m; pelagics above 50m`
+  } else if (t.depth25m !== null && t.depth100m !== null) {
+    thermocline = ` — gradual temperature gradient, no sharp thermocline`
+  }
+  return parts.join(' | ') + thermocline
+})()}
 ${params.nearbyReefs.length > 0
   ? '- Nearby reefs/structures:\n' + params.nearbyReefs.map(r => {
       const depth = r.depth_min != null ? `, ${r.depth_min}–${r.depth_max}m` : ''

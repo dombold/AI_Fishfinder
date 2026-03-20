@@ -1,4 +1,5 @@
-const ERDDAP = 'https://coastwatch.noaa.gov/erddap/griddap'
+const ERDDAP    = 'https://coastwatch.noaa.gov/erddap/griddap'
+const ERDDAP_PF = 'https://coastwatch.pfeg.noaa.gov/erddap/griddap'
 
 /**
  * Chlorophyll-a (mg/m³) via VIIRS DINEOF gap-filled satellite composite.
@@ -15,6 +16,27 @@ export async function getChlorophyll(lat: number, lng: number): Promise<number |
     const val = data.table?.rows?.[0]?.[colIdx]
     if (val === null || val === undefined || isNaN(val)) return null
     return parseFloat((val as number).toFixed(2))
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Sea Level Anomaly (metres) via NOAA altimetry.
+ * Dataset: nesdisSSH1day (0.25°, daily, multi-satellite merged)
+ * Positive SLA = raised sea level = anticyclonic warm-core eddy = pelagic aggregation
+ * Negative SLA = depressed sea level = cyclonic eddy / upwelling = cold nutrient-rich water
+ */
+export async function getSshAnomaly(lat: number, lng: number): Promise<number | null> {
+  try {
+    const url = `${ERDDAP_PF}/nesdisSSH1day.json?sla%5B(last)%5D%5B(${lat})%5D%5B(${lng})%5D`
+    const res = await fetch(url, { signal: AbortSignal.timeout(10000) })
+    if (!res.ok) return null
+    const data = await res.json()
+    const colIdx = data.table?.columnNames?.indexOf('sla') ?? -1
+    const val = data.table?.rows?.[0]?.[colIdx]
+    if (val === null || val === undefined || isNaN(val)) return null
+    return parseFloat((val as number).toFixed(3))
   } catch {
     return null
   }
