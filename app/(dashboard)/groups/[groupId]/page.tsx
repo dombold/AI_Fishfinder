@@ -65,6 +65,7 @@ export default function GroupDetailPage() {
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set())
   const [updatingAvatar, setUpdatingAvatar] = useState(false)
   const avatarInputRef = useRef<HTMLInputElement>(null)
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null)
 
   const fetchAll = useCallback(async () => {
     try {
@@ -91,6 +92,13 @@ export default function GroupDetailPage() {
   useEffect(() => {
     fetchAll()
   }, [fetchAll])
+
+  useEffect(() => {
+    if (!lightboxSrc) return
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setLightboxSrc(null) }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [lightboxSrc])
 
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault()
@@ -447,12 +455,19 @@ export default function GroupDetailPage() {
                           <div key={c.id} style={{ padding: '0.875rem 1.25rem', borderTop: i > 0 ? '1px solid rgba(107,143,163,0.08)' : undefined }}>
                             <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
                               {c.photoBase64 && (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                  src={`data:image/jpeg;base64,${c.photoBase64}`}
-                                  alt={`${c.species} catch photo`}
-                                  style={{ width: '56px', height: '56px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0, border: '1px solid rgba(107,143,163,0.2)' }}
-                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setLightboxSrc(c.photoBase64!)}
+                                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'zoom-in', flexShrink: 0 }}
+                                  aria-label="View full-size photo"
+                                >
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={`data:image/jpeg;base64,${c.photoBase64}`}
+                                    alt={`${c.species} catch photo`}
+                                    style={{ width: '56px', height: '56px', borderRadius: '8px', objectFit: 'cover', display: 'block', border: '1px solid rgba(107,143,163,0.2)' }}
+                                  />
+                                </button>
                               )}
                               <div style={{ flex: 1, minWidth: 0 }}>
                                 <p style={{ color: 'var(--color-foam)', fontSize: '0.9375rem', fontWeight: 600, marginBottom: '0.15rem' }}>
@@ -505,6 +520,46 @@ export default function GroupDetailPage() {
           )}
         </div>
       </div>
+
+      {lightboxSrc && (
+        <div
+          onClick={() => setLightboxSrc(null)}
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: 'fixed', inset: 0, zIndex: 1000,
+            background: 'rgba(4,20,30,0.85)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`data:image/jpeg;base64,${lightboxSrc}`}
+            alt="Catch photo"
+            onClick={e => e.stopPropagation()}
+            style={{
+              maxWidth: 'min(90vw, 800px)',
+              maxHeight: '85vh',
+              borderRadius: '12px',
+              boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
+              objectFit: 'contain',
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => setLightboxSrc(null)}
+            aria-label="Close"
+            style={{
+              position: 'absolute', top: '1.25rem', right: '1.25rem',
+              background: 'rgba(107,143,163,0.15)', border: '1px solid rgba(107,143,163,0.3)',
+              color: 'var(--color-foam)', borderRadius: '50%',
+              width: '2rem', height: '2rem', cursor: 'pointer', fontSize: '1rem',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >✕</button>
+        </div>
+      )}
     </div>
   )
 }
