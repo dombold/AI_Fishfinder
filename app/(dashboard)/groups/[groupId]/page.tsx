@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import DashboardNav from '@/components/DashboardNav'
+import { resizeImage } from '@/lib/image-utils'
 
 interface Member {
   id: string
@@ -33,6 +34,7 @@ interface CatchEntry {
 interface GroupDetail {
   id: string
   name: string
+  avatar: string | null
   ownerId: string
   owner: { id: string; username: string }
   createdAt: string
@@ -61,6 +63,8 @@ export default function GroupDetailPage() {
   const [renaming, setRenaming] = useState(false)
   const [renameError, setRenameError] = useState('')
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set())
+  const [updatingAvatar, setUpdatingAvatar] = useState(false)
+  const avatarInputRef = useRef<HTMLInputElement>(null)
 
   const fetchAll = useCallback(async () => {
     try {
@@ -170,6 +174,24 @@ export default function GroupDetailPage() {
     }
   }
 
+  async function handleAvatarUpdate(file: File) {
+    setUpdatingAvatar(true)
+    try {
+      const { base64, mimeType } = await resizeImage(file)
+      const dataUri = `data:${mimeType};base64,${base64}`
+      const res = await fetch(`/api/groups/${groupId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ avatar: dataUri }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setGroup(prev => prev ? { ...prev, avatar: data.group.avatar } : prev)
+      }
+    } catch {}
+    finally { setUpdatingAvatar(false) }
+  }
+
   const isOwner = group?.ownerId === currentUserId
 
   // Group catches by user, ordered by most recent catch date
@@ -220,6 +242,34 @@ export default function GroupDetailPage() {
         {/* Group header */}
         <div style={{ marginBottom: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: 0, display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+              {/* Group avatar */}
+              <div style={{ position: 'relative', flexShrink: 0 }}>
+                {group?.avatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={group.avatar!} alt={group.name} style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(61,184,200,0.35)', opacity: updatingAvatar ? 0.5 : 1 }} />
+                ) : (
+                  <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--color-current)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: '1.5rem', color: 'var(--color-foam)', border: '2px solid rgba(61,184,200,0.2)', opacity: updatingAvatar ? 0.5 : 1 }}>
+                    {group?.name.charAt(0).toUpperCase() ?? '?'}
+                  </div>
+                )}
+                {isOwner && (
+                  <button
+                    type="button"
+                    onClick={() => avatarInputRef.current?.click()}
+                    title="Change group photo"
+                    disabled={updatingAvatar}
+                    style={{ position: 'absolute', bottom: 0, right: 0, width: '22px', height: '22px', borderRadius: '50%', background: 'var(--color-depths)', border: '1px solid rgba(61,184,200,0.4)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', padding: 0 }}
+                  >✏️</button>
+                )}
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={e => { if (e.target.files?.[0]) handleAvatarUpdate(e.target.files[0]) }}
+                />
+              </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               {editingName ? (
                 <form onSubmit={handleRename} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', marginBottom: '0.25rem' }}>
@@ -264,6 +314,7 @@ export default function GroupDetailPage() {
               <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem' }}>
                 {members.length} member{members.length !== 1 ? 's' : ''} · owned by {group?.owner.username}
               </p>
+            </div>
             </div>
             <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
               {isOwner ? (

@@ -1,13 +1,15 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import DashboardNav from '@/components/DashboardNav'
+import { resizeImage } from '@/lib/image-utils'
 
 interface Group {
   id: string
   name: string
+  avatar: string | null
   ownerId: string
   owner: { id: string; username: string }
   memberCount: number
@@ -27,8 +29,10 @@ export default function GroupsPage() {
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
   const [newName, setNewName] = useState('')
+  const [newAvatar, setNewAvatar] = useState<string | null>(null)
   const [createError, setCreateError] = useState('')
   const [showCreate, setShowCreate] = useState(false)
+  const avatarInputRef = useRef<HTMLInputElement>(null)
 
   const fetchData = useCallback(async () => {
     try {
@@ -42,20 +46,30 @@ export default function GroupsPage() {
 
   useEffect(() => { fetchData() }, [fetchData])
 
+  async function handleAvatarFile(file: File) {
+    try {
+      const { base64, mimeType } = await resizeImage(file)
+      setNewAvatar(`data:${mimeType};base64,${base64}`)
+    } catch {}
+  }
+
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
     if (!newName.trim()) return
     setCreating(true)
     setCreateError('')
     try {
+      const body: { name: string; avatar?: string } = { name: newName.trim() }
+      if (newAvatar) body.avatar = newAvatar
       const res = await fetch('/api/groups', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newName.trim() }),
+        body: JSON.stringify(body),
       })
       if (res.ok) {
         const group = await res.json()
         setNewName('')
+        setNewAvatar(null)
         setShowCreate(false)
         router.push(`/groups/${group.id}`)
       } else {
@@ -96,19 +110,50 @@ export default function GroupsPage() {
         {/* Create group form */}
         {showCreate && (
           <div className="card" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
-            <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.625rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-              <input
-                type="text"
-                value={newName}
-                onChange={e => setNewName(e.target.value)}
-                placeholder="Group name…"
-                maxLength={60}
-                style={{ flex: 1, minWidth: '200px' }}
-                autoFocus
-              />
-              <button type="submit" className="btn-primary" disabled={creating || !newName.trim()} style={{ flexShrink: 0 }}>
-                {creating ? '…' : 'Create'}
-              </button>
+            <form onSubmit={handleCreate}>
+              <div style={{ display: 'flex', gap: '0.875rem', alignItems: 'center', marginBottom: '0.75rem' }}>
+                {/* Avatar picker */}
+                <button
+                  type="button"
+                  onClick={() => avatarInputRef.current?.click()}
+                  title="Add group photo"
+                  style={{
+                    width: '52px', height: '52px', borderRadius: '50%', flexShrink: 0, cursor: 'pointer',
+                    background: newAvatar ? 'transparent' : 'rgba(61,184,200,0.08)',
+                    border: '2px dashed rgba(61,184,200,0.35)', overflow: 'hidden',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    padding: 0,
+                  }}
+                >
+                  {newAvatar ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={newAvatar} alt="Group avatar preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>📷</span>
+                  )}
+                </button>
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={e => { if (e.target.files?.[0]) handleAvatarFile(e.target.files[0]) }}
+                />
+                <input
+                  type="text"
+                  value={newName}
+                  onChange={e => setNewName(e.target.value)}
+                  placeholder="Group name…"
+                  maxLength={60}
+                  style={{ flex: 1 }}
+                  autoFocus
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                <button type="submit" className="btn-primary" disabled={creating || !newName.trim()} style={{ flexShrink: 0 }}>
+                  {creating ? '…' : 'Create'}
+                </button>
+              </div>
             </form>
             {createError && (
               <p style={{ marginTop: '0.5rem', fontSize: '0.8125rem', color: 'var(--color-warning)' }}>{createError}</p>
@@ -155,7 +200,15 @@ export default function GroupsPage() {
                 href={`/groups/${g.id}`}
                 style={{ textDecoration: 'none' }}
               >
-                <div className="card" style={{ padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', cursor: 'pointer' }}>
+                <div className="card" style={{ padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.875rem', cursor: 'pointer' }}>
+                  {g.avatar ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={g.avatar} alt={g.name} style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '1px solid rgba(61,184,200,0.3)' }} />
+                  ) : (
+                    <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'var(--color-current)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: '1.125rem', color: 'var(--color-foam)', flexShrink: 0 }}>
+                      {g.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ color: 'var(--color-foam)', fontSize: '0.9375rem', fontWeight: 600, marginBottom: '0.15rem' }}>
                       {g.name}

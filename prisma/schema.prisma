@@ -130,6 +130,7 @@ model CatchLog {
 model Group {
   id          String            @id @default(cuid())
   name        String
+  avatar      String?
   ownerId     String
   owner       User              @relation("GroupOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   memberships GroupMembership[]

@@ -8,18 +8,31 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ gr
     const session = await auth()
     if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { name } = await req.json()
-    const trimmed = typeof name === 'string' ? name.trim() : ''
-    if (!trimmed || trimmed.length > 60) {
-      return NextResponse.json({ error: 'Group name must be 1–60 characters' }, { status: 400 })
+    const body = await req.json()
+    const updates: { name?: string; avatar?: string | null } = {}
+
+    if ('name' in body) {
+      const trimmed = typeof body.name === 'string' ? body.name.trim() : ''
+      if (!trimmed || trimmed.length > 60) {
+        return NextResponse.json({ error: 'Group name must be 1–60 characters' }, { status: 400 })
+      }
+      updates.name = trimmed
+    }
+
+    if ('avatar' in body) {
+      updates.avatar = typeof body.avatar === 'string' ? body.avatar : null
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ error: 'Nothing to update' }, { status: 400 })
     }
 
     const group = await prisma.group.findUnique({ where: { id: groupId } })
     if (!group) return NextResponse.json({ error: 'Not found' }, { status: 404 })
     if (group.ownerId !== session.user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-    const updated = await prisma.group.update({ where: { id: groupId }, data: { name: trimmed } })
-    return NextResponse.json({ group: { id: updated.id, name: updated.name } })
+    const updated = await prisma.group.update({ where: { id: groupId }, data: updates })
+    return NextResponse.json({ group: { id: updated.id, name: updated.name, avatar: updated.avatar } })
   } catch (err: any) {
     console.error('[PATCH /api/groups/[groupId]]', err)
     return NextResponse.json({ error: err?.message ?? 'Server error' }, { status: 500 })

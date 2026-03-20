@@ -4,7 +4,8 @@ import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 
 const createGroupSchema = z.object({
-  name: z.string().min(1).max(60),
+  name:   z.string().min(1).max(60),
+  avatar: z.string().optional(),
 })
 
 export async function GET() {
@@ -49,7 +50,7 @@ export async function POST(req: NextRequest) {
     const userId = session.user.id
     const group = await prisma.$transaction(async (tx) => {
       const g = await tx.group.create({
-        data: { name: parsed.data.name, ownerId: userId },
+        data: { name: parsed.data.name, avatar: parsed.data.avatar ?? null, ownerId: userId },
       })
       await tx.groupMembership.create({
         data: { groupId: g.id, userId, status: 'ACTIVE' },
