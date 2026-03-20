@@ -106,7 +106,7 @@ export default function DashboardNav({ backHref, backLabel = '← Dashboard' }: 
           top: '56px',
           left: 0,
           right: 0,
-          zIndex: 99,
+          zIndex: 1500,
           overflowY: 'auto',
           maxHeight: 'calc(100vh - 56px)',
           transition: 'transform 200ms cubic-bezier(0.25,0.46,0.45,0.94), opacity 200ms cubic-bezier(0.25,0.46,0.45,0.94)',

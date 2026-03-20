@@ -45,14 +45,17 @@ export default function MapPickerInner({ value, onChange, height = 640 }: Props)
   const weatherStationLayersRef  = useRef<any[]>([])
   const myCatchLayersRef         = useRef<any[]>([])
   const newsletterCatchLayersRef = useRef<any[]>([])
+  const groupCatchLayersRef      = useRef<any[]>([])
   const myCatchDataRef           = useRef<any[] | null>(null)
   const newsletterCatchDataRef   = useRef<any[] | null>(null)
+  const groupCatchDataRef        = useRef<{ catches: any[]; groups: { id: string; name: string }[] } | null>(null)
   const [mode, setMode] = useState<MapMode>('satellite')
   const [ready, setReady] = useState(false)
   const [showBoatRamps, setShowBoatRamps]               = useState(false)
   const [showWeatherStations, setShowWeatherStations]   = useState(false)
   const [showMyCatches, setShowMyCatches]               = useState(false)
   const [showNewsletterCatches, setShowNewsletterCatches] = useState(false)
+  const [showGroupCatches, setShowGroupCatches]         = useState(false)
 
   // ── Initialize map ────────────────────────────────────────────
   useEffect(() => {
@@ -112,6 +115,7 @@ export default function MapPickerInner({ value, onChange, height = 640 }: Props)
       weatherStationLayersRef.current = []
       myCatchLayersRef.current = []
       newsletterCatchLayersRef.current = []
+      groupCatchLayersRef.current = []
       if (containerRef.current) {
         ;(containerRef.current as any)._leaflet_id = undefined
       }
@@ -254,6 +258,49 @@ export default function MapPickerInner({ value, onChange, height = 640 }: Props)
     })
   }, [showNewsletterCatches, ready])
 
+  // ── Group catches overlay ─────────────────────────────────────
+  useEffect(() => {
+    if (!ready || !mapRef.current) return
+    const GROUP_COLORS = [
+      'rgba(249,115,22',   // orange
+      'rgba(236,72,153',   // pink
+      'rgba(20,184,166',   // teal
+      'rgba(234,179,8',    // yellow
+    ]
+    import('leaflet').then(async (mod) => {
+      const L   = mod.default
+      const map = mapRef.current
+      if (!map) return
+      groupCatchLayersRef.current.forEach(l => map.removeLayer(l))
+      groupCatchLayersRef.current = []
+      if (!showGroupCatches) return
+      if (!groupCatchDataRef.current) {
+        const res = await fetch('/api/groups/catches')
+        const data = await res.json()
+        groupCatchDataRef.current = { catches: data.catches ?? [], groups: data.groups ?? [] }
+      }
+      const { catches: gCatches, groups } = groupCatchDataRef.current
+      const groupIndex = new Map(groups.map((g, i) => [g.id, i]))
+      const groupName  = new Map(groups.map(g => [g.id, g.name]))
+      gCatches.forEach((c: any) => {
+        const idx   = (groupIndex.get(c.groupId) ?? 0) % GROUP_COLORS.length
+        const color = GROUP_COLORS[idx]
+        const icon  = L.divIcon({
+          className: '',
+          html: `<div style="width:26px;height:26px;border-radius:50%;background:${color},0.92);border:2px solid rgba(255,255,255,0.8);box-shadow:0 2px 6px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;">👥</div>`,
+          iconSize:   [26, 26],
+          iconAnchor: [13, 13],
+        })
+        const name = groupName.get(c.groupId) ?? 'Group'
+        const marker = L.marker([c.latitude, c.longitude], { icon }).bindPopup(
+          `<div style="font-family:sans-serif;min-width:160px;"><strong>${c.species}</strong> × ${c.quantity}<div style="font-size:0.8em;color:#666;margin-top:3px;">${c.date}</div><div style="font-size:0.8em;color:#888;margin-top:2px;">${c.user.username} · ${name}</div></div>`
+        )
+        marker.addTo(map)
+        groupCatchLayersRef.current.push(marker)
+      })
+    })
+  }, [showGroupCatches, ready])
+
   // ── Sync marker with value prop ───────────────────────────────
   useEffect(() => {
     if (!ready || !mapRef.current) return
@@ -267,7 +314,13 @@ export default function MapPickerInner({ value, onChange, height = 640 }: Props)
         markerRef.current = null
       }
       if (value) {
-        markerRef.current = L.marker([value.lat, value.lng]).addTo(map)
+        const pinIcon = L.divIcon({
+          className: '',
+          html: `<div style="width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:rgba(61,184,200,0.92);border:2px solid rgba(255,255,255,0.9);box-shadow:0 2px 8px rgba(0,0,0,0.5);"></div>`,
+          iconSize:   [28, 28],
+          iconAnchor: [14, 28],
+        })
+        markerRef.current = L.marker([value.lat, value.lng], { icon: pinIcon }).addTo(map)
       }
     })
   }, [value, ready])
@@ -367,6 +420,20 @@ export default function MapPickerInner({ value, onChange, height = 640 }: Props)
               transition: 'background 150ms',
             }}
           >📰</button>
+          <button
+            type="button"
+            onClick={() => setShowGroupCatches(v => !v)}
+            title="Toggle group member catches"
+            style={{
+              width: '30px', height: '30px', borderRadius: '0.375rem',
+              border: '1px solid rgba(255,255,255,0.25)',
+              background: showGroupCatches ? 'rgba(249,115,22,0.85)' : 'rgba(11,25,41,0.85)',
+              color: '#fff', fontSize: '14px', cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'background 150ms',
+            }}
+          >👥</button>
         </div>
       </div>
 

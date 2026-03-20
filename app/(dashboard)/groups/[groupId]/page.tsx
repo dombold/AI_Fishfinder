@@ -60,6 +60,7 @@ export default function GroupDetailPage() {
   const [nameInput, setNameInput] = useState('')
   const [renaming, setRenaming] = useState(false)
   const [renameError, setRenameError] = useState('')
+  const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set())
 
   const fetchAll = useCallback(async () => {
     try {
@@ -170,6 +171,34 @@ export default function GroupDetailPage() {
   }
 
   const isOwner = group?.ownerId === currentUserId
+
+  // Group catches by user, ordered by most recent catch date
+  const catchesByUser: { user: CatchEntry['user']; catches: CatchEntry[] }[] = []
+  {
+    const map = new Map<string, { user: CatchEntry['user']; catches: CatchEntry[] }>()
+    for (const c of catches) {
+      if (!map.has(c.user.id)) map.set(c.user.id, { user: c.user, catches: [] })
+      map.get(c.user.id)!.catches.push(c)
+    }
+    for (const entry of map.values()) {
+      catchesByUser.push(entry)
+    }
+    // Sort by most recent catch date descending
+    catchesByUser.sort((a, b) => {
+      const aDate = a.catches[0]?.date ?? ''
+      const bDate = b.catches[0]?.date ?? ''
+      return bDate.localeCompare(aDate)
+    })
+  }
+
+  function toggleUser(userId: string) {
+    setExpandedUsers(prev => {
+      const next = new Set(prev)
+      if (next.has(userId)) next.delete(userId)
+      else next.add(userId)
+      return next
+    })
+  }
 
   if (loading) {
     return (
@@ -329,72 +358,98 @@ export default function GroupDetailPage() {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
-              {catches.map(c => (
-                <div key={c.id} className="card" style={{ padding: '0.875rem 1.25rem' }}>
-                  {/* Member attribution */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.625rem' }}>
-                    {c.user.avatar ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={c.user.avatar} alt={c.user.username} style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(61,184,200,0.25)' }} />
-                    ) : (
-                      <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'var(--color-current)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.625rem', fontFamily: 'var(--font-display)', color: 'var(--color-foam)', flexShrink: 0 }}>
-                        {c.user.username.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                    <span style={{ fontSize: '0.75rem', color: 'var(--color-seafoam)', fontWeight: 600 }}>{c.user.username}</span>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-                    {c.photoBase64 && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={`data:image/jpeg;base64,${c.photoBase64}`}
-                        alt={`${c.species} catch photo`}
-                        style={{ width: '56px', height: '56px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0, border: '1px solid rgba(107,143,163,0.2)' }}
-                      />
-                    )}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ color: 'var(--color-foam)', fontSize: '0.9375rem', fontWeight: 600, marginBottom: '0.15rem' }}>
-                        {c.species}{' '}
-                        <span style={{ color: 'var(--color-mist)', fontWeight: 400, fontSize: '0.875rem' }}>
-                          × {c.quantity}{c.weightKg ? ` · ${c.weightKg}kg` : ''}{c.lengthCm ? ` · ${c.lengthCm}cm` : ''}
-                        </span>
-                      </p>
-                      <p style={{ color: 'var(--color-mist)', fontSize: '0.8125rem' }}>
-                        {new Date(c.date + 'T12:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
-                        {' · '}{Math.abs(c.latitude).toFixed(3)}°S, {c.longitude.toFixed(3)}°E
-                      </p>
-                      {c.notes && (
-                        <p style={{ color: 'rgba(107,143,163,0.7)', fontSize: '0.75rem', marginTop: '0.2rem' }}>{c.notes}</p>
-                      )}
-                      {(c.sst != null || c.tideDirection || c.moonPhase || c.waterDepthM != null) && (
-                        <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
-                          {c.sst != null && (
-                            <span style={{ fontSize: '0.72rem', padding: '0.15rem 0.45rem', borderRadius: '999px', background: 'rgba(10,126,164,0.12)', border: '1px solid rgba(10,126,164,0.3)', color: 'var(--color-current, #2196c4)' }}>
-                              {c.sst.toFixed(1)}°C
-                            </span>
-                          )}
-                          {c.waterDepthM != null && (
-                            <span style={{ fontSize: '0.72rem', padding: '0.15rem 0.45rem', borderRadius: '999px', background: 'rgba(10,126,164,0.08)', border: '1px solid rgba(10,126,164,0.25)', color: 'var(--color-current, #2196c4)' }}>
-                              {c.waterDepthM % 1 === 0 ? c.waterDepthM : c.waterDepthM.toFixed(1)}m depth
-                            </span>
-                          )}
-                          {c.tideDirection && (
-                            <span style={{ fontSize: '0.72rem', padding: '0.15rem 0.45rem', borderRadius: '999px', background: 'rgba(60,191,174,0.1)', border: '1px solid rgba(60,191,174,0.3)', color: 'var(--color-seafoam)' }}>
-                              {c.tideDirection.charAt(0).toUpperCase() + c.tideDirection.slice(1)} tide
-                            </span>
-                          )}
-                          {c.moonPhase && (
-                            <span style={{ fontSize: '0.72rem', padding: '0.15rem 0.45rem', borderRadius: '999px', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.3)', color: 'var(--color-sand, #c9a84c)' }}>
-                              {c.moonPhase}
-                            </span>
-                          )}
+              {catchesByUser.map(({ user: u, catches: userCatches }) => {
+                const expanded = expandedUsers.has(u.id)
+                return (
+                  <div key={u.id} className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                    {/* User summary header — clickable */}
+                    <button
+                      type="button"
+                      onClick={() => toggleUser(u.id)}
+                      style={{
+                        width: '100%', display: 'flex', alignItems: 'center', gap: '0.625rem',
+                        padding: '0.875rem 1.25rem', background: 'none', border: 'none',
+                        cursor: 'pointer', textAlign: 'left',
+                      }}
+                    >
+                      {u.avatar ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={u.avatar} alt={u.username} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '1px solid rgba(61,184,200,0.3)' }} />
+                      ) : (
+                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--color-current)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8125rem', fontFamily: 'var(--font-display)', color: 'var(--color-foam)', flexShrink: 0 }}>
+                          {u.username.charAt(0).toUpperCase()}
                         </div>
                       )}
-                    </div>
+                      <span style={{ flex: 1, color: 'var(--color-foam)', fontSize: '0.9375rem', fontWeight: 600 }}>{u.username}</span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--color-seafoam)', background: 'rgba(61,184,200,0.1)', border: '1px solid rgba(61,184,200,0.2)', borderRadius: '999px', padding: '0.15rem 0.6rem', flexShrink: 0 }}>
+                        {userCatches.length} catch{userCatches.length !== 1 ? 'es' : ''}
+                      </span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(107,143,163,0.6)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 200ms' }}>
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </button>
+
+                    {/* Expanded catch list */}
+                    {expanded && (
+                      <div style={{ borderTop: '1px solid rgba(107,143,163,0.12)', display: 'flex', flexDirection: 'column', gap: 0 }}>
+                        {userCatches.map((c, i) => (
+                          <div key={c.id} style={{ padding: '0.875rem 1.25rem', borderTop: i > 0 ? '1px solid rgba(107,143,163,0.08)' : undefined }}>
+                            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                              {c.photoBase64 && (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={`data:image/jpeg;base64,${c.photoBase64}`}
+                                  alt={`${c.species} catch photo`}
+                                  style={{ width: '56px', height: '56px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0, border: '1px solid rgba(107,143,163,0.2)' }}
+                                />
+                              )}
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <p style={{ color: 'var(--color-foam)', fontSize: '0.9375rem', fontWeight: 600, marginBottom: '0.15rem' }}>
+                                  {c.species}{' '}
+                                  <span style={{ color: 'var(--color-mist)', fontWeight: 400, fontSize: '0.875rem' }}>
+                                    × {c.quantity}{c.weightKg ? ` · ${c.weightKg}kg` : ''}{c.lengthCm ? ` · ${c.lengthCm}cm` : ''}
+                                  </span>
+                                </p>
+                                <p style={{ color: 'var(--color-mist)', fontSize: '0.8125rem' }}>
+                                  {new Date(c.date + 'T12:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                  {' · '}{Math.abs(c.latitude).toFixed(3)}°S, {c.longitude.toFixed(3)}°E
+                                </p>
+                                {c.notes && (
+                                  <p style={{ color: 'rgba(107,143,163,0.7)', fontSize: '0.75rem', marginTop: '0.2rem' }}>{c.notes}</p>
+                                )}
+                                {(c.sst != null || c.tideDirection || c.moonPhase || c.waterDepthM != null) && (
+                                  <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+                                    {c.sst != null && (
+                                      <span style={{ fontSize: '0.72rem', padding: '0.15rem 0.45rem', borderRadius: '999px', background: 'rgba(10,126,164,0.12)', border: '1px solid rgba(10,126,164,0.3)', color: 'var(--color-current, #2196c4)' }}>
+                                        {c.sst.toFixed(1)}°C
+                                      </span>
+                                    )}
+                                    {c.waterDepthM != null && (
+                                      <span style={{ fontSize: '0.72rem', padding: '0.15rem 0.45rem', borderRadius: '999px', background: 'rgba(10,126,164,0.08)', border: '1px solid rgba(10,126,164,0.25)', color: 'var(--color-current, #2196c4)' }}>
+                                        {c.waterDepthM % 1 === 0 ? c.waterDepthM : c.waterDepthM.toFixed(1)}m depth
+                                      </span>
+                                    )}
+                                    {c.tideDirection && (
+                                      <span style={{ fontSize: '0.72rem', padding: '0.15rem 0.45rem', borderRadius: '999px', background: 'rgba(60,191,174,0.1)', border: '1px solid rgba(60,191,174,0.3)', color: 'var(--color-seafoam)' }}>
+                                        {c.tideDirection.charAt(0).toUpperCase() + c.tideDirection.slice(1)} tide
+                                      </span>
+                                    )}
+                                    {c.moonPhase && (
+                                      <span style={{ fontSize: '0.72rem', padding: '0.15rem 0.45rem', borderRadius: '999px', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.3)', color: 'var(--color-sand, #c9a84c)' }}>
+                                        {c.moonPhase}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
