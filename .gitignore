@@ -39,8 +39,9 @@ temporary screenshots/
 screenshot.mjs
 scripts/
 
-# PM2 runtime
+# PM2
 .pm2/
+ecosystem.config.js
 
 # TypeScript
 *.tsbuildinfo

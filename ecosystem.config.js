@@ -4,7 +4,7 @@ module.exports = {
       name: 'ai-fishfinder',
       script: 'node_modules/.bin/next',
       args: 'start',
-      cwd: '/home/dombold/Coding_Files/AI_Fishfinder',
+      cwd: '/home/dombold/fishfinder',
       instances: 1,
       autorestart: true,
       watch: false,
