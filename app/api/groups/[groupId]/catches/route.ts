@@ -16,12 +16,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ grou
 
     const catches = await prisma.catchLog.findMany({
       where: {
-        shared: true,
         user: {
           memberships: {
             some: { groupId, status: 'ACTIVE' },
           },
         },
+        OR: [
+          { shared: true },
+          { shared: false, sharedGroups: { some: { groupId } } },
+        ],
       },
       include: {
         user: { select: { id: true, username: true, avatar: true } },

@@ -11,9 +11,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const { id } = await params
     const session = await auth()
     if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const userId = session.user.id
 
     const existing = await prisma.catchLog.findUnique({
-      where: { id, userId: session.user.id },
+      where: { id, userId },
       select: { id: true, latitude: true, longitude: true },
     })
     if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
@@ -22,7 +23,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const result = patchSchema.safeParse(body)
     if (!result.success) return NextResponse.json({ error: 'Invalid input', details: result.error.flatten() }, { status: 400 })
 
-    const updates: Record<string, unknown> = { ...result.data }
+    const { sharedGroupIds, ...catchFields } = result.data
+    const updates: Record<string, unknown> = { ...catchFields }
 
     if (result.data.latitude != null || result.data.longitude != null) {
       const lat = result.data.latitude ?? existing.latitude
@@ -30,7 +32,36 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       updates.bioregion = getBioregion(lat, lng)
     }
 
-    const updated = await prisma.catchLog.update({ where: { id }, data: updates })
+    const updated = await prisma.$transaction(async (tx) => {
+      const record = await tx.catchLog.update({ where: { id }, data: updates })
+
+      const sharedValue = result.data.shared ?? record.shared
+
+      // Clear junction rows when explicitly switching to shared=true (cleanup)
+      if (result.data.shared === true) {
+        await tx.catchLogSharedGroup.deleteMany({ where: { catchLogId: id } })
+      }
+
+      // Replace junction rows when sharedGroupIds was explicitly sent
+      if (sharedGroupIds !== undefined && sharedValue === false) {
+        await tx.catchLogSharedGroup.deleteMany({ where: { catchLogId: id } })
+        if (sharedGroupIds.length > 0) {
+          const memberships = await tx.groupMembership.findMany({
+            where: { userId, groupId: { in: sharedGroupIds }, status: 'ACTIVE' },
+            select: { groupId: true },
+          })
+          const validIds = memberships.map(m => m.groupId)
+          if (validIds.length > 0) {
+            await tx.catchLogSharedGroup.createMany({
+              data: validIds.map(groupId => ({ catchLogId: id, groupId })),
+              skipDuplicates: true,
+            })
+          }
+        }
+      }
+
+      return record
+    })
     return NextResponse.json(updated)
   } catch (err: any) {
     console.error('[PATCH /api/catch-log/[id]]', err)

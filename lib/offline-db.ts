@@ -41,6 +41,8 @@ export interface PendingCatch {
     tideDirection?: string
     moonPhase?: string
     waterDepthM?: number
+    shared?: boolean
+    sharedGroupIds?: string[]
   }
 }
 

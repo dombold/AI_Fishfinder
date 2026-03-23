@@ -34,6 +34,7 @@ interface Props {
     moonPhase: string | null
     waterDepthM: number | null
     shared: boolean
+    sharedGroupIds?: string[]
   }
 }
 
@@ -94,6 +95,9 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
   const [gpsError, setGpsError] = useState('')
 
   const [shared, setShared] = useState(initialValues?.shared ?? true)
+  const [groups, setGroups] = useState<{ id: string; name: string }[]>([])
+  const [groupsLoading, setGroupsLoading] = useState(false)
+  const [sharedGroupIds, setSharedGroupIds] = useState<string[]>(initialValues?.sharedGroupIds ?? [])
 
   // Conditions state
   const [sst, setSst] = useState<string>(initialValues?.sst != null ? String(initialValues.sst) : '')
@@ -128,6 +132,17 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
       .finally(() => { if (!cancelled) setConditionsLoading(false) })
     return () => { cancelled = true }
   }, [location, date, captureTime, conditionsFetched, isOnline])
+
+  // Fetch user's groups once (for per-group sharing checkboxes)
+  useEffect(() => {
+    if (!isOnline) return
+    setGroupsLoading(true)
+    fetch('/api/groups')
+      .then(r => r.json())
+      .then(data => setGroups(data.groups ?? []))
+      .catch(() => {})
+      .finally(() => setGroupsLoading(false))
+  }, [isOnline])
 
   async function processFile(file: File) {
     setIdentifyError('')
@@ -235,6 +250,7 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
     setMoonPhase('')
     setWaterDepthM('')
     setShared(true)
+    setSharedGroupIds([])
     setConditionsFetched(false)
     setOfflineSaved(false)
   }
@@ -263,6 +279,7 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
       ...(moonPhase.trim() ? { moonPhase: moonPhase.trim() } : {}),
       ...(waterDepthM ? { waterDepthM: parseFloat(waterDepthM) } : {}),
       shared,
+      sharedGroupIds: shared ? [] : sharedGroupIds,
     }
 
     // ─── Offline path ──────────────────────────────────────────────────────
@@ -519,30 +536,87 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
       </div>
 
       {/* Share with groups */}
-      <label style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', cursor: 'pointer', userSelect: 'none' }}>
-        <div
-          onClick={() => setShared(v => !v)}
-          style={{
-            width: '18px',
-            height: '18px',
-            borderRadius: '4px',
-            border: `1.5px solid ${shared ? 'var(--color-seafoam)' : 'rgba(107,143,163,0.4)'}`,
-            background: shared ? 'rgba(61,184,200,0.15)' : 'transparent',
-            flexShrink: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'border-color 150ms, background 150ms',
-          }}
-        >
-          {shared && (
-            <svg width="11" height="9" viewBox="0 0 11 9" fill="none" aria-hidden="true">
-              <path d="M1 4.5L4 7.5L10 1.5" stroke="var(--color-seafoam)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          )}
-        </div>
-        <span style={{ fontSize: '0.875rem', color: 'var(--color-mist)' }}>Share with groups</span>
-      </label>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        {/* "Share with all groups" master checkbox */}
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', cursor: 'pointer', userSelect: 'none' }}>
+          <div
+            onClick={() => {
+              setShared(v => {
+                if (!v) setSharedGroupIds([])
+                return !v
+              })
+            }}
+            style={{
+              width: '18px',
+              height: '18px',
+              borderRadius: '4px',
+              border: `1.5px solid ${shared ? 'var(--color-seafoam)' : 'rgba(107,143,163,0.4)'}`,
+              background: shared ? 'rgba(61,184,200,0.15)' : 'transparent',
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'border-color 150ms, background 150ms',
+            }}
+          >
+            {shared && (
+              <svg width="11" height="9" viewBox="0 0 11 9" fill="none" aria-hidden="true">
+                <path d="M1 4.5L4 7.5L10 1.5" stroke="var(--color-seafoam)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+          </div>
+          <span style={{ fontSize: '0.875rem', color: 'var(--color-mist)' }}>Share with all groups</span>
+        </label>
+
+        {/* Per-group checkboxes — visible when "share with all" is unchecked */}
+        {!shared && (
+          <div style={{ paddingLeft: '1.625rem', display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+            {!isOnline ? (
+              <p style={{ fontSize: '0.75rem', color: 'rgba(201,168,76,0.7)', margin: 0 }}>
+                Per-group sharing unavailable offline
+              </p>
+            ) : groupsLoading ? (
+              <span style={{ fontSize: '0.75rem', color: 'var(--color-mist)' }}>Loading groups…</span>
+            ) : groups.length === 0 ? null : (
+              <>
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-mist)', margin: '0 0 0.125rem' }}>
+                  Share with specific groups:
+                </p>
+                {groups.map(g => (
+                  <label key={g.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', userSelect: 'none' }}>
+                    <div
+                      onClick={() =>
+                        setSharedGroupIds(prev =>
+                          prev.includes(g.id) ? prev.filter(id => id !== g.id) : [...prev, g.id]
+                        )
+                      }
+                      style={{
+                        width: '16px',
+                        height: '16px',
+                        borderRadius: '3px',
+                        border: `1.5px solid ${sharedGroupIds.includes(g.id) ? 'var(--color-seafoam)' : 'rgba(107,143,163,0.4)'}`,
+                        background: sharedGroupIds.includes(g.id) ? 'rgba(61,184,200,0.15)' : 'transparent',
+                        flexShrink: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'border-color 150ms, background 150ms',
+                      }}
+                    >
+                      {sharedGroupIds.includes(g.id) && (
+                        <svg width="10" height="8" viewBox="0 0 11 9" fill="none" aria-hidden="true">
+                          <path d="M1 4.5L4 7.5L10 1.5" stroke="var(--color-seafoam)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
+                    </div>
+                    <span style={{ fontSize: '0.8125rem', color: 'var(--color-foam)' }}>{g.name}</span>
+                  </label>
+                ))}
+              </>
+            )}
+          </div>
+        )}
+      </div>
 
       {error && (
         <div style={{ background: 'rgba(224,92,42,0.12)', border: '1px solid rgba(224,92,42,0.35)', borderRadius: '0.5rem', padding: '0.625rem 0.875rem', color: 'var(--color-warning)', fontSize: '0.8125rem' }}>

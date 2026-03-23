@@ -25,6 +25,7 @@ interface CatchEntry {
   waterDepthM: number | null
   photoBase64: string | null
   shared: boolean
+  sharedGroups: { groupId: string }[]
 }
 
 export default function CatchLogPage() {
@@ -92,15 +93,26 @@ export default function CatchLogPage() {
     return () => window.removeEventListener('keydown', handler)
   }, [lightboxSrc])
 
-  async function toggleShared(id: string, currentShared: boolean) {
+  function sharingState(c: CatchEntry): 'all' | 'partial' | 'private' {
+    if (c.shared) return 'all'
+    if (c.sharedGroups.length > 0) return 'partial'
+    return 'private'
+  }
+
+  async function cycleSharing(c: CatchEntry) {
+    const next = c.shared
+      ? { shared: false, sharedGroupIds: [] }
+      : { shared: true, sharedGroupIds: [] }
     try {
-      const res = await fetch(`/api/catch-log/${id}`, {
+      const res = await fetch(`/api/catch-log/${c.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shared: !currentShared }),
+        body: JSON.stringify(next),
       })
       if (res.ok) {
-        setCatches(prev => prev.map(c => c.id === id ? { ...c, shared: !currentShared } : c))
+        setCatches(prev => prev.map(x =>
+          x.id === c.id ? { ...x, shared: next.shared, sharedGroups: [] } : x
+        ))
       }
     } catch {}
   }
@@ -242,26 +254,36 @@ export default function CatchLogPage() {
                     )}
                   </div>
                   <div style={{ display: 'flex', gap: '0.25rem', flexShrink: 0, alignItems: 'center' }}>
-                    <button
-                      type="button"
-                      onClick={() => toggleShared(c.id, c.shared)}
-                      title={c.shared ? 'Visible to groups — click to make private' : 'Private — click to share with groups'}
-                      style={{
-                        background: c.shared ? 'rgba(61,184,200,0.1)' : 'rgba(107,143,163,0.08)',
-                        border: `1px solid ${c.shared ? 'rgba(61,184,200,0.3)' : 'rgba(107,143,163,0.25)'}`,
-                        borderRadius: '20px',
-                        padding: '0.15rem 0.5rem',
-                        cursor: 'pointer',
-                        color: c.shared ? 'var(--color-seafoam)' : 'var(--color-mist)',
-                        fontSize: '0.6875rem',
-                        fontWeight: 600,
-                        lineHeight: 1.4,
-                        flexShrink: 0,
-                        letterSpacing: '0.03em',
-                      }}
-                    >
-                      {c.shared ? 'Shared' : 'Private'}
-                    </button>
+                    {(() => {
+                      const state = sharingState(c)
+                      const badgeLabel = state === 'all' ? 'All groups' : state === 'partial' ? `${c.sharedGroups.length} group${c.sharedGroups.length > 1 ? 's' : ''}` : 'Private'
+                      const badgeTip = state === 'all' ? 'Visible to all groups — click to make private' : state === 'partial' ? `Shared with ${c.sharedGroups.length} group${c.sharedGroups.length > 1 ? 's' : ''} — click to make private` : 'Private — click to share with all groups'
+                      const badgeBg = state === 'all' ? 'rgba(61,184,200,0.1)' : state === 'partial' ? 'rgba(201,168,76,0.08)' : 'rgba(107,143,163,0.08)'
+                      const badgeBorder = state === 'all' ? 'rgba(61,184,200,0.3)' : state === 'partial' ? 'rgba(201,168,76,0.3)' : 'rgba(107,143,163,0.25)'
+                      const badgeColor = state === 'all' ? 'var(--color-seafoam)' : state === 'partial' ? '#c9a84c' : 'var(--color-mist)'
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => cycleSharing(c)}
+                          title={badgeTip}
+                          style={{
+                            background: badgeBg,
+                            border: `1px solid ${badgeBorder}`,
+                            borderRadius: '20px',
+                            padding: '0.15rem 0.5rem',
+                            cursor: 'pointer',
+                            color: badgeColor,
+                            fontSize: '0.6875rem',
+                            fontWeight: 600,
+                            lineHeight: 1.4,
+                            flexShrink: 0,
+                            letterSpacing: '0.03em',
+                          }}
+                        >
+                          {badgeLabel}
+                        </button>
+                      )
+                    })()}
                     <button
                       type="button"
                       onClick={() => setEditingId(editingId === c.id ? null : c.id)}
@@ -304,6 +326,7 @@ export default function CatchLogPage() {
                         moonPhase: c.moonPhase,
                         waterDepthM: c.waterDepthM,
                         shared: c.shared,
+                        sharedGroupIds: c.sharedGroups.map(sg => sg.groupId),
                       }}
                       onSuccess={() => { fetchCatches(); setEditingId(null) }}
                     />
