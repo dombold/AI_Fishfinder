@@ -2,6 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'ai-fishfinder',
+      interpreter: '/home/dombold/.nvm/versions/node/v22.22.1/bin/node',
       script: 'node_modules/.bin/next',
       args: 'start',
       cwd: '/home/dombold/fishfinder',

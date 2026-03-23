@@ -43,14 +43,14 @@ An AI-powered fishing briefing card generator for Western Australian waters. Ent
 | Maps | React Leaflet — CartoDB Voyager + Esri Satellite |
 | Offline storage | IndexedDB via `idb` + Service Worker (Cache Storage) |
 | Email | Nodemailer (any SMTP provider) |
-| Styling | Tailwind CSS (CDN) |
+| Styling | Tailwind CSS v4 (PostCSS) |
 | Deployment | PM2 |
 
 ---
 
 ## Prerequisites
 
-- Node.js 18+
+- Node.js 20+
 - PostgreSQL database
 - [Anthropic API key](https://console.anthropic.com)
 - [WillyWeather API key](https://www.willyweather.com.au/info/api.html)

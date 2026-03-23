@@ -29,7 +29,7 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): nu
 /** Get ocean depth (metres, negative) or land elevation (positive) at a coordinate */
 export async function getDepthAt(lat: number, lng: number): Promise<number | null> {
   try {
-    const res = await fetch(`${GEBCO_API}?locations=${lat},${lng}`)
+    const res = await fetch(`${GEBCO_API}?locations=${lat},${lng}`, { signal: AbortSignal.timeout(10000) })
     const data = await res.json()
     return data.results?.[0]?.elevation ?? null
   } catch {
@@ -42,7 +42,7 @@ export async function batchDepths(coords: { lat: number; lng: number }[]): Promi
   if (!coords.length) return []
   try {
     const locs = coords.map(c => `${c.lat},${c.lng}`).join('|')
-    const res = await fetch(`${GEBCO_API}?locations=${locs}`)
+    const res = await fetch(`${GEBCO_API}?locations=${locs}`, { signal: AbortSignal.timeout(10000) })
     const data = await res.json()
     return data.results?.map((r: any) => r.elevation ?? null) ?? coords.map(() => null)
   } catch {
