@@ -49,7 +49,7 @@ const nextConfig = {
         headers: catchLogHeaders,
       },
       {
-        source: '/(.*)',
+        source: '/((?!catch-log).*)',
         headers: baseSecurityHeaders,
       },
     ]
