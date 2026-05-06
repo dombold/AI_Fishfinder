@@ -22,15 +22,12 @@ function FingerprintIcon() {
 }
 
 function BiometricButton() {
-  const [supported, setSupported] = useState(false)
+  const [supported, setSupported] = useState<boolean | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!window.PublicKeyCredential) return
-    PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
-      .then((ok) => setSupported(ok))
-      .catch(() => {})
+    setSupported(typeof window !== 'undefined' && !!window.PublicKeyCredential)
   }, [])
 
   if (!supported) return null
