@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import AuthModal from './components/AuthModal'
 
 export default function LandingPage() {
@@ -30,7 +31,26 @@ export default function LandingPage() {
           {/* CTAs */}
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <AuthModal defaultView="register" />
-            <AuthModal defaultView="signin" />
+            <Link
+              href="/login"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                color: 'var(--color-seafoam)',
+                fontSize: '1rem',
+                fontWeight: 500,
+                padding: '0.75rem 1.5rem',
+                border: '1px solid rgba(59,191,174,0.3)',
+                borderRadius: '0.5rem',
+                background: 'transparent',
+                cursor: 'pointer',
+                fontFamily: 'var(--font-body)',
+                transition: 'transform 0.15s, opacity 0.15s',
+                textDecoration: 'none',
+              }}
+            >
+              Sign In
+            </Link>
           </div>
         </div>
 
