@@ -223,8 +223,14 @@ export default function CatchLogForm({ onSuccess, catchId, initialValues }: Prop
         setConditionsFetched(false)
         setGpsLoading(false)
       },
-      () => {
-        setGpsError('Could not get GPS location')
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED) {
+          setGpsError('Location permission denied — please allow location access in your browser settings')
+        } else if (err.code === err.POSITION_UNAVAILABLE) {
+          setGpsError('GPS unavailable — check that location services are enabled on your device')
+        } else {
+          setGpsError('Could not get GPS location in time — try moving to an area with better signal')
+        }
         setGpsLoading(false)
       },
       { enableHighAccuracy: true, timeout: 15000 }
