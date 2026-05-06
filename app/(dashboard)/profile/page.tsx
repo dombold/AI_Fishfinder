@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import DashboardNav from '@/components/DashboardNav'
 import { resizeImage } from '@/lib/image-utils'
+import PasskeyManager from '@/app/components/PasskeyManager'
 
 const SOUNDER_OPTIONS = ['NONE', 'GARMIN', 'SIMRAD', 'LOWRANCE', 'HUMMINBIRD', 'RAYMARINE', 'FURUNO', 'B&G']
 
@@ -452,6 +453,17 @@ export default function ProfilePage() {
                 </button>
               </div>
             </form>
+
+            {/* Divider */}
+            <div style={{ borderTop: '1px solid rgba(107,143,163,0.15)', margin: '2rem 0' }} />
+
+            {/* Biometric Login */}
+            <div>
+              <p style={{ fontSize: '0.9rem', color: 'var(--color-foam)', fontWeight: 600, marginBottom: '1rem' }}>
+                Biometric Login
+              </p>
+              <PasskeyManager />
+            </div>
 
           </div>
         )}

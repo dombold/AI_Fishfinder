@@ -9,6 +9,8 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/User'
+export type * from './models/WebAuthnCredential'
+export type * from './models/WebAuthnChallenge'
 export type * from './models/FishingSession'
 export type * from './models/SelectedSpecies'
 export type * from './models/MarineData'

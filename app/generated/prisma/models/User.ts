@@ -276,6 +276,8 @@ export type UserWhereInput = {
   catchLogs?: Prisma.CatchLogListRelationFilter
   ownedGroups?: Prisma.GroupListRelationFilter
   memberships?: Prisma.GroupMembershipListRelationFilter
+  webAuthnCredentials?: Prisma.WebAuthnCredentialListRelationFilter
+  webAuthnChallenges?: Prisma.WebAuthnChallengeListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -295,6 +297,8 @@ export type UserOrderByWithRelationInput = {
   catchLogs?: Prisma.CatchLogOrderByRelationAggregateInput
   ownedGroups?: Prisma.GroupOrderByRelationAggregateInput
   memberships?: Prisma.GroupMembershipOrderByRelationAggregateInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialOrderByRelationAggregateInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -317,6 +321,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   catchLogs?: Prisma.CatchLogListRelationFilter
   ownedGroups?: Prisma.GroupListRelationFilter
   memberships?: Prisma.GroupMembershipListRelationFilter
+  webAuthnCredentials?: Prisma.WebAuthnCredentialListRelationFilter
+  webAuthnChallenges?: Prisma.WebAuthnChallengeListRelationFilter
 }, "id" | "username" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -374,6 +380,8 @@ export type UserCreateInput = {
   catchLogs?: Prisma.CatchLogCreateNestedManyWithoutUserInput
   ownedGroups?: Prisma.GroupCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.GroupMembershipCreateNestedManyWithoutUserInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialCreateNestedManyWithoutUserInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -393,6 +401,8 @@ export type UserUncheckedCreateInput = {
   catchLogs?: Prisma.CatchLogUncheckedCreateNestedManyWithoutUserInput
   ownedGroups?: Prisma.GroupUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.GroupMembershipUncheckedCreateNestedManyWithoutUserInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedCreateNestedManyWithoutUserInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -412,6 +422,8 @@ export type UserUpdateInput = {
   catchLogs?: Prisma.CatchLogUpdateManyWithoutUserNestedInput
   ownedGroups?: Prisma.GroupUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.GroupMembershipUpdateManyWithoutUserNestedInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialUpdateManyWithoutUserNestedInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -431,6 +443,8 @@ export type UserUncheckedUpdateInput = {
   catchLogs?: Prisma.CatchLogUncheckedUpdateManyWithoutUserNestedInput
   ownedGroups?: Prisma.GroupUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.GroupMembershipUncheckedUpdateManyWithoutUserNestedInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedUpdateManyWithoutUserNestedInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -536,6 +550,11 @@ export type UserScalarRelationFilter = {
   isNot?: Prisma.UserWhereInput
 }
 
+export type UserNullableScalarRelationFilter = {
+  is?: Prisma.UserWhereInput | null
+  isNot?: Prisma.UserWhereInput | null
+}
+
 export type StringFieldUpdateOperationsInput = {
   set?: string
 }
@@ -562,6 +581,36 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type UserCreateNestedOneWithoutWebAuthnCredentialsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutWebAuthnCredentialsInput, Prisma.UserUncheckedCreateWithoutWebAuthnCredentialsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutWebAuthnCredentialsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutWebAuthnCredentialsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutWebAuthnCredentialsInput, Prisma.UserUncheckedCreateWithoutWebAuthnCredentialsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutWebAuthnCredentialsInput
+  upsert?: Prisma.UserUpsertWithoutWebAuthnCredentialsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutWebAuthnCredentialsInput, Prisma.UserUpdateWithoutWebAuthnCredentialsInput>, Prisma.UserUncheckedUpdateWithoutWebAuthnCredentialsInput>
+}
+
+export type UserCreateNestedOneWithoutWebAuthnChallengesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutWebAuthnChallengesInput, Prisma.UserUncheckedCreateWithoutWebAuthnChallengesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutWebAuthnChallengesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutWebAuthnChallengesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutWebAuthnChallengesInput, Prisma.UserUncheckedCreateWithoutWebAuthnChallengesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutWebAuthnChallengesInput
+  upsert?: Prisma.UserUpsertWithoutWebAuthnChallengesInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutWebAuthnChallengesInput, Prisma.UserUpdateWithoutWebAuthnChallengesInput>, Prisma.UserUncheckedUpdateWithoutWebAuthnChallengesInput>
 }
 
 export type UserCreateNestedOneWithoutSessionsInput = {
@@ -620,6 +669,198 @@ export type UserUpdateOneRequiredWithoutMembershipsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMembershipsInput, Prisma.UserUpdateWithoutMembershipsInput>, Prisma.UserUncheckedUpdateWithoutMembershipsInput>
 }
 
+export type UserCreateWithoutWebAuthnCredentialsInput = {
+  id?: string
+  username: string
+  email: string
+  passwordHash: string
+  sounderType?: string
+  seasicknessTolerance?: number
+  weeklyDigestOptIn?: boolean
+  avatar?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpires?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.FishingSessionCreateNestedManyWithoutUserInput
+  catchLogs?: Prisma.CatchLogCreateNestedManyWithoutUserInput
+  ownedGroups?: Prisma.GroupCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.GroupMembershipCreateNestedManyWithoutUserInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutWebAuthnCredentialsInput = {
+  id?: string
+  username: string
+  email: string
+  passwordHash: string
+  sounderType?: string
+  seasicknessTolerance?: number
+  weeklyDigestOptIn?: boolean
+  avatar?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpires?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.FishingSessionUncheckedCreateNestedManyWithoutUserInput
+  catchLogs?: Prisma.CatchLogUncheckedCreateNestedManyWithoutUserInput
+  ownedGroups?: Prisma.GroupUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.GroupMembershipUncheckedCreateNestedManyWithoutUserInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutWebAuthnCredentialsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutWebAuthnCredentialsInput, Prisma.UserUncheckedCreateWithoutWebAuthnCredentialsInput>
+}
+
+export type UserUpsertWithoutWebAuthnCredentialsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutWebAuthnCredentialsInput, Prisma.UserUncheckedUpdateWithoutWebAuthnCredentialsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutWebAuthnCredentialsInput, Prisma.UserUncheckedCreateWithoutWebAuthnCredentialsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutWebAuthnCredentialsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutWebAuthnCredentialsInput, Prisma.UserUncheckedUpdateWithoutWebAuthnCredentialsInput>
+}
+
+export type UserUpdateWithoutWebAuthnCredentialsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  sounderType?: Prisma.StringFieldUpdateOperationsInput | string
+  seasicknessTolerance?: Prisma.IntFieldUpdateOperationsInput | number
+  weeklyDigestOptIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.FishingSessionUpdateManyWithoutUserNestedInput
+  catchLogs?: Prisma.CatchLogUpdateManyWithoutUserNestedInput
+  ownedGroups?: Prisma.GroupUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.GroupMembershipUpdateManyWithoutUserNestedInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutWebAuthnCredentialsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  sounderType?: Prisma.StringFieldUpdateOperationsInput | string
+  seasicknessTolerance?: Prisma.IntFieldUpdateOperationsInput | number
+  weeklyDigestOptIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.FishingSessionUncheckedUpdateManyWithoutUserNestedInput
+  catchLogs?: Prisma.CatchLogUncheckedUpdateManyWithoutUserNestedInput
+  ownedGroups?: Prisma.GroupUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.GroupMembershipUncheckedUpdateManyWithoutUserNestedInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutWebAuthnChallengesInput = {
+  id?: string
+  username: string
+  email: string
+  passwordHash: string
+  sounderType?: string
+  seasicknessTolerance?: number
+  weeklyDigestOptIn?: boolean
+  avatar?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpires?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.FishingSessionCreateNestedManyWithoutUserInput
+  catchLogs?: Prisma.CatchLogCreateNestedManyWithoutUserInput
+  ownedGroups?: Prisma.GroupCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.GroupMembershipCreateNestedManyWithoutUserInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutWebAuthnChallengesInput = {
+  id?: string
+  username: string
+  email: string
+  passwordHash: string
+  sounderType?: string
+  seasicknessTolerance?: number
+  weeklyDigestOptIn?: boolean
+  avatar?: string | null
+  passwordResetToken?: string | null
+  passwordResetExpires?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.FishingSessionUncheckedCreateNestedManyWithoutUserInput
+  catchLogs?: Prisma.CatchLogUncheckedCreateNestedManyWithoutUserInput
+  ownedGroups?: Prisma.GroupUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.GroupMembershipUncheckedCreateNestedManyWithoutUserInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutWebAuthnChallengesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutWebAuthnChallengesInput, Prisma.UserUncheckedCreateWithoutWebAuthnChallengesInput>
+}
+
+export type UserUpsertWithoutWebAuthnChallengesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutWebAuthnChallengesInput, Prisma.UserUncheckedUpdateWithoutWebAuthnChallengesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutWebAuthnChallengesInput, Prisma.UserUncheckedCreateWithoutWebAuthnChallengesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutWebAuthnChallengesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutWebAuthnChallengesInput, Prisma.UserUncheckedUpdateWithoutWebAuthnChallengesInput>
+}
+
+export type UserUpdateWithoutWebAuthnChallengesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  sounderType?: Prisma.StringFieldUpdateOperationsInput | string
+  seasicknessTolerance?: Prisma.IntFieldUpdateOperationsInput | number
+  weeklyDigestOptIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.FishingSessionUpdateManyWithoutUserNestedInput
+  catchLogs?: Prisma.CatchLogUpdateManyWithoutUserNestedInput
+  ownedGroups?: Prisma.GroupUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.GroupMembershipUpdateManyWithoutUserNestedInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutWebAuthnChallengesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  sounderType?: Prisma.StringFieldUpdateOperationsInput | string
+  seasicknessTolerance?: Prisma.IntFieldUpdateOperationsInput | number
+  weeklyDigestOptIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.FishingSessionUncheckedUpdateManyWithoutUserNestedInput
+  catchLogs?: Prisma.CatchLogUncheckedUpdateManyWithoutUserNestedInput
+  ownedGroups?: Prisma.GroupUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.GroupMembershipUncheckedUpdateManyWithoutUserNestedInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedUpdateManyWithoutUserNestedInput
+}
+
 export type UserCreateWithoutSessionsInput = {
   id?: string
   username: string
@@ -636,6 +877,8 @@ export type UserCreateWithoutSessionsInput = {
   catchLogs?: Prisma.CatchLogCreateNestedManyWithoutUserInput
   ownedGroups?: Prisma.GroupCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.GroupMembershipCreateNestedManyWithoutUserInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialCreateNestedManyWithoutUserInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -654,6 +897,8 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   catchLogs?: Prisma.CatchLogUncheckedCreateNestedManyWithoutUserInput
   ownedGroups?: Prisma.GroupUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.GroupMembershipUncheckedCreateNestedManyWithoutUserInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedCreateNestedManyWithoutUserInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -688,6 +933,8 @@ export type UserUpdateWithoutSessionsInput = {
   catchLogs?: Prisma.CatchLogUpdateManyWithoutUserNestedInput
   ownedGroups?: Prisma.GroupUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.GroupMembershipUpdateManyWithoutUserNestedInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialUpdateManyWithoutUserNestedInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -706,6 +953,8 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   catchLogs?: Prisma.CatchLogUncheckedUpdateManyWithoutUserNestedInput
   ownedGroups?: Prisma.GroupUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.GroupMembershipUncheckedUpdateManyWithoutUserNestedInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedUpdateManyWithoutUserNestedInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCatchLogsInput = {
@@ -724,6 +973,8 @@ export type UserCreateWithoutCatchLogsInput = {
   sessions?: Prisma.FishingSessionCreateNestedManyWithoutUserInput
   ownedGroups?: Prisma.GroupCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.GroupMembershipCreateNestedManyWithoutUserInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialCreateNestedManyWithoutUserInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCatchLogsInput = {
@@ -742,6 +993,8 @@ export type UserUncheckedCreateWithoutCatchLogsInput = {
   sessions?: Prisma.FishingSessionUncheckedCreateNestedManyWithoutUserInput
   ownedGroups?: Prisma.GroupUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.GroupMembershipUncheckedCreateNestedManyWithoutUserInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedCreateNestedManyWithoutUserInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCatchLogsInput = {
@@ -776,6 +1029,8 @@ export type UserUpdateWithoutCatchLogsInput = {
   sessions?: Prisma.FishingSessionUpdateManyWithoutUserNestedInput
   ownedGroups?: Prisma.GroupUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.GroupMembershipUpdateManyWithoutUserNestedInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialUpdateManyWithoutUserNestedInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCatchLogsInput = {
@@ -794,6 +1049,8 @@ export type UserUncheckedUpdateWithoutCatchLogsInput = {
   sessions?: Prisma.FishingSessionUncheckedUpdateManyWithoutUserNestedInput
   ownedGroups?: Prisma.GroupUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.GroupMembershipUncheckedUpdateManyWithoutUserNestedInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedUpdateManyWithoutUserNestedInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutOwnedGroupsInput = {
@@ -812,6 +1069,8 @@ export type UserCreateWithoutOwnedGroupsInput = {
   sessions?: Prisma.FishingSessionCreateNestedManyWithoutUserInput
   catchLogs?: Prisma.CatchLogCreateNestedManyWithoutUserInput
   memberships?: Prisma.GroupMembershipCreateNestedManyWithoutUserInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialCreateNestedManyWithoutUserInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOwnedGroupsInput = {
@@ -830,6 +1089,8 @@ export type UserUncheckedCreateWithoutOwnedGroupsInput = {
   sessions?: Prisma.FishingSessionUncheckedCreateNestedManyWithoutUserInput
   catchLogs?: Prisma.CatchLogUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.GroupMembershipUncheckedCreateNestedManyWithoutUserInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedCreateNestedManyWithoutUserInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOwnedGroupsInput = {
@@ -864,6 +1125,8 @@ export type UserUpdateWithoutOwnedGroupsInput = {
   sessions?: Prisma.FishingSessionUpdateManyWithoutUserNestedInput
   catchLogs?: Prisma.CatchLogUpdateManyWithoutUserNestedInput
   memberships?: Prisma.GroupMembershipUpdateManyWithoutUserNestedInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialUpdateManyWithoutUserNestedInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOwnedGroupsInput = {
@@ -882,6 +1145,8 @@ export type UserUncheckedUpdateWithoutOwnedGroupsInput = {
   sessions?: Prisma.FishingSessionUncheckedUpdateManyWithoutUserNestedInput
   catchLogs?: Prisma.CatchLogUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.GroupMembershipUncheckedUpdateManyWithoutUserNestedInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedUpdateManyWithoutUserNestedInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMembershipsInput = {
@@ -900,6 +1165,8 @@ export type UserCreateWithoutMembershipsInput = {
   sessions?: Prisma.FishingSessionCreateNestedManyWithoutUserInput
   catchLogs?: Prisma.CatchLogCreateNestedManyWithoutUserInput
   ownedGroups?: Prisma.GroupCreateNestedManyWithoutOwnerInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialCreateNestedManyWithoutUserInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMembershipsInput = {
@@ -918,6 +1185,8 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   sessions?: Prisma.FishingSessionUncheckedCreateNestedManyWithoutUserInput
   catchLogs?: Prisma.CatchLogUncheckedCreateNestedManyWithoutUserInput
   ownedGroups?: Prisma.GroupUncheckedCreateNestedManyWithoutOwnerInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedCreateNestedManyWithoutUserInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMembershipsInput = {
@@ -952,6 +1221,8 @@ export type UserUpdateWithoutMembershipsInput = {
   sessions?: Prisma.FishingSessionUpdateManyWithoutUserNestedInput
   catchLogs?: Prisma.CatchLogUpdateManyWithoutUserNestedInput
   ownedGroups?: Prisma.GroupUpdateManyWithoutOwnerNestedInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialUpdateManyWithoutUserNestedInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMembershipsInput = {
@@ -970,6 +1241,8 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   sessions?: Prisma.FishingSessionUncheckedUpdateManyWithoutUserNestedInput
   catchLogs?: Prisma.CatchLogUncheckedUpdateManyWithoutUserNestedInput
   ownedGroups?: Prisma.GroupUncheckedUpdateManyWithoutOwnerNestedInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedUpdateManyWithoutUserNestedInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -982,6 +1255,8 @@ export type UserCountOutputType = {
   catchLogs: number
   ownedGroups: number
   memberships: number
+  webAuthnCredentials: number
+  webAuthnChallenges: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -989,6 +1264,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   catchLogs?: boolean | UserCountOutputTypeCountCatchLogsArgs
   ownedGroups?: boolean | UserCountOutputTypeCountOwnedGroupsArgs
   memberships?: boolean | UserCountOutputTypeCountMembershipsArgs
+  webAuthnCredentials?: boolean | UserCountOutputTypeCountWebAuthnCredentialsArgs
+  webAuthnChallenges?: boolean | UserCountOutputTypeCountWebAuthnChallengesArgs
 }
 
 /**
@@ -1029,6 +1306,20 @@ export type UserCountOutputTypeCountMembershipsArgs<ExtArgs extends runtime.Type
   where?: Prisma.GroupMembershipWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountWebAuthnCredentialsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.WebAuthnCredentialWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountWebAuthnChallengesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.WebAuthnChallengeWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1047,6 +1338,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   catchLogs?: boolean | Prisma.User$catchLogsArgs<ExtArgs>
   ownedGroups?: boolean | Prisma.User$ownedGroupsArgs<ExtArgs>
   memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
+  webAuthnCredentials?: boolean | Prisma.User$webAuthnCredentialsArgs<ExtArgs>
+  webAuthnChallenges?: boolean | Prisma.User$webAuthnChallengesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1101,6 +1394,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   catchLogs?: boolean | Prisma.User$catchLogsArgs<ExtArgs>
   ownedGroups?: boolean | Prisma.User$ownedGroupsArgs<ExtArgs>
   memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
+  webAuthnCredentials?: boolean | Prisma.User$webAuthnCredentialsArgs<ExtArgs>
+  webAuthnChallenges?: boolean | Prisma.User$webAuthnChallengesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1113,6 +1408,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     catchLogs: Prisma.$CatchLogPayload<ExtArgs>[]
     ownedGroups: Prisma.$GroupPayload<ExtArgs>[]
     memberships: Prisma.$GroupMembershipPayload<ExtArgs>[]
+    webAuthnCredentials: Prisma.$WebAuthnCredentialPayload<ExtArgs>[]
+    webAuthnChallenges: Prisma.$WebAuthnChallengePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1525,6 +1822,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   catchLogs<T extends Prisma.User$catchLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$catchLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CatchLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   ownedGroups<T extends Prisma.User$ownedGroupsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ownedGroupsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   memberships<T extends Prisma.User$membershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GroupMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  webAuthnCredentials<T extends Prisma.User$webAuthnCredentialsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$webAuthnCredentialsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WebAuthnCredentialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  webAuthnChallenges<T extends Prisma.User$webAuthnChallengesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$webAuthnChallengesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WebAuthnChallengePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2052,6 +2351,54 @@ export type User$membershipsArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.GroupMembershipScalarFieldEnum | Prisma.GroupMembershipScalarFieldEnum[]
+}
+
+/**
+ * User.webAuthnCredentials
+ */
+export type User$webAuthnCredentialsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WebAuthnCredential
+   */
+  select?: Prisma.WebAuthnCredentialSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the WebAuthnCredential
+   */
+  omit?: Prisma.WebAuthnCredentialOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WebAuthnCredentialInclude<ExtArgs> | null
+  where?: Prisma.WebAuthnCredentialWhereInput
+  orderBy?: Prisma.WebAuthnCredentialOrderByWithRelationInput | Prisma.WebAuthnCredentialOrderByWithRelationInput[]
+  cursor?: Prisma.WebAuthnCredentialWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.WebAuthnCredentialScalarFieldEnum | Prisma.WebAuthnCredentialScalarFieldEnum[]
+}
+
+/**
+ * User.webAuthnChallenges
+ */
+export type User$webAuthnChallengesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WebAuthnChallenge
+   */
+  select?: Prisma.WebAuthnChallengeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the WebAuthnChallenge
+   */
+  omit?: Prisma.WebAuthnChallengeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WebAuthnChallengeInclude<ExtArgs> | null
+  where?: Prisma.WebAuthnChallengeWhereInput
+  orderBy?: Prisma.WebAuthnChallengeOrderByWithRelationInput | Prisma.WebAuthnChallengeOrderByWithRelationInput[]
+  cursor?: Prisma.WebAuthnChallengeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.WebAuthnChallengeScalarFieldEnum | Prisma.WebAuthnChallengeScalarFieldEnum[]
 }
 
 /**

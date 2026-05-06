@@ -47,6 +47,16 @@ export { Prisma }
  */
 export type User = Prisma.UserModel
 /**
+ * Model WebAuthnCredential
+ * 
+ */
+export type WebAuthnCredential = Prisma.WebAuthnCredentialModel
+/**
+ * Model WebAuthnChallenge
+ * 
+ */
+export type WebAuthnChallenge = Prisma.WebAuthnChallengeModel
+/**
  * Model FishingSession
  * 
  */

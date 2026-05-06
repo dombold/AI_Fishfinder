@@ -1,9 +1,96 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { startAuthentication } from '@simplewebauthn/browser'
+
+function FingerprintIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4" />
+      <path d="M14 13.12c0 2.38 0 6.38-1 8.88" />
+      <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02" />
+      <path d="M2 12a10 10 0 0 1 18-6" />
+      <path d="M2 17c1 .5 2.6 1.5 4 1.5" />
+      <path d="M20 12c.7 2 .5 6.4-1.3 9" />
+      <path d="M5.5 15.5c.5-1.5.5-5.5 1-7.5" />
+      <path d="M8.5 8a5 5 0 0 1 8 4.8" />
+    </svg>
+  )
+}
+
+function BiometricButton() {
+  const [supported, setSupported] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!window.PublicKeyCredential) return
+    PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+      .then((ok) => setSupported(ok))
+      .catch(() => {})
+  }, [])
+
+  if (!supported) return null
+
+  async function handleBiometric() {
+    setLoading(true)
+    setError(null)
+    try {
+      const optRes = await fetch('/api/webauthn/auth/options', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+      if (!optRes.ok) throw new Error('Failed to get options')
+      const options = await optRes.json()
+
+      const assertion = await startAuthentication(options)
+
+      const verRes = await fetch('/api/webauthn/auth/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ response: assertion }),
+      })
+      const data = await verRes.json()
+      if (!verRes.ok) throw new Error(data.error ?? 'Authentication failed')
+
+      window.location.href = data.redirectTo ?? '/dashboard'
+    } catch (err) {
+      if (err instanceof Error && err.name === 'NotAllowedError') return
+      setError(err instanceof Error ? err.message : 'Biometric login failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div style={{ marginTop: '1.25rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', margin: '1rem 0' }}>
+        <div style={{ flex: 1, height: '1px', background: 'rgba(107,143,163,0.2)' }} />
+        <span style={{ margin: '0 0.75rem', fontSize: '0.75rem', color: 'var(--color-mist)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>or</span>
+        <div style={{ flex: 1, height: '1px', background: 'rgba(107,143,163,0.2)' }} />
+      </div>
+      {error && (
+        <div role="alert" style={{ background: 'rgba(224,92,42,0.15)', border: '1px solid rgba(224,92,42,0.4)', borderRadius: '0.5rem', padding: '0.75rem 1rem', marginBottom: '0.75rem', color: 'var(--color-warning)', fontSize: '0.875rem' }}>
+          {error}
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={handleBiometric}
+        disabled={loading}
+        className="btn-ghost"
+        style={{ width: '100%', justifyContent: 'center', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+      >
+        <FingerprintIcon />
+        {loading ? 'Verifying…' : 'Sign in with Biometrics'}
+      </button>
+    </div>
+  )
+}
 
 function LoginForm() {
   const router = useRouter()
@@ -117,6 +204,8 @@ function LoginForm() {
               Create an account
             </Link>
           </p>
+
+          <BiometricButton />
         </div>
       </div>
     </div>

@@ -26,8 +26,39 @@ model User {
   catchLogs            CatchLog[]
   ownedGroups          Group[]           @relation("GroupOwner")
   memberships          GroupMembership[] @relation("GroupMemberships")
+  webAuthnCredentials  WebAuthnCredential[]
+  webAuthnChallenges   WebAuthnChallenge[]
 
   @@map("users")
+}
+
+model WebAuthnCredential {
+  id           String   @id @default(cuid())
+  userId       String
+  credentialId String   @unique
+  publicKey    Bytes
+  counter      BigInt   @default(0)
+  deviceType   String
+  backedUp     Boolean  @default(false)
+  transports   String[]
+  name         String   @default("Biometric")
+  createdAt    DateTime @default(now())
+  lastUsedAt   DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("webauthn_credentials")
+}
+
+model WebAuthnChallenge {
+  id        String   @id @default(cuid())
+  userId    String?
+  challenge String   @unique
+  type      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("webauthn_challenges")
 }
 
 model FishingSession {
