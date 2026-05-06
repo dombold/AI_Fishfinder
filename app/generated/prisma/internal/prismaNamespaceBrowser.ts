@@ -63,7 +63,8 @@ export const ModelName = {
   GroupMembership: 'GroupMembership',
   CatchLogSharedGroup: 'CatchLogSharedGroup',
   NewsletterFetch: 'NewsletterFetch',
-  CrowdSourceSummary: 'CrowdSourceSummary'
+  CrowdSourceSummary: 'CrowdSourceSummary',
+  PasswordResetToken: 'PasswordResetToken'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -91,8 +92,6 @@ export const UserScalarFieldEnum = {
   seasicknessTolerance: 'seasicknessTolerance',
   weeklyDigestOptIn: 'weeklyDigestOptIn',
   avatar: 'avatar',
-  passwordResetToken: 'passwordResetToken',
-  passwordResetExpires: 'passwordResetExpires',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -265,6 +264,18 @@ export const CrowdSourceSummaryScalarFieldEnum = {
 } as const
 
 export type CrowdSourceSummaryScalarFieldEnum = (typeof CrowdSourceSummaryScalarFieldEnum)[keyof typeof CrowdSourceSummaryScalarFieldEnum]
+
+
+export const PasswordResetTokenScalarFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  email: 'email',
+  userId: 'userId',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
 
 
 export const SortOrder = {

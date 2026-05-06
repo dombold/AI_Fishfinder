@@ -158,7 +158,7 @@ export type FishingPlanGroupByOutputType = {
   _max: FishingPlanMaxAggregateOutputType | null
 }
 
-type GetFishingPlanGroupByPayload<T extends FishingPlanGroupByArgs> = Prisma.PrismaPromise<
+export type GetFishingPlanGroupByPayload<T extends FishingPlanGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<FishingPlanGroupByOutputType, T['by']> &
       {

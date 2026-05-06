@@ -151,7 +151,7 @@ export type CrowdSourceSummaryGroupByOutputType = {
   _max: CrowdSourceSummaryMaxAggregateOutputType | null
 }
 
-type GetCrowdSourceSummaryGroupByPayload<T extends CrowdSourceSummaryGroupByArgs> = Prisma.PrismaPromise<
+export type GetCrowdSourceSummaryGroupByPayload<T extends CrowdSourceSummaryGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<CrowdSourceSummaryGroupByOutputType, T['by']> &
       {

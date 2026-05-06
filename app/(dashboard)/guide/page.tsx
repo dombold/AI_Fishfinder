@@ -14,6 +14,7 @@ const toc = [
   { id: 'offline-mode',     label: 'Offline Mode' },
   { id: 'regulations',      label: 'Regulations Hub' },
   { id: 'profile',          label: 'Profile & Account' },
+  { id: 'passkeys',         label: 'Biometric Login (Passkeys)' },
   { id: 'groups',           label: 'Fishing Groups' },
 ]
 
@@ -381,22 +382,67 @@ export default async function GuidePage() {
             </div>
             <div style={stepRow}>
               <span style={stepNumber}>3</span>
-              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Forgot your password</strong> — on the login screen, click <em>Forgot password</em>, enter your email address, and follow the reset link sent to your inbox.</p>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Forgot your password</strong> — on the login screen, click <em>Forgot password?</em>, enter your registered email address, and a reset link will be sent to your inbox. The link expires in 1 hour and can only be used once.</p>
             </div>
             <div style={stepRow}>
               <span style={stepNumber}>4</span>
-              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Change password</strong> — enter your current password and a new password, then click <em>Update Password</em>. Use a strong, unique password.</p>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Change password</strong> — enter your current password and a new password (minimum 8 characters, must contain letters and numbers), then click <em>Update Password</em>.</p>
             </div>
             <div style={stepRow}>
               <span style={stepNumber}>5</span>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Weekly fishing digest</strong> — tick the <em>Weekly fishing intelligence email</em> checkbox to receive a Friday email summarising species activity and hotspots across all four WA bioregions. Uncheck to unsubscribe at any time.</p>
+            </div>
+            <div style={stepRow}>
+              <span style={stepNumber}>6</span>
               <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Sign out</strong> — select <em>Sign out</em> from the user dropdown in the top navigation. Your saved plans and catch log remain stored when you return.</p>
             </div>
           </div>
         </section>
 
-        {/* ─── 9. Fishing Groups ─── */}
+        {/* ─── 9. Biometric Login (Passkeys) ─── */}
+        <section id="passkeys" style={sectionStyle}>
+          <h2 style={h2Style}>9. Biometric Login (Passkeys)</h2>
+          <div className="card" style={{ padding: '1.5rem', marginBottom: '1rem' }}>
+            <p style={{ color: 'var(--color-mist)', fontSize: '0.9375rem', lineHeight: 1.7, marginBottom: '1.25rem' }}>
+              Passkeys let you log in with your device's biometric sensor — fingerprint, Face ID, or Windows Hello — instead of typing a password. Once registered, a single tap signs you straight in.
+            </p>
+            <div style={stepRow}>
+              <span style={stepNumber}>1</span>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Open Profile</strong> — go to your profile page from the top-right user menu.</p>
+            </div>
+            <div style={stepRow}>
+              <span style={stepNumber}>2</span>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Register a passkey</strong> — scroll to the <em>Passkeys</em> section and click <em>Add passkey</em>. Your browser will prompt you to use your fingerprint, Face ID, or device PIN. Give the passkey a name to identify it (e.g. "iPhone" or "Work laptop").</p>
+            </div>
+            <div style={stepRow}>
+              <span style={stepNumber}>3</span>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Log in with biometrics</strong> — on the login screen, click the fingerprint icon button below the sign-in form. Your browser will prompt for your biometric — no username or password required.</p>
+            </div>
+            <div style={stepRow}>
+              <span style={stepNumber}>4</span>
+              <p style={stepText}><strong style={{ color: 'var(--color-foam)' }}>Manage passkeys</strong> — each registered passkey is listed on your profile page with its name and registration date. Click the delete icon next to any passkey to remove it. Removing all passkeys returns you to standard password login.</p>
+            </div>
+          </div>
+          <div style={{ display: 'grid', gap: '0.625rem', marginBottom: '1rem' }}>
+            <div style={{ padding: '1rem 1.25rem', background: 'rgba(60,191,174,0.06)', borderRadius: '8px', border: '1px solid rgba(60,191,174,0.15)' }}>
+              <p style={{ fontWeight: 600, color: 'var(--color-seafoam)', fontSize: '0.875rem', marginBottom: '0.25rem' }}>Supported devices</p>
+              <p style={{ color: 'var(--color-mist)', fontSize: '0.8125rem', lineHeight: 1.6, margin: 0 }}>iPhone / iPad (Face ID or Touch ID in Safari) · Android (fingerprint in Chrome) · Mac (Touch ID in Safari or Chrome) · Windows (Windows Hello in Edge or Chrome) · Any WebAuthn-capable browser</p>
+            </div>
+            <div style={{ padding: '1rem 1.25rem', background: 'rgba(107,143,163,0.06)', borderRadius: '8px', border: '1px solid rgba(107,143,163,0.12)' }}>
+              <p style={{ fontWeight: 600, color: 'var(--color-mist)', fontSize: '0.875rem', marginBottom: '0.25rem' }}>Security note</p>
+              <p style={{ color: 'var(--color-mist)', fontSize: '0.8125rem', lineHeight: 1.6, margin: 0 }}>Your biometric data never leaves your device — the app only stores a public key. Passkeys are device-specific, so register one on each device you use.</p>
+            </div>
+          </div>
+          <div style={tipBox}>
+            <p style={{ color: 'var(--color-mist)', fontSize: '0.875rem', lineHeight: 1.6, margin: 0 }}>
+              <strong style={{ color: 'var(--color-current)' }}>Tip:</strong> Register a passkey on your phone before going out — it makes logging back in at sea on the boat much faster than typing a password on a touchscreen.
+            </p>
+          </div>
+        </section>
+
+        {/* ─── 10. Fishing Groups ─── */}
         <section id="groups" style={sectionStyle}>
-          <h2 style={h2Style}>9. Fishing Groups</h2>
+          <h2 style={h2Style}>10. Fishing Groups</h2>
           <div className="card" style={{ padding: '1.5rem', marginBottom: '1rem' }}>
             <div style={stepRow}>
               <span style={stepNumber}>1</span>

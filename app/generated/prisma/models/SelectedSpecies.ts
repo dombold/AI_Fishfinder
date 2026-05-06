@@ -144,7 +144,7 @@ export type SelectedSpeciesGroupByOutputType = {
   _max: SelectedSpeciesMaxAggregateOutputType | null
 }
 
-type GetSelectedSpeciesGroupByPayload<T extends SelectedSpeciesGroupByArgs> = Prisma.PrismaPromise<
+export type GetSelectedSpeciesGroupByPayload<T extends SelectedSpeciesGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<SelectedSpeciesGroupByOutputType, T['by']> &
       {

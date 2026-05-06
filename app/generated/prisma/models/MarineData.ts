@@ -179,7 +179,7 @@ export type MarineDataGroupByOutputType = {
   _max: MarineDataMaxAggregateOutputType | null
 }
 
-type GetMarineDataGroupByPayload<T extends MarineDataGroupByArgs> = Prisma.PrismaPromise<
+export type GetMarineDataGroupByPayload<T extends MarineDataGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<MarineDataGroupByOutputType, T['by']> &
       {

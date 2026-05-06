@@ -82,3 +82,8 @@ export type NewsletterFetch = Prisma.NewsletterFetchModel
  * 
  */
 export type CrowdSourceSummary = Prisma.CrowdSourceSummaryModel
+/**
+ * Model PasswordResetToken
+ * 
+ */
+export type PasswordResetToken = Prisma.PasswordResetTokenModel

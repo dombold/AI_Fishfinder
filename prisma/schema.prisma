@@ -18,8 +18,6 @@ model User {
   seasicknessTolerance Int               @default(3)
   weeklyDigestOptIn    Boolean           @default(false)
   avatar               String?
-  passwordResetToken   String?
-  passwordResetExpires DateTime?
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
   sessions             FishingSession[]
@@ -28,6 +26,7 @@ model User {
   memberships          GroupMembership[] @relation("GroupMemberships")
   webAuthnCredentials  WebAuthnCredential[]
   webAuthnChallenges   WebAuthnChallenge[]
+  passwordResetTokens  PasswordResetToken[]
 
   @@map("users")
 }
@@ -220,4 +219,16 @@ model CrowdSourceSummary {
   summaryJson String
 
   @@map("crowd_source_summaries")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  email     String
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
 }

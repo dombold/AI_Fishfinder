@@ -266,7 +266,7 @@ export type FishingSessionGroupByOutputType = {
   _max: FishingSessionMaxAggregateOutputType | null
 }
 
-type GetFishingSessionGroupByPayload<T extends FishingSessionGroupByArgs> = Prisma.PrismaPromise<
+export type GetFishingSessionGroupByPayload<T extends FishingSessionGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<FishingSessionGroupByOutputType, T['by']> &
       {

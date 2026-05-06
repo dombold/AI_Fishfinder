@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useParams, useRouter } from 'next/navigation'
 
 function ResetPasswordForm() {
-  const searchParams = useSearchParams()
+  const params = useParams()
   const router = useRouter()
-  const token = searchParams.get('token')
+  const token = typeof params.token === 'string' ? params.token : null
 
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')

@@ -43,8 +43,6 @@ export type UserMinAggregateOutputType = {
   seasicknessTolerance: number | null
   weeklyDigestOptIn: boolean | null
   avatar: string | null
-  passwordResetToken: string | null
-  passwordResetExpires: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -58,8 +56,6 @@ export type UserMaxAggregateOutputType = {
   seasicknessTolerance: number | null
   weeklyDigestOptIn: boolean | null
   avatar: string | null
-  passwordResetToken: string | null
-  passwordResetExpires: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -73,8 +69,6 @@ export type UserCountAggregateOutputType = {
   seasicknessTolerance: number
   weeklyDigestOptIn: number
   avatar: number
-  passwordResetToken: number
-  passwordResetExpires: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -98,8 +92,6 @@ export type UserMinAggregateInputType = {
   seasicknessTolerance?: true
   weeklyDigestOptIn?: true
   avatar?: true
-  passwordResetToken?: true
-  passwordResetExpires?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -113,8 +105,6 @@ export type UserMaxAggregateInputType = {
   seasicknessTolerance?: true
   weeklyDigestOptIn?: true
   avatar?: true
-  passwordResetToken?: true
-  passwordResetExpires?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -128,8 +118,6 @@ export type UserCountAggregateInputType = {
   seasicknessTolerance?: true
   weeklyDigestOptIn?: true
   avatar?: true
-  passwordResetToken?: true
-  passwordResetExpires?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -230,8 +218,6 @@ export type UserGroupByOutputType = {
   seasicknessTolerance: number
   weeklyDigestOptIn: boolean
   avatar: string | null
-  passwordResetToken: string | null
-  passwordResetExpires: Date | null
   createdAt: Date
   updatedAt: Date
   _count: UserCountAggregateOutputType | null
@@ -241,7 +227,7 @@ export type UserGroupByOutputType = {
   _max: UserMaxAggregateOutputType | null
 }
 
-type GetUserGroupByPayload<T extends UserGroupByArgs> = Prisma.PrismaPromise<
+export type GetUserGroupByPayload<T extends UserGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<UserGroupByOutputType, T['by']> &
       {
@@ -268,8 +254,6 @@ export type UserWhereInput = {
   seasicknessTolerance?: Prisma.IntFilter<"User"> | number
   weeklyDigestOptIn?: Prisma.BoolFilter<"User"> | boolean
   avatar?: Prisma.StringNullableFilter<"User"> | string | null
-  passwordResetToken?: Prisma.StringNullableFilter<"User"> | string | null
-  passwordResetExpires?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   sessions?: Prisma.FishingSessionListRelationFilter
@@ -278,6 +262,7 @@ export type UserWhereInput = {
   memberships?: Prisma.GroupMembershipListRelationFilter
   webAuthnCredentials?: Prisma.WebAuthnCredentialListRelationFilter
   webAuthnChallenges?: Prisma.WebAuthnChallengeListRelationFilter
+  passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -289,8 +274,6 @@ export type UserOrderByWithRelationInput = {
   seasicknessTolerance?: Prisma.SortOrder
   weeklyDigestOptIn?: Prisma.SortOrder
   avatar?: Prisma.SortOrderInput | Prisma.SortOrder
-  passwordResetToken?: Prisma.SortOrderInput | Prisma.SortOrder
-  passwordResetExpires?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   sessions?: Prisma.FishingSessionOrderByRelationAggregateInput
@@ -299,6 +282,7 @@ export type UserOrderByWithRelationInput = {
   memberships?: Prisma.GroupMembershipOrderByRelationAggregateInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialOrderByRelationAggregateInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeOrderByRelationAggregateInput
+  passwordResetTokens?: Prisma.PasswordResetTokenOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -313,8 +297,6 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   seasicknessTolerance?: Prisma.IntFilter<"User"> | number
   weeklyDigestOptIn?: Prisma.BoolFilter<"User"> | boolean
   avatar?: Prisma.StringNullableFilter<"User"> | string | null
-  passwordResetToken?: Prisma.StringNullableFilter<"User"> | string | null
-  passwordResetExpires?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   sessions?: Prisma.FishingSessionListRelationFilter
@@ -323,6 +305,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   memberships?: Prisma.GroupMembershipListRelationFilter
   webAuthnCredentials?: Prisma.WebAuthnCredentialListRelationFilter
   webAuthnChallenges?: Prisma.WebAuthnChallengeListRelationFilter
+  passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
 }, "id" | "username" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -334,8 +317,6 @@ export type UserOrderByWithAggregationInput = {
   seasicknessTolerance?: Prisma.SortOrder
   weeklyDigestOptIn?: Prisma.SortOrder
   avatar?: Prisma.SortOrderInput | Prisma.SortOrder
-  passwordResetToken?: Prisma.SortOrderInput | Prisma.SortOrder
-  passwordResetExpires?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
@@ -357,8 +338,6 @@ export type UserScalarWhereWithAggregatesInput = {
   seasicknessTolerance?: Prisma.IntWithAggregatesFilter<"User"> | number
   weeklyDigestOptIn?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   avatar?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
-  passwordResetToken?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
-  passwordResetExpires?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
@@ -372,8 +351,6 @@ export type UserCreateInput = {
   seasicknessTolerance?: number
   weeklyDigestOptIn?: boolean
   avatar?: string | null
-  passwordResetToken?: string | null
-  passwordResetExpires?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.FishingSessionCreateNestedManyWithoutUserInput
@@ -382,6 +359,7 @@ export type UserCreateInput = {
   memberships?: Prisma.GroupMembershipCreateNestedManyWithoutUserInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialCreateNestedManyWithoutUserInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -393,8 +371,6 @@ export type UserUncheckedCreateInput = {
   seasicknessTolerance?: number
   weeklyDigestOptIn?: boolean
   avatar?: string | null
-  passwordResetToken?: string | null
-  passwordResetExpires?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.FishingSessionUncheckedCreateNestedManyWithoutUserInput
@@ -403,6 +379,7 @@ export type UserUncheckedCreateInput = {
   memberships?: Prisma.GroupMembershipUncheckedCreateNestedManyWithoutUserInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedCreateNestedManyWithoutUserInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -414,8 +391,6 @@ export type UserUpdateInput = {
   seasicknessTolerance?: Prisma.IntFieldUpdateOperationsInput | number
   weeklyDigestOptIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.FishingSessionUpdateManyWithoutUserNestedInput
@@ -424,6 +399,7 @@ export type UserUpdateInput = {
   memberships?: Prisma.GroupMembershipUpdateManyWithoutUserNestedInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialUpdateManyWithoutUserNestedInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -435,8 +411,6 @@ export type UserUncheckedUpdateInput = {
   seasicknessTolerance?: Prisma.IntFieldUpdateOperationsInput | number
   weeklyDigestOptIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.FishingSessionUncheckedUpdateManyWithoutUserNestedInput
@@ -445,6 +419,7 @@ export type UserUncheckedUpdateInput = {
   memberships?: Prisma.GroupMembershipUncheckedUpdateManyWithoutUserNestedInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedUpdateManyWithoutUserNestedInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -456,8 +431,6 @@ export type UserCreateManyInput = {
   seasicknessTolerance?: number
   weeklyDigestOptIn?: boolean
   avatar?: string | null
-  passwordResetToken?: string | null
-  passwordResetExpires?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -471,8 +444,6 @@ export type UserUpdateManyMutationInput = {
   seasicknessTolerance?: Prisma.IntFieldUpdateOperationsInput | number
   weeklyDigestOptIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -486,8 +457,6 @@ export type UserUncheckedUpdateManyInput = {
   seasicknessTolerance?: Prisma.IntFieldUpdateOperationsInput | number
   weeklyDigestOptIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -501,8 +470,6 @@ export type UserCountOrderByAggregateInput = {
   seasicknessTolerance?: Prisma.SortOrder
   weeklyDigestOptIn?: Prisma.SortOrder
   avatar?: Prisma.SortOrder
-  passwordResetToken?: Prisma.SortOrder
-  passwordResetExpires?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -520,8 +487,6 @@ export type UserMaxOrderByAggregateInput = {
   seasicknessTolerance?: Prisma.SortOrder
   weeklyDigestOptIn?: Prisma.SortOrder
   avatar?: Prisma.SortOrder
-  passwordResetToken?: Prisma.SortOrder
-  passwordResetExpires?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -535,8 +500,6 @@ export type UserMinOrderByAggregateInput = {
   seasicknessTolerance?: Prisma.SortOrder
   weeklyDigestOptIn?: Prisma.SortOrder
   avatar?: Prisma.SortOrder
-  passwordResetToken?: Prisma.SortOrder
-  passwordResetExpires?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -573,10 +536,6 @@ export type BoolFieldUpdateOperationsInput = {
 
 export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
-}
-
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -669,6 +628,20 @@ export type UserUpdateOneRequiredWithoutMembershipsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMembershipsInput, Prisma.UserUpdateWithoutMembershipsInput>, Prisma.UserUncheckedUpdateWithoutMembershipsInput>
 }
 
+export type UserCreateNestedOneWithoutPasswordResetTokensInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetTokensInput, Prisma.UserUncheckedCreateWithoutPasswordResetTokensInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordResetTokensInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPasswordResetTokensNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetTokensInput, Prisma.UserUncheckedCreateWithoutPasswordResetTokensInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordResetTokensInput
+  upsert?: Prisma.UserUpsertWithoutPasswordResetTokensInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPasswordResetTokensInput, Prisma.UserUpdateWithoutPasswordResetTokensInput>, Prisma.UserUncheckedUpdateWithoutPasswordResetTokensInput>
+}
+
 export type UserCreateWithoutWebAuthnCredentialsInput = {
   id?: string
   username: string
@@ -678,8 +651,6 @@ export type UserCreateWithoutWebAuthnCredentialsInput = {
   seasicknessTolerance?: number
   weeklyDigestOptIn?: boolean
   avatar?: string | null
-  passwordResetToken?: string | null
-  passwordResetExpires?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.FishingSessionCreateNestedManyWithoutUserInput
@@ -687,6 +658,7 @@ export type UserCreateWithoutWebAuthnCredentialsInput = {
   ownedGroups?: Prisma.GroupCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.GroupMembershipCreateNestedManyWithoutUserInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutWebAuthnCredentialsInput = {
@@ -698,8 +670,6 @@ export type UserUncheckedCreateWithoutWebAuthnCredentialsInput = {
   seasicknessTolerance?: number
   weeklyDigestOptIn?: boolean
   avatar?: string | null
-  passwordResetToken?: string | null
-  passwordResetExpires?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.FishingSessionUncheckedCreateNestedManyWithoutUserInput
@@ -707,6 +677,7 @@ export type UserUncheckedCreateWithoutWebAuthnCredentialsInput = {
   ownedGroups?: Prisma.GroupUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.GroupMembershipUncheckedCreateNestedManyWithoutUserInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutWebAuthnCredentialsInput = {
@@ -734,8 +705,6 @@ export type UserUpdateWithoutWebAuthnCredentialsInput = {
   seasicknessTolerance?: Prisma.IntFieldUpdateOperationsInput | number
   weeklyDigestOptIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.FishingSessionUpdateManyWithoutUserNestedInput
@@ -743,6 +712,7 @@ export type UserUpdateWithoutWebAuthnCredentialsInput = {
   ownedGroups?: Prisma.GroupUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.GroupMembershipUpdateManyWithoutUserNestedInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWebAuthnCredentialsInput = {
@@ -754,8 +724,6 @@ export type UserUncheckedUpdateWithoutWebAuthnCredentialsInput = {
   seasicknessTolerance?: Prisma.IntFieldUpdateOperationsInput | number
   weeklyDigestOptIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.FishingSessionUncheckedUpdateManyWithoutUserNestedInput
@@ -763,6 +731,7 @@ export type UserUncheckedUpdateWithoutWebAuthnCredentialsInput = {
   ownedGroups?: Prisma.GroupUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.GroupMembershipUncheckedUpdateManyWithoutUserNestedInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutWebAuthnChallengesInput = {
@@ -774,8 +743,6 @@ export type UserCreateWithoutWebAuthnChallengesInput = {
   seasicknessTolerance?: number
   weeklyDigestOptIn?: boolean
   avatar?: string | null
-  passwordResetToken?: string | null
-  passwordResetExpires?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.FishingSessionCreateNestedManyWithoutUserInput
@@ -783,6 +750,7 @@ export type UserCreateWithoutWebAuthnChallengesInput = {
   ownedGroups?: Prisma.GroupCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.GroupMembershipCreateNestedManyWithoutUserInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutWebAuthnChallengesInput = {
@@ -794,8 +762,6 @@ export type UserUncheckedCreateWithoutWebAuthnChallengesInput = {
   seasicknessTolerance?: number
   weeklyDigestOptIn?: boolean
   avatar?: string | null
-  passwordResetToken?: string | null
-  passwordResetExpires?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.FishingSessionUncheckedCreateNestedManyWithoutUserInput
@@ -803,6 +769,7 @@ export type UserUncheckedCreateWithoutWebAuthnChallengesInput = {
   ownedGroups?: Prisma.GroupUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.GroupMembershipUncheckedCreateNestedManyWithoutUserInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutWebAuthnChallengesInput = {
@@ -830,8 +797,6 @@ export type UserUpdateWithoutWebAuthnChallengesInput = {
   seasicknessTolerance?: Prisma.IntFieldUpdateOperationsInput | number
   weeklyDigestOptIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.FishingSessionUpdateManyWithoutUserNestedInput
@@ -839,6 +804,7 @@ export type UserUpdateWithoutWebAuthnChallengesInput = {
   ownedGroups?: Prisma.GroupUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.GroupMembershipUpdateManyWithoutUserNestedInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWebAuthnChallengesInput = {
@@ -850,8 +816,6 @@ export type UserUncheckedUpdateWithoutWebAuthnChallengesInput = {
   seasicknessTolerance?: Prisma.IntFieldUpdateOperationsInput | number
   weeklyDigestOptIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.FishingSessionUncheckedUpdateManyWithoutUserNestedInput
@@ -859,6 +823,7 @@ export type UserUncheckedUpdateWithoutWebAuthnChallengesInput = {
   ownedGroups?: Prisma.GroupUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.GroupMembershipUncheckedUpdateManyWithoutUserNestedInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSessionsInput = {
@@ -870,8 +835,6 @@ export type UserCreateWithoutSessionsInput = {
   seasicknessTolerance?: number
   weeklyDigestOptIn?: boolean
   avatar?: string | null
-  passwordResetToken?: string | null
-  passwordResetExpires?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   catchLogs?: Prisma.CatchLogCreateNestedManyWithoutUserInput
@@ -879,6 +842,7 @@ export type UserCreateWithoutSessionsInput = {
   memberships?: Prisma.GroupMembershipCreateNestedManyWithoutUserInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialCreateNestedManyWithoutUserInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -890,8 +854,6 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   seasicknessTolerance?: number
   weeklyDigestOptIn?: boolean
   avatar?: string | null
-  passwordResetToken?: string | null
-  passwordResetExpires?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   catchLogs?: Prisma.CatchLogUncheckedCreateNestedManyWithoutUserInput
@@ -899,6 +861,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   memberships?: Prisma.GroupMembershipUncheckedCreateNestedManyWithoutUserInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedCreateNestedManyWithoutUserInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -926,8 +889,6 @@ export type UserUpdateWithoutSessionsInput = {
   seasicknessTolerance?: Prisma.IntFieldUpdateOperationsInput | number
   weeklyDigestOptIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   catchLogs?: Prisma.CatchLogUpdateManyWithoutUserNestedInput
@@ -935,6 +896,7 @@ export type UserUpdateWithoutSessionsInput = {
   memberships?: Prisma.GroupMembershipUpdateManyWithoutUserNestedInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialUpdateManyWithoutUserNestedInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -946,8 +908,6 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   seasicknessTolerance?: Prisma.IntFieldUpdateOperationsInput | number
   weeklyDigestOptIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   catchLogs?: Prisma.CatchLogUncheckedUpdateManyWithoutUserNestedInput
@@ -955,6 +915,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   memberships?: Prisma.GroupMembershipUncheckedUpdateManyWithoutUserNestedInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedUpdateManyWithoutUserNestedInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCatchLogsInput = {
@@ -966,8 +927,6 @@ export type UserCreateWithoutCatchLogsInput = {
   seasicknessTolerance?: number
   weeklyDigestOptIn?: boolean
   avatar?: string | null
-  passwordResetToken?: string | null
-  passwordResetExpires?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.FishingSessionCreateNestedManyWithoutUserInput
@@ -975,6 +934,7 @@ export type UserCreateWithoutCatchLogsInput = {
   memberships?: Prisma.GroupMembershipCreateNestedManyWithoutUserInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialCreateNestedManyWithoutUserInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCatchLogsInput = {
@@ -986,8 +946,6 @@ export type UserUncheckedCreateWithoutCatchLogsInput = {
   seasicknessTolerance?: number
   weeklyDigestOptIn?: boolean
   avatar?: string | null
-  passwordResetToken?: string | null
-  passwordResetExpires?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.FishingSessionUncheckedCreateNestedManyWithoutUserInput
@@ -995,6 +953,7 @@ export type UserUncheckedCreateWithoutCatchLogsInput = {
   memberships?: Prisma.GroupMembershipUncheckedCreateNestedManyWithoutUserInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedCreateNestedManyWithoutUserInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCatchLogsInput = {
@@ -1022,8 +981,6 @@ export type UserUpdateWithoutCatchLogsInput = {
   seasicknessTolerance?: Prisma.IntFieldUpdateOperationsInput | number
   weeklyDigestOptIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.FishingSessionUpdateManyWithoutUserNestedInput
@@ -1031,6 +988,7 @@ export type UserUpdateWithoutCatchLogsInput = {
   memberships?: Prisma.GroupMembershipUpdateManyWithoutUserNestedInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialUpdateManyWithoutUserNestedInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCatchLogsInput = {
@@ -1042,8 +1000,6 @@ export type UserUncheckedUpdateWithoutCatchLogsInput = {
   seasicknessTolerance?: Prisma.IntFieldUpdateOperationsInput | number
   weeklyDigestOptIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.FishingSessionUncheckedUpdateManyWithoutUserNestedInput
@@ -1051,6 +1007,7 @@ export type UserUncheckedUpdateWithoutCatchLogsInput = {
   memberships?: Prisma.GroupMembershipUncheckedUpdateManyWithoutUserNestedInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedUpdateManyWithoutUserNestedInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutOwnedGroupsInput = {
@@ -1062,8 +1019,6 @@ export type UserCreateWithoutOwnedGroupsInput = {
   seasicknessTolerance?: number
   weeklyDigestOptIn?: boolean
   avatar?: string | null
-  passwordResetToken?: string | null
-  passwordResetExpires?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.FishingSessionCreateNestedManyWithoutUserInput
@@ -1071,6 +1026,7 @@ export type UserCreateWithoutOwnedGroupsInput = {
   memberships?: Prisma.GroupMembershipCreateNestedManyWithoutUserInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialCreateNestedManyWithoutUserInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOwnedGroupsInput = {
@@ -1082,8 +1038,6 @@ export type UserUncheckedCreateWithoutOwnedGroupsInput = {
   seasicknessTolerance?: number
   weeklyDigestOptIn?: boolean
   avatar?: string | null
-  passwordResetToken?: string | null
-  passwordResetExpires?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.FishingSessionUncheckedCreateNestedManyWithoutUserInput
@@ -1091,6 +1045,7 @@ export type UserUncheckedCreateWithoutOwnedGroupsInput = {
   memberships?: Prisma.GroupMembershipUncheckedCreateNestedManyWithoutUserInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedCreateNestedManyWithoutUserInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOwnedGroupsInput = {
@@ -1118,8 +1073,6 @@ export type UserUpdateWithoutOwnedGroupsInput = {
   seasicknessTolerance?: Prisma.IntFieldUpdateOperationsInput | number
   weeklyDigestOptIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.FishingSessionUpdateManyWithoutUserNestedInput
@@ -1127,6 +1080,7 @@ export type UserUpdateWithoutOwnedGroupsInput = {
   memberships?: Prisma.GroupMembershipUpdateManyWithoutUserNestedInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialUpdateManyWithoutUserNestedInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOwnedGroupsInput = {
@@ -1138,8 +1092,6 @@ export type UserUncheckedUpdateWithoutOwnedGroupsInput = {
   seasicknessTolerance?: Prisma.IntFieldUpdateOperationsInput | number
   weeklyDigestOptIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.FishingSessionUncheckedUpdateManyWithoutUserNestedInput
@@ -1147,6 +1099,7 @@ export type UserUncheckedUpdateWithoutOwnedGroupsInput = {
   memberships?: Prisma.GroupMembershipUncheckedUpdateManyWithoutUserNestedInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedUpdateManyWithoutUserNestedInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMembershipsInput = {
@@ -1158,8 +1111,6 @@ export type UserCreateWithoutMembershipsInput = {
   seasicknessTolerance?: number
   weeklyDigestOptIn?: boolean
   avatar?: string | null
-  passwordResetToken?: string | null
-  passwordResetExpires?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.FishingSessionCreateNestedManyWithoutUserInput
@@ -1167,6 +1118,7 @@ export type UserCreateWithoutMembershipsInput = {
   ownedGroups?: Prisma.GroupCreateNestedManyWithoutOwnerInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialCreateNestedManyWithoutUserInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMembershipsInput = {
@@ -1178,8 +1130,6 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   seasicknessTolerance?: number
   weeklyDigestOptIn?: boolean
   avatar?: string | null
-  passwordResetToken?: string | null
-  passwordResetExpires?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.FishingSessionUncheckedCreateNestedManyWithoutUserInput
@@ -1187,6 +1137,7 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   ownedGroups?: Prisma.GroupUncheckedCreateNestedManyWithoutOwnerInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedCreateNestedManyWithoutUserInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMembershipsInput = {
@@ -1214,8 +1165,6 @@ export type UserUpdateWithoutMembershipsInput = {
   seasicknessTolerance?: Prisma.IntFieldUpdateOperationsInput | number
   weeklyDigestOptIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.FishingSessionUpdateManyWithoutUserNestedInput
@@ -1223,6 +1172,7 @@ export type UserUpdateWithoutMembershipsInput = {
   ownedGroups?: Prisma.GroupUpdateManyWithoutOwnerNestedInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialUpdateManyWithoutUserNestedInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMembershipsInput = {
@@ -1234,13 +1184,104 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   seasicknessTolerance?: Prisma.IntFieldUpdateOperationsInput | number
   weeklyDigestOptIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  passwordResetExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.FishingSessionUncheckedUpdateManyWithoutUserNestedInput
   catchLogs?: Prisma.CatchLogUncheckedUpdateManyWithoutUserNestedInput
   ownedGroups?: Prisma.GroupUncheckedUpdateManyWithoutOwnerNestedInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedUpdateManyWithoutUserNestedInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutPasswordResetTokensInput = {
+  id?: string
+  username: string
+  email: string
+  passwordHash: string
+  sounderType?: string
+  seasicknessTolerance?: number
+  weeklyDigestOptIn?: boolean
+  avatar?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.FishingSessionCreateNestedManyWithoutUserInput
+  catchLogs?: Prisma.CatchLogCreateNestedManyWithoutUserInput
+  ownedGroups?: Prisma.GroupCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.GroupMembershipCreateNestedManyWithoutUserInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialCreateNestedManyWithoutUserInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
+  id?: string
+  username: string
+  email: string
+  passwordHash: string
+  sounderType?: string
+  seasicknessTolerance?: number
+  weeklyDigestOptIn?: boolean
+  avatar?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.FishingSessionUncheckedCreateNestedManyWithoutUserInput
+  catchLogs?: Prisma.CatchLogUncheckedCreateNestedManyWithoutUserInput
+  ownedGroups?: Prisma.GroupUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.GroupMembershipUncheckedCreateNestedManyWithoutUserInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedCreateNestedManyWithoutUserInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetTokensInput, Prisma.UserUncheckedCreateWithoutPasswordResetTokensInput>
+}
+
+export type UserUpsertWithoutPasswordResetTokensInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPasswordResetTokensInput, Prisma.UserUncheckedUpdateWithoutPasswordResetTokensInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetTokensInput, Prisma.UserUncheckedCreateWithoutPasswordResetTokensInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPasswordResetTokensInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPasswordResetTokensInput, Prisma.UserUncheckedUpdateWithoutPasswordResetTokensInput>
+}
+
+export type UserUpdateWithoutPasswordResetTokensInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  sounderType?: Prisma.StringFieldUpdateOperationsInput | string
+  seasicknessTolerance?: Prisma.IntFieldUpdateOperationsInput | number
+  weeklyDigestOptIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.FishingSessionUpdateManyWithoutUserNestedInput
+  catchLogs?: Prisma.CatchLogUpdateManyWithoutUserNestedInput
+  ownedGroups?: Prisma.GroupUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.GroupMembershipUpdateManyWithoutUserNestedInput
+  webAuthnCredentials?: Prisma.WebAuthnCredentialUpdateManyWithoutUserNestedInput
+  webAuthnChallenges?: Prisma.WebAuthnChallengeUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  sounderType?: Prisma.StringFieldUpdateOperationsInput | string
+  seasicknessTolerance?: Prisma.IntFieldUpdateOperationsInput | number
+  weeklyDigestOptIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.FishingSessionUncheckedUpdateManyWithoutUserNestedInput
+  catchLogs?: Prisma.CatchLogUncheckedUpdateManyWithoutUserNestedInput
+  ownedGroups?: Prisma.GroupUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.GroupMembershipUncheckedUpdateManyWithoutUserNestedInput
   webAuthnCredentials?: Prisma.WebAuthnCredentialUncheckedUpdateManyWithoutUserNestedInput
   webAuthnChallenges?: Prisma.WebAuthnChallengeUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -1257,6 +1298,7 @@ export type UserCountOutputType = {
   memberships: number
   webAuthnCredentials: number
   webAuthnChallenges: number
+  passwordResetTokens: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1266,6 +1308,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   memberships?: boolean | UserCountOutputTypeCountMembershipsArgs
   webAuthnCredentials?: boolean | UserCountOutputTypeCountWebAuthnCredentialsArgs
   webAuthnChallenges?: boolean | UserCountOutputTypeCountWebAuthnChallengesArgs
+  passwordResetTokens?: boolean | UserCountOutputTypeCountPasswordResetTokensArgs
 }
 
 /**
@@ -1320,6 +1363,13 @@ export type UserCountOutputTypeCountWebAuthnChallengesArgs<ExtArgs extends runti
   where?: Prisma.WebAuthnChallengeWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPasswordResetTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PasswordResetTokenWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1330,8 +1380,6 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   seasicknessTolerance?: boolean
   weeklyDigestOptIn?: boolean
   avatar?: boolean
-  passwordResetToken?: boolean
-  passwordResetExpires?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
@@ -1340,6 +1388,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
   webAuthnCredentials?: boolean | Prisma.User$webAuthnCredentialsArgs<ExtArgs>
   webAuthnChallenges?: boolean | Prisma.User$webAuthnChallengesArgs<ExtArgs>
+  passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1352,8 +1401,6 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   seasicknessTolerance?: boolean
   weeklyDigestOptIn?: boolean
   avatar?: boolean
-  passwordResetToken?: boolean
-  passwordResetExpires?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -1367,8 +1414,6 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   seasicknessTolerance?: boolean
   weeklyDigestOptIn?: boolean
   avatar?: boolean
-  passwordResetToken?: boolean
-  passwordResetExpires?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -1382,13 +1427,11 @@ export type UserSelectScalar = {
   seasicknessTolerance?: boolean
   weeklyDigestOptIn?: boolean
   avatar?: boolean
-  passwordResetToken?: boolean
-  passwordResetExpires?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "username" | "email" | "passwordHash" | "sounderType" | "seasicknessTolerance" | "weeklyDigestOptIn" | "avatar" | "passwordResetToken" | "passwordResetExpires" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "username" | "email" | "passwordHash" | "sounderType" | "seasicknessTolerance" | "weeklyDigestOptIn" | "avatar" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   catchLogs?: boolean | Prisma.User$catchLogsArgs<ExtArgs>
@@ -1396,6 +1439,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
   webAuthnCredentials?: boolean | Prisma.User$webAuthnCredentialsArgs<ExtArgs>
   webAuthnChallenges?: boolean | Prisma.User$webAuthnChallengesArgs<ExtArgs>
+  passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1410,6 +1454,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     memberships: Prisma.$GroupMembershipPayload<ExtArgs>[]
     webAuthnCredentials: Prisma.$WebAuthnCredentialPayload<ExtArgs>[]
     webAuthnChallenges: Prisma.$WebAuthnChallengePayload<ExtArgs>[]
+    passwordResetTokens: Prisma.$PasswordResetTokenPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1420,8 +1465,6 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     seasicknessTolerance: number
     weeklyDigestOptIn: boolean
     avatar: string | null
-    passwordResetToken: string | null
-    passwordResetExpires: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["user"]>
@@ -1824,6 +1867,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   memberships<T extends Prisma.User$membershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GroupMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   webAuthnCredentials<T extends Prisma.User$webAuthnCredentialsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$webAuthnCredentialsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WebAuthnCredentialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   webAuthnChallenges<T extends Prisma.User$webAuthnChallengesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$webAuthnChallengesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WebAuthnChallengePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  passwordResetTokens<T extends Prisma.User$passwordResetTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$passwordResetTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1861,8 +1905,6 @@ export interface UserFieldRefs {
   readonly seasicknessTolerance: Prisma.FieldRef<"User", 'Int'>
   readonly weeklyDigestOptIn: Prisma.FieldRef<"User", 'Boolean'>
   readonly avatar: Prisma.FieldRef<"User", 'String'>
-  readonly passwordResetToken: Prisma.FieldRef<"User", 'String'>
-  readonly passwordResetExpires: Prisma.FieldRef<"User", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }
@@ -2399,6 +2441,30 @@ export type User$webAuthnChallengesArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.WebAuthnChallengeScalarFieldEnum | Prisma.WebAuthnChallengeScalarFieldEnum[]
+}
+
+/**
+ * User.passwordResetTokens
+ */
+export type User$passwordResetTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PasswordResetToken
+   */
+  select?: Prisma.PasswordResetTokenSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PasswordResetToken
+   */
+  omit?: Prisma.PasswordResetTokenOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PasswordResetTokenInclude<ExtArgs> | null
+  where?: Prisma.PasswordResetTokenWhereInput
+  orderBy?: Prisma.PasswordResetTokenOrderByWithRelationInput | Prisma.PasswordResetTokenOrderByWithRelationInput[]
+  cursor?: Prisma.PasswordResetTokenWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PasswordResetTokenScalarFieldEnum | Prisma.PasswordResetTokenScalarFieldEnum[]
 }
 
 /**

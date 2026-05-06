@@ -346,7 +346,7 @@ export type CatchLogGroupByOutputType = {
   _max: CatchLogMaxAggregateOutputType | null
 }
 
-type GetCatchLogGroupByPayload<T extends CatchLogGroupByArgs> = Prisma.PrismaPromise<
+export type GetCatchLogGroupByPayload<T extends CatchLogGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<CatchLogGroupByOutputType, T['by']> &
       {

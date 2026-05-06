@@ -24,7 +24,8 @@ An AI-powered fishing briefing card generator for Western Australian waters. Ent
 - **Saved plans** — Bookmark plans to your profile for later reference; download any plan for offline access with a single tap
 - **User profile** — Store sounder brand (Garmin, Simrad, Lowrance, etc.) and sea conditions tolerance for personalised plans
 - **Fishing Groups** — Create or join private fishing groups to share catch logs with your crew; owner-managed invites; shared catches visible to all active group members
-- **Password reset** — Forgot-password email flow with secure token-based reset link
+- **Passkey / biometric login** — Register a fingerprint or Face ID passkey on your device; log in with a single tap instead of a password. Manage passkeys from your profile page. Requires a WebAuthn-capable browser (Safari, Chrome, Edge on any modern device)
+- **Password reset** — Forgot-password email flow with secure token-based reset link (1-hour expiry, one-time use)
 - **User avatars** — Upload a profile avatar shown across the app
 - **User accounts** — Secure registration and login with NextAuth
 
@@ -167,11 +168,18 @@ app/
     auth/
       forgot-password/   # Send password reset email
       reset-password/    # Complete password reset with token
+    webauthn/
+      register/options/  # Generate WebAuthn registration challenge
+      register/verify/   # Verify and save new passkey credential
+      auth/options/      # Generate WebAuthn authentication challenge
+      auth/verify/       # Verify passkey assertion and sign in
+      passkeys/          # List user's registered passkeys
+      credentials/[id]/  # Delete a passkey credential
     cron/
       parse-recfishwest/   # Fetch & parse RecFishWest newsletter
       update-crowd-data/   # Weekly iNaturalist + catch-log aggregation
       send-weekly-digest/  # Weekly email digest to opted-in users
-components/        # Page-level React components (maps, forms, plan display, GPX button, CoordInput)
+components/        # Page-level React components (maps, forms, plan display, GPX button, CoordInput, PasskeyManager)
 lib/
   claude-api.ts          # AI plan generation prompt + schema; species identification
   marine-api.ts          # WillyWeather + Open-Meteo data fetching
@@ -183,6 +191,7 @@ lib/
   parse-coords.ts        # Multi-format coordinate parser (DD, DDM, DMS, cardinal prefix/suffix)
   crowd-source-aggregator.ts  # Combines catch logs and newsletter observations → CrowdSummary per bioregion
   email.ts               # Nodemailer transport + branded HTML email templates
+  webauthn.ts            # WebAuthn helpers: challenge generation, credential verification
   data/                  # Static JSON: boat ramps, reef features
 prisma/
   schema.prisma    # Database schema

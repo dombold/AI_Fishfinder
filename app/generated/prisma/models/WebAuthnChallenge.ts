@@ -165,7 +165,7 @@ export type WebAuthnChallengeGroupByOutputType = {
   _max: WebAuthnChallengeMaxAggregateOutputType | null
 }
 
-type GetWebAuthnChallengeGroupByPayload<T extends WebAuthnChallengeGroupByArgs> = Prisma.PrismaPromise<
+export type GetWebAuthnChallengeGroupByPayload<T extends WebAuthnChallengeGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<WebAuthnChallengeGroupByOutputType, T['by']> &
       {
