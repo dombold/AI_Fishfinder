@@ -44,6 +44,10 @@ export default function DashboardPage() {
   const [species, setSpecies] = useState<string[]>([])
   const [availableSpecies, setAvailableSpecies] = useState<string[]>([])
 
+  const [maxDepthM, setMaxDepthM] = useState<number | null>(null)
+  const [maxDistanceKm, setMaxDistanceKm] = useState<number | null>(null)
+  const [planInstructions, setPlanInstructions] = useState('')
+
   const [closureWarnings, setClosureWarnings] = useState<{ severity: string; message: string }[]>([])
   const [loading, setLoading] = useState(false)
   const [loadingStep, setLoadingStep] = useState('')
@@ -119,7 +123,18 @@ export default function DashboardPage() {
       const sessionRes = await fetch('/api/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ latitude: location.lat, longitude: location.lng, startDate, endDate, fishingType, targetType, selectedSpecies: species }),
+        body: JSON.stringify({
+          latitude: location.lat,
+          longitude: location.lng,
+          startDate,
+          endDate,
+          fishingType,
+          targetType,
+          selectedSpecies: species,
+          ...(maxDepthM !== null && { maxDepthM }),
+          ...(maxDistanceKm !== null && { maxDistanceKm }),
+          ...(planInstructions.trim() && { planInstructions: planInstructions.trim() }),
+        }),
       })
       if (!sessionRes.ok) {
         const d = await sessionRes.json()
@@ -296,6 +311,73 @@ export default function DashboardPage() {
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', color: 'var(--color-foam)', marginBottom: '0.25rem' }}>4. Target Species</h2>
               <p style={{ color: 'var(--color-mist)', fontSize: '0.8125rem', marginBottom: '1rem' }}>Select up to 4 species. List adjusts based on your fishing setup above.</p>
               <SpeciesSelector available={availableSpecies} selected={species} onChange={setSpecies} max={4} />
+            </section>
+
+            {/* Section 5: Plan Preferences */}
+            <section className="card" style={{ padding: '1.5rem' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', color: 'var(--color-foam)', marginBottom: '0.25rem' }}>5. Plan Preferences</h2>
+              <p style={{ color: 'var(--color-mist)', fontSize: '0.8125rem', marginBottom: '1.25rem' }}>
+                Optionally constrain the AI plan. Leave as &ldquo;Default&rdquo; to let the AI decide based on conditions.
+              </p>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-mist)', marginBottom: '0.375rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    Maximum Water Depth
+                  </label>
+                  <select
+                    value={maxDepthM ?? ''}
+                    onChange={e => setMaxDepthM(e.target.value === '' ? null : Number(e.target.value))}
+                    style={{ width: '100%' }}
+                  >
+                    <option value="">Default</option>
+                    <option value="5">5 m</option>
+                    <option value="10">10 m</option>
+                    <option value="20">20 m</option>
+                    <option value="30">30 m</option>
+                    <option value="50">50 m</option>
+                    <option value="100">100 m</option>
+                    <option value="200">200 m</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-mist)', marginBottom: '0.375rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    Maximum Distance from Pin
+                  </label>
+                  <select
+                    value={maxDistanceKm ?? ''}
+                    onChange={e => setMaxDistanceKm(e.target.value === '' ? null : Number(e.target.value))}
+                    style={{ width: '100%' }}
+                  >
+                    <option value="">Default</option>
+                    <option value="5">5 km</option>
+                    <option value="10">10 km</option>
+                    <option value="20">20 km</option>
+                    <option value="30">30 km</option>
+                    <option value="50">50 km</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-mist)', marginBottom: '0.375rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                  Specific Instructions <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
+                </label>
+                <textarea
+                  value={planInstructions}
+                  onChange={e => setPlanInstructions(e.target.value)}
+                  maxLength={500}
+                  rows={3}
+                  placeholder="e.g. Focus on shallow reefs, avoid trolling, prefer morning starts…"
+                  style={{ width: '100%', resize: 'vertical', minHeight: '72px' }}
+                />
+                {planInstructions.length > 400 && (
+                  <p style={{ color: 'var(--color-mist)', fontSize: '0.75rem', marginTop: '0.25rem', textAlign: 'right' }}>
+                    {planInstructions.length}/500
+                  </p>
+                )}
+              </div>
             </section>
 
             {/* Error */}

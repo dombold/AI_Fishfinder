@@ -75,6 +75,9 @@ model FishingSession {
   errorMessage    String?
   saved           Boolean  @default(false)
   contextData     String?
+  maxDepthM       Int?
+  maxDistanceKm   Float?
+  planInstructions String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

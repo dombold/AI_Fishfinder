@@ -108,6 +108,9 @@ export async function POST(req: NextRequest) {
       sshAnomaly,
       subsurfaceTemps,
       crowdSummary,
+      maxDepthM: fishingSession.maxDepthM ?? null,
+      maxDistanceKm: fishingSession.maxDistanceKm ?? null,
+      planInstructions: fishingSession.planInstructions ?? null,
     })
 
     // Store each day's plan

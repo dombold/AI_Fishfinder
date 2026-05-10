@@ -29,11 +29,15 @@ export type AggregateFishingSession = {
 export type FishingSessionAvgAggregateOutputType = {
   latitude: number | null
   longitude: number | null
+  maxDepthM: number | null
+  maxDistanceKm: number | null
 }
 
 export type FishingSessionSumAggregateOutputType = {
   latitude: number | null
   longitude: number | null
+  maxDepthM: number | null
+  maxDistanceKm: number | null
 }
 
 export type FishingSessionMinAggregateOutputType = {
@@ -50,6 +54,9 @@ export type FishingSessionMinAggregateOutputType = {
   errorMessage: string | null
   saved: boolean | null
   contextData: string | null
+  maxDepthM: number | null
+  maxDistanceKm: number | null
+  planInstructions: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -68,6 +75,9 @@ export type FishingSessionMaxAggregateOutputType = {
   errorMessage: string | null
   saved: boolean | null
   contextData: string | null
+  maxDepthM: number | null
+  maxDistanceKm: number | null
+  planInstructions: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -86,6 +96,9 @@ export type FishingSessionCountAggregateOutputType = {
   errorMessage: number
   saved: number
   contextData: number
+  maxDepthM: number
+  maxDistanceKm: number
+  planInstructions: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -95,11 +108,15 @@ export type FishingSessionCountAggregateOutputType = {
 export type FishingSessionAvgAggregateInputType = {
   latitude?: true
   longitude?: true
+  maxDepthM?: true
+  maxDistanceKm?: true
 }
 
 export type FishingSessionSumAggregateInputType = {
   latitude?: true
   longitude?: true
+  maxDepthM?: true
+  maxDistanceKm?: true
 }
 
 export type FishingSessionMinAggregateInputType = {
@@ -116,6 +133,9 @@ export type FishingSessionMinAggregateInputType = {
   errorMessage?: true
   saved?: true
   contextData?: true
+  maxDepthM?: true
+  maxDistanceKm?: true
+  planInstructions?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -134,6 +154,9 @@ export type FishingSessionMaxAggregateInputType = {
   errorMessage?: true
   saved?: true
   contextData?: true
+  maxDepthM?: true
+  maxDistanceKm?: true
+  planInstructions?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -152,6 +175,9 @@ export type FishingSessionCountAggregateInputType = {
   errorMessage?: true
   saved?: true
   contextData?: true
+  maxDepthM?: true
+  maxDistanceKm?: true
+  planInstructions?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -257,6 +283,9 @@ export type FishingSessionGroupByOutputType = {
   errorMessage: string | null
   saved: boolean
   contextData: string | null
+  maxDepthM: number | null
+  maxDistanceKm: number | null
+  planInstructions: string | null
   createdAt: Date
   updatedAt: Date
   _count: FishingSessionCountAggregateOutputType | null
@@ -298,6 +327,9 @@ export type FishingSessionWhereInput = {
   errorMessage?: Prisma.StringNullableFilter<"FishingSession"> | string | null
   saved?: Prisma.BoolFilter<"FishingSession"> | boolean
   contextData?: Prisma.StringNullableFilter<"FishingSession"> | string | null
+  maxDepthM?: Prisma.IntNullableFilter<"FishingSession"> | number | null
+  maxDistanceKm?: Prisma.FloatNullableFilter<"FishingSession"> | number | null
+  planInstructions?: Prisma.StringNullableFilter<"FishingSession"> | string | null
   createdAt?: Prisma.DateTimeFilter<"FishingSession"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"FishingSession"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -320,6 +352,9 @@ export type FishingSessionOrderByWithRelationInput = {
   errorMessage?: Prisma.SortOrderInput | Prisma.SortOrder
   saved?: Prisma.SortOrder
   contextData?: Prisma.SortOrderInput | Prisma.SortOrder
+  maxDepthM?: Prisma.SortOrderInput | Prisma.SortOrder
+  maxDistanceKm?: Prisma.SortOrderInput | Prisma.SortOrder
+  planInstructions?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -345,6 +380,9 @@ export type FishingSessionWhereUniqueInput = Prisma.AtLeast<{
   errorMessage?: Prisma.StringNullableFilter<"FishingSession"> | string | null
   saved?: Prisma.BoolFilter<"FishingSession"> | boolean
   contextData?: Prisma.StringNullableFilter<"FishingSession"> | string | null
+  maxDepthM?: Prisma.IntNullableFilter<"FishingSession"> | number | null
+  maxDistanceKm?: Prisma.FloatNullableFilter<"FishingSession"> | number | null
+  planInstructions?: Prisma.StringNullableFilter<"FishingSession"> | string | null
   createdAt?: Prisma.DateTimeFilter<"FishingSession"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"FishingSession"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -367,6 +405,9 @@ export type FishingSessionOrderByWithAggregationInput = {
   errorMessage?: Prisma.SortOrderInput | Prisma.SortOrder
   saved?: Prisma.SortOrder
   contextData?: Prisma.SortOrderInput | Prisma.SortOrder
+  maxDepthM?: Prisma.SortOrderInput | Prisma.SortOrder
+  maxDistanceKm?: Prisma.SortOrderInput | Prisma.SortOrder
+  planInstructions?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.FishingSessionCountOrderByAggregateInput
@@ -393,6 +434,9 @@ export type FishingSessionScalarWhereWithAggregatesInput = {
   errorMessage?: Prisma.StringNullableWithAggregatesFilter<"FishingSession"> | string | null
   saved?: Prisma.BoolWithAggregatesFilter<"FishingSession"> | boolean
   contextData?: Prisma.StringNullableWithAggregatesFilter<"FishingSession"> | string | null
+  maxDepthM?: Prisma.IntNullableWithAggregatesFilter<"FishingSession"> | number | null
+  maxDistanceKm?: Prisma.FloatNullableWithAggregatesFilter<"FishingSession"> | number | null
+  planInstructions?: Prisma.StringNullableWithAggregatesFilter<"FishingSession"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"FishingSession"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"FishingSession"> | Date | string
 }
@@ -410,6 +454,9 @@ export type FishingSessionCreateInput = {
   errorMessage?: string | null
   saved?: boolean
   contextData?: string | null
+  maxDepthM?: number | null
+  maxDistanceKm?: number | null
+  planInstructions?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutSessionsInput
@@ -432,6 +479,9 @@ export type FishingSessionUncheckedCreateInput = {
   errorMessage?: string | null
   saved?: boolean
   contextData?: string | null
+  maxDepthM?: number | null
+  maxDistanceKm?: number | null
+  planInstructions?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   selectedSpecies?: Prisma.SelectedSpeciesUncheckedCreateNestedManyWithoutSessionInput
@@ -452,6 +502,9 @@ export type FishingSessionUpdateInput = {
   errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   contextData?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxDepthM?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  planInstructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutSessionsNestedInput
@@ -474,6 +527,9 @@ export type FishingSessionUncheckedUpdateInput = {
   errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   contextData?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxDepthM?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  planInstructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   selectedSpecies?: Prisma.SelectedSpeciesUncheckedUpdateManyWithoutSessionNestedInput
@@ -495,6 +551,9 @@ export type FishingSessionCreateManyInput = {
   errorMessage?: string | null
   saved?: boolean
   contextData?: string | null
+  maxDepthM?: number | null
+  maxDistanceKm?: number | null
+  planInstructions?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -512,6 +571,9 @@ export type FishingSessionUpdateManyMutationInput = {
   errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   contextData?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxDepthM?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  planInstructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -530,6 +592,9 @@ export type FishingSessionUncheckedUpdateManyInput = {
   errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   contextData?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxDepthM?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  planInstructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -558,6 +623,9 @@ export type FishingSessionCountOrderByAggregateInput = {
   errorMessage?: Prisma.SortOrder
   saved?: Prisma.SortOrder
   contextData?: Prisma.SortOrder
+  maxDepthM?: Prisma.SortOrder
+  maxDistanceKm?: Prisma.SortOrder
+  planInstructions?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -565,6 +633,8 @@ export type FishingSessionCountOrderByAggregateInput = {
 export type FishingSessionAvgOrderByAggregateInput = {
   latitude?: Prisma.SortOrder
   longitude?: Prisma.SortOrder
+  maxDepthM?: Prisma.SortOrder
+  maxDistanceKm?: Prisma.SortOrder
 }
 
 export type FishingSessionMaxOrderByAggregateInput = {
@@ -581,6 +651,9 @@ export type FishingSessionMaxOrderByAggregateInput = {
   errorMessage?: Prisma.SortOrder
   saved?: Prisma.SortOrder
   contextData?: Prisma.SortOrder
+  maxDepthM?: Prisma.SortOrder
+  maxDistanceKm?: Prisma.SortOrder
+  planInstructions?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -599,6 +672,9 @@ export type FishingSessionMinOrderByAggregateInput = {
   errorMessage?: Prisma.SortOrder
   saved?: Prisma.SortOrder
   contextData?: Prisma.SortOrder
+  maxDepthM?: Prisma.SortOrder
+  maxDistanceKm?: Prisma.SortOrder
+  planInstructions?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -606,6 +682,8 @@ export type FishingSessionMinOrderByAggregateInput = {
 export type FishingSessionSumOrderByAggregateInput = {
   latitude?: Prisma.SortOrder
   longitude?: Prisma.SortOrder
+  maxDepthM?: Prisma.SortOrder
+  maxDistanceKm?: Prisma.SortOrder
 }
 
 export type FishingSessionScalarRelationFilter = {
@@ -657,6 +735,22 @@ export type FishingSessionUncheckedUpdateManyWithoutUserNestedInput = {
 
 export type FloatFieldUpdateOperationsInput = {
   set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type NullableFloatFieldUpdateOperationsInput = {
+  set?: number | null
   increment?: number
   decrement?: number
   multiply?: number
@@ -718,6 +812,9 @@ export type FishingSessionCreateWithoutUserInput = {
   errorMessage?: string | null
   saved?: boolean
   contextData?: string | null
+  maxDepthM?: number | null
+  maxDistanceKm?: number | null
+  planInstructions?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   selectedSpecies?: Prisma.SelectedSpeciesCreateNestedManyWithoutSessionInput
@@ -738,6 +835,9 @@ export type FishingSessionUncheckedCreateWithoutUserInput = {
   errorMessage?: string | null
   saved?: boolean
   contextData?: string | null
+  maxDepthM?: number | null
+  maxDistanceKm?: number | null
+  planInstructions?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   selectedSpecies?: Prisma.SelectedSpeciesUncheckedCreateNestedManyWithoutSessionInput
@@ -788,6 +888,9 @@ export type FishingSessionScalarWhereInput = {
   errorMessage?: Prisma.StringNullableFilter<"FishingSession"> | string | null
   saved?: Prisma.BoolFilter<"FishingSession"> | boolean
   contextData?: Prisma.StringNullableFilter<"FishingSession"> | string | null
+  maxDepthM?: Prisma.IntNullableFilter<"FishingSession"> | number | null
+  maxDistanceKm?: Prisma.FloatNullableFilter<"FishingSession"> | number | null
+  planInstructions?: Prisma.StringNullableFilter<"FishingSession"> | string | null
   createdAt?: Prisma.DateTimeFilter<"FishingSession"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"FishingSession"> | Date | string
 }
@@ -805,6 +908,9 @@ export type FishingSessionCreateWithoutSelectedSpeciesInput = {
   errorMessage?: string | null
   saved?: boolean
   contextData?: string | null
+  maxDepthM?: number | null
+  maxDistanceKm?: number | null
+  planInstructions?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutSessionsInput
@@ -826,6 +932,9 @@ export type FishingSessionUncheckedCreateWithoutSelectedSpeciesInput = {
   errorMessage?: string | null
   saved?: boolean
   contextData?: string | null
+  maxDepthM?: number | null
+  maxDistanceKm?: number | null
+  planInstructions?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   marineData?: Prisma.MarineDataUncheckedCreateNestedManyWithoutSessionInput
@@ -861,6 +970,9 @@ export type FishingSessionUpdateWithoutSelectedSpeciesInput = {
   errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   contextData?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxDepthM?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  planInstructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutSessionsNestedInput
@@ -882,6 +994,9 @@ export type FishingSessionUncheckedUpdateWithoutSelectedSpeciesInput = {
   errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   contextData?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxDepthM?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  planInstructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   marineData?: Prisma.MarineDataUncheckedUpdateManyWithoutSessionNestedInput
@@ -901,6 +1016,9 @@ export type FishingSessionCreateWithoutMarineDataInput = {
   errorMessage?: string | null
   saved?: boolean
   contextData?: string | null
+  maxDepthM?: number | null
+  maxDistanceKm?: number | null
+  planInstructions?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutSessionsInput
@@ -922,6 +1040,9 @@ export type FishingSessionUncheckedCreateWithoutMarineDataInput = {
   errorMessage?: string | null
   saved?: boolean
   contextData?: string | null
+  maxDepthM?: number | null
+  maxDistanceKm?: number | null
+  planInstructions?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   selectedSpecies?: Prisma.SelectedSpeciesUncheckedCreateNestedManyWithoutSessionInput
@@ -957,6 +1078,9 @@ export type FishingSessionUpdateWithoutMarineDataInput = {
   errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   contextData?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxDepthM?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  planInstructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutSessionsNestedInput
@@ -978,6 +1102,9 @@ export type FishingSessionUncheckedUpdateWithoutMarineDataInput = {
   errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   contextData?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxDepthM?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  planInstructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   selectedSpecies?: Prisma.SelectedSpeciesUncheckedUpdateManyWithoutSessionNestedInput
@@ -997,6 +1124,9 @@ export type FishingSessionCreateWithoutFishingPlansInput = {
   errorMessage?: string | null
   saved?: boolean
   contextData?: string | null
+  maxDepthM?: number | null
+  maxDistanceKm?: number | null
+  planInstructions?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutSessionsInput
@@ -1018,6 +1148,9 @@ export type FishingSessionUncheckedCreateWithoutFishingPlansInput = {
   errorMessage?: string | null
   saved?: boolean
   contextData?: string | null
+  maxDepthM?: number | null
+  maxDistanceKm?: number | null
+  planInstructions?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   selectedSpecies?: Prisma.SelectedSpeciesUncheckedCreateNestedManyWithoutSessionInput
@@ -1053,6 +1186,9 @@ export type FishingSessionUpdateWithoutFishingPlansInput = {
   errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   contextData?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxDepthM?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  planInstructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutSessionsNestedInput
@@ -1074,6 +1210,9 @@ export type FishingSessionUncheckedUpdateWithoutFishingPlansInput = {
   errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   contextData?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxDepthM?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  planInstructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   selectedSpecies?: Prisma.SelectedSpeciesUncheckedUpdateManyWithoutSessionNestedInput
@@ -1093,6 +1232,9 @@ export type FishingSessionCreateManyUserInput = {
   errorMessage?: string | null
   saved?: boolean
   contextData?: string | null
+  maxDepthM?: number | null
+  maxDistanceKm?: number | null
+  planInstructions?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1110,6 +1252,9 @@ export type FishingSessionUpdateWithoutUserInput = {
   errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   contextData?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxDepthM?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  planInstructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   selectedSpecies?: Prisma.SelectedSpeciesUpdateManyWithoutSessionNestedInput
@@ -1130,6 +1275,9 @@ export type FishingSessionUncheckedUpdateWithoutUserInput = {
   errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   contextData?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxDepthM?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  planInstructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   selectedSpecies?: Prisma.SelectedSpeciesUncheckedUpdateManyWithoutSessionNestedInput
@@ -1150,6 +1298,9 @@ export type FishingSessionUncheckedUpdateManyWithoutUserInput = {
   errorMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saved?: Prisma.BoolFieldUpdateOperationsInput | boolean
   contextData?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maxDepthM?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxDistanceKm?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  planInstructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1217,6 +1368,9 @@ export type FishingSessionSelect<ExtArgs extends runtime.Types.Extensions.Intern
   errorMessage?: boolean
   saved?: boolean
   contextData?: boolean
+  maxDepthM?: boolean
+  maxDistanceKm?: boolean
+  planInstructions?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1240,6 +1394,9 @@ export type FishingSessionSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   errorMessage?: boolean
   saved?: boolean
   contextData?: boolean
+  maxDepthM?: boolean
+  maxDistanceKm?: boolean
+  planInstructions?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1259,6 +1416,9 @@ export type FishingSessionSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   errorMessage?: boolean
   saved?: boolean
   contextData?: boolean
+  maxDepthM?: boolean
+  maxDistanceKm?: boolean
+  planInstructions?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1278,11 +1438,14 @@ export type FishingSessionSelectScalar = {
   errorMessage?: boolean
   saved?: boolean
   contextData?: boolean
+  maxDepthM?: boolean
+  maxDistanceKm?: boolean
+  planInstructions?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type FishingSessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "latitude" | "longitude" | "locationName" | "startDate" | "endDate" | "fishingType" | "targetType" | "status" | "errorMessage" | "saved" | "contextData" | "createdAt" | "updatedAt", ExtArgs["result"]["fishingSession"]>
+export type FishingSessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "latitude" | "longitude" | "locationName" | "startDate" | "endDate" | "fishingType" | "targetType" | "status" | "errorMessage" | "saved" | "contextData" | "maxDepthM" | "maxDistanceKm" | "planInstructions" | "createdAt" | "updatedAt", ExtArgs["result"]["fishingSession"]>
 export type FishingSessionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   selectedSpecies?: boolean | Prisma.FishingSession$selectedSpeciesArgs<ExtArgs>
@@ -1319,6 +1482,9 @@ export type $FishingSessionPayload<ExtArgs extends runtime.Types.Extensions.Inte
     errorMessage: string | null
     saved: boolean
     contextData: string | null
+    maxDepthM: number | null
+    maxDistanceKm: number | null
+    planInstructions: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["fishingSession"]>
@@ -1761,6 +1927,9 @@ export interface FishingSessionFieldRefs {
   readonly errorMessage: Prisma.FieldRef<"FishingSession", 'String'>
   readonly saved: Prisma.FieldRef<"FishingSession", 'Boolean'>
   readonly contextData: Prisma.FieldRef<"FishingSession", 'String'>
+  readonly maxDepthM: Prisma.FieldRef<"FishingSession", 'Int'>
+  readonly maxDistanceKm: Prisma.FieldRef<"FishingSession", 'Float'>
+  readonly planInstructions: Prisma.FieldRef<"FishingSession", 'String'>
   readonly createdAt: Prisma.FieldRef<"FishingSession", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"FishingSession", 'DateTime'>
 }

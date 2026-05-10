@@ -12,6 +12,9 @@ const SessionSchema = z.object({
   fishingType: z.enum(['beach', 'boat']),
   targetType: z.enum(['pelagic', 'demersal', 'both']),
   selectedSpecies: z.array(z.string()).min(1).max(4),
+  maxDepthM: z.number().int().positive().optional(),
+  maxDistanceKm: z.number().positive().optional(),
+  planInstructions: z.string().max(500).optional(),
 })
 
 export async function POST(req: NextRequest) {
@@ -28,7 +31,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
     }
 
-    const { latitude, longitude, locationName, startDate, endDate, fishingType, targetType, selectedSpecies } = parsed.data
+    const { latitude, longitude, locationName, startDate, endDate, fishingType, targetType, selectedSpecies, maxDepthM, maxDistanceKm, planInstructions } = parsed.data
 
     // Validate date range
     const start = new Date(startDate)
@@ -53,6 +56,9 @@ export async function POST(req: NextRequest) {
         endDate,
         fishingType,
         targetType,
+        maxDepthM: maxDepthM ?? null,
+        maxDistanceKm: maxDistanceKm ?? null,
+        planInstructions: planInstructions ?? null,
         status: 'PENDING',
         selectedSpecies: {
           create: selectedSpecies.map(speciesName => ({ speciesName })),

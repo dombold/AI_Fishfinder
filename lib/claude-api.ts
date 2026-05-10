@@ -187,6 +187,9 @@ export async function generateFishingPlan(params: {
   sshAnomaly: number | null
   subsurfaceTemps: SubsurfaceTemps | null
   crowdSummary: CrowdSummary | null
+  maxDepthM: number | null
+  maxDistanceKm: number | null
+  planInstructions: string | null
 }): Promise<DailyPlan[]> {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   const bioregion = getBioregion(params.latitude, params.longitude)
@@ -285,14 +288,19 @@ ${formatPeriods(day.periods)}
 ## Target Species Knowledge & Regulations
 ${buildSpeciesBlock(params.selectedSpecies, params.latitude, params.longitude)}
 
-## Output Schema:
+${(params.maxDepthM || params.maxDistanceKm || params.planInstructions) ? `## User Constraints for This Plan
+${params.maxDepthM ? `- Maximum water depth: ${params.maxDepthM}m — do not place any waypoint deeper than this` : ''}
+${params.maxDistanceKm ? `- Maximum distance from pin: ${params.maxDistanceKm}km — all waypoints must be within this radius of the session location` : ''}
+${params.planInstructions ? `- Specific instructions: ${params.planInstructions}` : ''}
+
+` : ''}## Output Schema:
 ${DAILY_PLAN_SCHEMA}
 
 Rules:
 - windTable must have exactly 5 entries (one per period: Pre-dawn, Morning, Midday, Afternoon, Evening)
 - fishingPlan must have exactly 7 phases in order: Start, Run, Repeat, Prime, Late, Adapt, Pack Up
 - All times use 24h format HH:MM
-- Waypoints use realistic coordinates within 60km of ${params.latitude}, ${params.longitude}
+- Waypoints use realistic coordinates within ${params.maxDistanceKm ?? 60}km of ${params.latitude}, ${params.longitude}
 - Rating values must be exactly one of: BEST WINDOW, GOOD, IMPROVING, AVERAGE, FISHABLE, DETERIORATING
 - Include 2–4 waypoints per day
 - oceanConditions must include SST, Current, Pressure, Moon (minimum 4 rows)

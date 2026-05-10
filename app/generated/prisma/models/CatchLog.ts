@@ -853,22 +853,6 @@ export type CatchLogUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.CatchLogScalarWhereInput | Prisma.CatchLogScalarWhereInput[]
 }
 
-export type NullableFloatFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type CatchLogCreateNestedOneWithoutSharedGroupsInput = {
   create?: Prisma.XOR<Prisma.CatchLogCreateWithoutSharedGroupsInput, Prisma.CatchLogUncheckedCreateWithoutSharedGroupsInput>
   connectOrCreate?: Prisma.CatchLogCreateOrConnectWithoutSharedGroupsInput
