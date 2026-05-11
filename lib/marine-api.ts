@@ -329,8 +329,40 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): nu
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
+// Curated list of WA locations with official tide gauges in WillyWeather.
+// Many weather stations in WA_STATIONS don't have tide gauge data — this list
+// is used to find the nearest location that will reliably return tide forecasts.
+export const WA_TIDE_STATIONS: WaStation[] = [
+  { id: 14735, lat: -17.9551, lng: 122.2415, name: 'Broome' },
+  { id: 15532, lat: -20.3142, lng: 118.578,  name: 'Port Hedland' },
+  { id: 14879, lat: -20.6617, lng: 116.7071, name: 'Dampier' },
+  { id: 39786, lat: -21.5917, lng: 113.8046, name: 'Exmouth' },
+  { id: 14651, lat: -20.7919, lng: 115.4001, name: 'Barrow Island' },
+  { id: 14793, lat: -24.8837, lng: 113.657,  name: 'Carnarvon' },
+  { id: 15315, lat: -25.7942, lng: 113.7183, name: 'Monkey Mia' },
+  { id: 15117, lat: -27.7106, lng: 114.1644, name: 'Kalbarri' },
+  { id: 15002, lat: -28.7731, lng: 114.6113, name: 'Geraldton' },
+  { id: 14555, lat: -31.0215, lng: 115.3321, name: 'Lancelin' },
+  { id: 14542, lat: -31.8074, lng: 115.7435, name: 'Hillarys' },
+  { id: 14468, lat: -31.9954, lng: 115.5396, name: 'Rottnest Island' },
+  { id: 14384, lat: -32.0531, lng: 115.7459, name: 'Fremantle' },
+  { id: 14422, lat: -32.5337, lng: 115.7217, name: 'Mandurah' },
+  { id: 15883, lat: -33.3271, lng: 115.637,  name: 'Bunbury' },
+  { id: 14768, lat: -33.6506, lng: 115.347,  name: 'Busselton' },
+  { id: 14931, lat: -33.6159, lng: 115.1066, name: 'Dunsborough' },
+  { id: 14605, lat: -35.0239, lng: 117.8835, name: 'Albany' },
+  { id: 14968, lat: -33.8613, lng: 121.8914, name: 'Esperance' },
+  { id: 14899, lat: -17.3048, lng: 123.6325, name: 'Derby' },
+]
+
 function nearestStation(lat: number, lng: number) {
   return WA_STATIONS.reduce((best, s) =>
+    haversineKm(lat, lng, s.lat, s.lng) < haversineKm(lat, lng, best.lat, best.lng) ? s : best
+  )
+}
+
+function nearestTideStation(lat: number, lng: number) {
+  return WA_TIDE_STATIONS.reduce((best, s) =>
     haversineKm(lat, lng, s.lat, s.lng) < haversineKm(lat, lng, best.lat, best.lng) ? s : best
   )
 }
@@ -355,20 +387,26 @@ async function fetchWillyWeatherData(lat: number, lng: number, dates: string[]) 
     }))
   }
 
-  // Step 1: Find nearest WillyWeather station via haversine distance
+  // Step 1: Find nearest weather station (for wind/swell/moon) and nearest tide station
   const station = nearestStation(lat, lng)
+  const tideStation = nearestTideStation(lat, lng)
   const locationId = station.id
   const startDate = dates[0]
   const numDays = dates.length
 
-  // Step 2: Fetch forecasts
-  const forecastUrl = `https://api.willyweather.com.au/v2/${apiKey}/locations/${locationId}/weather.json?forecasts=tides,wind,swell,moonphases&startDate=${startDate}&days=${numDays}`
-  const forecastRes = await fetch(forecastUrl)
+  // Step 2: Fetch in parallel — wind/swell/moon from weather station, tides from nearest tide station.
+  // Many weather stations lack tide gauge data; using a dedicated tide station list ensures tide
+  // events are always returned regardless of which weather station is nearest.
+  const weatherUrl = `https://api.willyweather.com.au/v2/${apiKey}/locations/${locationId}/weather.json?forecasts=wind,swell,moonphases&startDate=${startDate}&days=${numDays}`
+  const tideUrl    = `https://api.willyweather.com.au/v2/${apiKey}/locations/${tideStation.id}/weather.json?forecasts=tides&startDate=${startDate}&days=${numDays}`
+
+  const [forecastRes, tideRes] = await Promise.all([fetch(weatherUrl), fetch(tideUrl)])
   if (!forecastRes.ok) throw new Error(`WillyWeather forecast failed: ${forecastRes.status}`)
   const forecastData = await forecastRes.json()
+  const tideData     = tideRes.ok ? await tideRes.json() : {}
 
   return dates.map(date => {
-    const dayData = forecastData?.forecasts?.tides?.days?.find((d: any) => d.dateTime?.startsWith(date))
+    const dayData = tideData?.forecasts?.tides?.days?.find((d: any) => d.dateTime?.startsWith(date))
     const windDay = forecastData?.forecasts?.wind?.days?.find((d: any) => d.dateTime?.startsWith(date))
     const swellDay = forecastData?.forecasts?.swell?.days?.find((d: any) => d.dateTime?.startsWith(date))
     const moonDay = forecastData?.forecasts?.moonphases?.days?.find((d: any) => d.dateTime?.startsWith(date))
