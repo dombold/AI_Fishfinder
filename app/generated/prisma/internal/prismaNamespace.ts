@@ -1551,6 +1551,7 @@ export const FishingSessionScalarFieldEnum = {
   errorMessage: 'errorMessage',
   saved: 'saved',
   contextData: 'contextData',
+  minDepthM: 'minDepthM',
   maxDepthM: 'maxDepthM',
   maxDistanceKm: 'maxDistanceKm',
   planInstructions: 'planInstructions',

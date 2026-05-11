@@ -108,6 +108,7 @@ export async function POST(req: NextRequest) {
       sshAnomaly,
       subsurfaceTemps,
       crowdSummary,
+      minDepthM: fishingSession.minDepthM ?? null,
       maxDepthM: fishingSession.maxDepthM ?? null,
       maxDistanceKm: fishingSession.maxDistanceKm ?? null,
       planInstructions: fishingSession.planInstructions ?? null,

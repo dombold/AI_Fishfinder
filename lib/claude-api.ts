@@ -187,6 +187,7 @@ export async function generateFishingPlan(params: {
   sshAnomaly: number | null
   subsurfaceTemps: SubsurfaceTemps | null
   crowdSummary: CrowdSummary | null
+  minDepthM: number | null
   maxDepthM: number | null
   maxDistanceKm: number | null
   planInstructions: string | null
@@ -288,7 +289,8 @@ ${formatPeriods(day.periods)}
 ## Target Species Knowledge & Regulations
 ${buildSpeciesBlock(params.selectedSpecies, params.latitude, params.longitude)}
 
-${(params.maxDepthM || params.maxDistanceKm || params.planInstructions) ? `## User Constraints for This Plan
+${(params.minDepthM || params.maxDepthM || params.maxDistanceKm || params.planInstructions) ? `## User Constraints for This Plan
+${params.minDepthM ? `- Minimum water depth: ${params.minDepthM}m — do not place any waypoint shallower than this` : ''}
 ${params.maxDepthM ? `- Maximum water depth: ${params.maxDepthM}m — do not place any waypoint deeper than this` : ''}
 ${params.maxDistanceKm ? `- Maximum distance from pin: ${params.maxDistanceKm}km — all waypoints must be within this radius of the session location` : ''}
 ${params.planInstructions ? `- Specific instructions: ${params.planInstructions}` : ''}

@@ -75,6 +75,7 @@ model FishingSession {
   errorMessage    String?
   saved           Boolean  @default(false)
   contextData     String?
+  minDepthM       Int?
   maxDepthM       Int?
   maxDistanceKm   Float?
   planInstructions String?

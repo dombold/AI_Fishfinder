@@ -44,6 +44,7 @@ export default function DashboardPage() {
   const [species, setSpecies] = useState<string[]>([])
   const [availableSpecies, setAvailableSpecies] = useState<string[]>([])
 
+  const [minDepthM, setMinDepthM] = useState<number | null>(null)
   const [maxDepthM, setMaxDepthM] = useState<number | null>(null)
   const [maxDistanceKm, setMaxDistanceKm] = useState<number | null>(null)
   const [planInstructions, setPlanInstructions] = useState('')
@@ -131,6 +132,7 @@ export default function DashboardPage() {
           fishingType,
           targetType,
           selectedSpecies: species,
+          ...(minDepthM !== null && { minDepthM }),
           ...(maxDepthM !== null && { maxDepthM }),
           ...(maxDistanceKm !== null && { maxDistanceKm }),
           ...(planInstructions.trim() && { planInstructions: planInstructions.trim() }),
@@ -320,7 +322,27 @@ export default function DashboardPage() {
                 Optionally constrain the AI plan. Leave as &ldquo;Default&rdquo; to let the AI decide based on conditions.
               </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-mist)', marginBottom: '0.375rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    Minimum Water Depth
+                  </label>
+                  <select
+                    value={minDepthM ?? ''}
+                    onChange={e => setMinDepthM(e.target.value === '' ? null : Number(e.target.value))}
+                    style={{ width: '100%' }}
+                  >
+                    <option value="">Default</option>
+                    <option value="5">5 m</option>
+                    <option value="10">10 m</option>
+                    <option value="20">20 m</option>
+                    <option value="30">30 m</option>
+                    <option value="50">50 m</option>
+                    <option value="100">100 m</option>
+                    <option value="200">200 m</option>
+                  </select>
+                </div>
+
                 <div>
                   <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-mist)', marginBottom: '0.375rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                     Maximum Water Depth
