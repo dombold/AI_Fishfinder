@@ -60,13 +60,6 @@ export default function WaypointMapInner({ waypoints }: { waypoints: Waypoint[] 
 
       const L = mod.default
 
-      delete (L.Icon.Default.prototype as any)._getIconUrl
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-        iconUrl:       'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-        shadowUrl:     'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-      })
-
       const el = containerRef.current
       if (!el) return
 
@@ -124,15 +117,22 @@ export default function WaypointMapInner({ waypoints }: { waypoints: Waypoint[] 
       })
 
       waypoints.forEach((wp, i) => {
-        const marker = L.marker([wp.latitude, wp.longitude])
-        marker.bindPopup(`
-          <div style="font-family: sans-serif; min-width: 160px;">
-            <strong>${i + 1}. ${wp.name}</strong>
-            ${wp.depth ? `<div>Depth: ${wp.depth}</div>` : ''}
-            <div style="font-size: 0.8em; margin-top: 4px;">${wp.notes}</div>
-          </div>
-        `)
-        marker.addTo(map)
+        const wpIcon = L.divIcon({
+          className: '',
+          html: `<div style="width:28px;height:28px;border-radius:50%;background:#3DB8C8;border:2px solid rgba(255,255,255,0.9);box-shadow:0 2px 8px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;line-height:1;">${i + 1}</div>`,
+          iconSize:   [28, 28],
+          iconAnchor: [14, 14],
+          popupAnchor: [0, -16],
+        })
+        L.marker([wp.latitude, wp.longitude], { icon: wpIcon })
+          .bindPopup(`
+            <div style="font-family: sans-serif; min-width: 160px;">
+              <strong>${i + 1}. ${wp.name}</strong>
+              ${wp.depth ? `<div>Depth: ${wp.depth}</div>` : ''}
+              <div style="font-size: 0.8em; margin-top: 4px;">${wp.notes}</div>
+            </div>
+          `)
+          .addTo(map)
       })
 
       if (showBoatRamps) {
